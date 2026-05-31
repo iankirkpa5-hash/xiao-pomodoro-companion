@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <math.h>
 #include "app_state.h"
+#include "pomodoro_timer.h"
 
 // Round Display for XIAO uses XIAO D8/D10 for SPI and D1/D3 for LCD CS/DC.
 // XIAO ESP32S3 mapping: D8=GPIO7, D10=GPIO9, D1=GPIO2, D3=GPIO4, D6=GPIO43.
@@ -18,13 +19,9 @@ constexpr int TOUCH_SDA = 5;       // XIAO D4
 constexpr int TOUCH_SCL = 6;       // XIAO D5
 constexpr int TOUCH_INT = 44;      // XIAO D7
 constexpr uint8_t TOUCH_ADDR = 0x2e;
-constexpr uint32_t FOCUS_SECONDS = 25UL * 60UL;
-constexpr uint32_t BREAK_SECONDS = 5UL * 60UL;
 constexpr uint32_t LONG_PRESS_MS = 900;
 constexpr uint32_t TOUCH_RELEASE_GAP_MS = 180;
 
-uint32_t remaining_seconds = FOCUS_SECONDS;
-unsigned long last_countdown_ms = 0;
 uint32_t last_rendered_seconds = UINT32_MAX;
 int last_progress_angle = -90;
 
@@ -82,10 +79,6 @@ void setBacklight(uint8_t brightness) {
   ledcSetup(BACKLIGHT_CHANNEL, 5000, 8);
   ledcAttachPin(LCD_BL, BACKLIGHT_CHANNEL);
   ledcWrite(BACKLIGHT_CHANNEL, brightness);
-}
-
-uint32_t sessionSeconds() {
-  return mode == SessionMode::Focus ? FOCUS_SECONDS : BREAK_SECONDS;
 }
 
 uint16_t progressColor() {
@@ -197,8 +190,7 @@ void renderResetWithoutFullRedraw() {
 
 void resetCurrentSession() {
   setRunning(false);
-  remaining_seconds = sessionSeconds();
-  last_countdown_ms = millis();
+  resetTimerForCurrentSession(millis());
   renderResetWithoutFullRedraw();
   Serial.println("Session reset");
 }
@@ -206,34 +198,19 @@ void resetCurrentSession() {
 void switchSession() {
   toggleSessionMode();
   setRunning(false);
-  remaining_seconds = sessionSeconds();
-  last_countdown_ms = millis();
+  resetTimerForCurrentSession(millis());
   drawStaticPomodoroHome();
   Serial.printf("Switched to %s\n", modeLabel());
 }
 
 void updateCountdown(unsigned long now) {
-  if (!running) {
-    last_countdown_ms = now;
-    return;
+  const bool changed = advanceTimer(now);
+
+  if (changed) {
+    renderTick();
   }
 
-  if (now - last_countdown_ms < 1000) {
-    return;
-  }
-
-  const uint32_t elapsed = (now - last_countdown_ms) / 1000;
-  last_countdown_ms += elapsed * 1000;
-
-  if (elapsed >= remaining_seconds) {
-    remaining_seconds = 0;
-  } else {
-    remaining_seconds -= elapsed;
-  }
-
-  renderTick();
-
-  if (remaining_seconds == 0) {
+  if (isTimerComplete()) {
     Serial.println("Session complete");
     switchSession();
   }
@@ -301,7 +278,7 @@ void loop() {
   if (touch_released && !long_press_handled && now - last_touch_ms > 300) {
     last_touch_ms = now;
     toggleRunning();
-    last_countdown_ms = now;
+    restartCountdownAt(now);
     drawStatusText();
 
     Serial.printf("Touch: x=%u y=%u, running=%s\n", last_touch_x, last_touch_y, running ? "true" : "false");
