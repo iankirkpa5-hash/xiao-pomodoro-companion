@@ -34,6 +34,32 @@ void updateCountdown(unsigned long now) {
   }
 }
 
+void handleInput(unsigned long now) {
+  const InputEvent event = input_update(now);
+  const TouchPoint touch = input_last_touch();
+  if (event == InputEvent::LongPress) {
+    resetCurrentSession();
+    Serial.printf("Long press reset: x=%u y=%u\n", touch.x, touch.y);
+  }
+
+  if (event == InputEvent::ShortPress) {
+    toggleRunning();
+    restartCountdownAt(now);
+    ui_draw_status_text();
+
+    Serial.printf("Touch: x=%u y=%u, running=%s\n", touch.x, touch.y, running ? "true" : "false");
+  }
+}
+
+void printStatusEverySecond(unsigned long now) {
+  static unsigned long last_print_ms = 0;
+
+  if (now - last_print_ms >= 1000) {
+    last_print_ms = now;
+    Serial.printf("Pomodoro: %s %lus running=%s\n", modeLabel(), remaining_seconds, running ? "true" : "false");
+  }
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -58,28 +84,9 @@ void setup() {
 }
 
 void loop() {
-  static unsigned long last_print_ms = 0;
   const unsigned long now = millis();
 
-  const InputEvent event = input_update(now);
-  const TouchPoint touch = input_last_touch();
-  if (event == InputEvent::LongPress) {
-    resetCurrentSession();
-    Serial.printf("Long press reset: x=%u y=%u\n", touch.x, touch.y);
-  }
-
-  if (event == InputEvent::ShortPress) {
-    toggleRunning();
-    restartCountdownAt(now);
-    ui_draw_status_text();
-
-    Serial.printf("Touch: x=%u y=%u, running=%s\n", touch.x, touch.y, running ? "true" : "false");
-  }
-
+  handleInput(now);
   updateCountdown(now);
-
-  if (now - last_print_ms >= 1000) {
-    last_print_ms = now;
-    Serial.printf("Pomodoro: %s %lus running=%s\n", modeLabel(), remaining_seconds, running ? "true" : "false");
-  }
+  printStatusEverySecond(now);
 }
