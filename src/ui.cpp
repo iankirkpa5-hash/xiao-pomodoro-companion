@@ -55,6 +55,20 @@ void drawProgressArcSegment(int from_angle, int to_angle, uint16_t color) {
   }
 }
 
+void eraseProgressArc() {
+  const uint16_t outer = color565(16, 32, 52);
+  const int center_x = 120;
+  const int center_y = 120;
+  const int radius = 111;
+
+  for (int angle = -90; angle <= 270; angle++) {
+    const float rad = angle * DEG_TO_RAD;
+    const int x = center_x + static_cast<int>(cos(rad) * radius);
+    const int y = center_y + static_cast<int>(sin(rad) * radius);
+    display->fillCircle(x, y, 4, outer);
+  }
+}
+
 void drawTimerText() {
   const uint16_t face = color565(255, 242, 214);
   const uint16_t ink = color565(35, 38, 42);
@@ -128,6 +142,31 @@ void ui_draw_static_pomodoro_home() {
   ui_draw_status_text();
 }
 
+void ui_draw_session_feedback(SessionMode next_mode) {
+  const uint16_t background = color565(5, 10, 18);
+  const uint16_t outer = color565(16, 32, 52);
+  const uint16_t accent = next_mode == SessionMode::Break ? color565(74, 172, 104) : color565(38, 150, 178);
+  const uint16_t face = color565(255, 242, 214);
+  const uint16_t ink = color565(35, 38, 42);
+
+  display->fillScreen(background);
+  display->fillCircle(120, 120, 116, outer);
+  display->fillCircle(120, 120, 86, accent);
+  display->fillCircle(120, 120, 58, face);
+
+  display->setTextColor(ink);
+  display->setTextSize(2);
+  display->setCursor(next_mode == SessionMode::Break ? 58 : 55, 98);
+  display->print(next_mode == SessionMode::Break ? "Break Time" : "Focus Time");
+
+  display->setTextSize(1);
+  display->setCursor(next_mode == SessionMode::Break ? 80 : 90, 128);
+  display->print(next_mode == SessionMode::Break ? "Stretch / Rest" : "Deep Work");
+
+  last_rendered_seconds = UINT32_MAX;
+  last_progress_angle = -90;
+}
+
 void ui_render_tick() {
   if (remaining_seconds != last_rendered_seconds) {
     drawTimerText();
@@ -142,10 +181,7 @@ void ui_render_tick() {
 }
 
 void ui_render_reset_without_full_redraw() {
-  const uint16_t outer = color565(16, 32, 52);
-
-  display->drawCircle(120, 120, 111, outer);
-  display->drawCircle(120, 120, 112, outer);
+  eraseProgressArc();
   redrawProgressTrack();
   last_rendered_seconds = UINT32_MAX;
   drawTimerText();

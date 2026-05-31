@@ -5,6 +5,10 @@
 #include "ui.h"
 
 constexpr int BACKLIGHT_BRIGHTNESS = 150;
+constexpr uint32_t SESSION_FEEDBACK_MS = 2000;
+
+bool session_feedback_active = false;
+unsigned long session_feedback_until_ms = 0;
 
 void resetCurrentSession() {
   setRunning(false);
@@ -13,11 +17,28 @@ void resetCurrentSession() {
   Serial.println("Session reset");
 }
 
-void switchSession() {
+void beginSessionFeedback(unsigned long now) {
+  session_feedback_active = true;
+  session_feedback_until_ms = now + SESSION_FEEDBACK_MS;
+  ui_draw_session_feedback(mode);
+}
+
+void finishSessionFeedbackIfReady(unsigned long now) {
+  if (!session_feedback_active) {
+    return;
+  }
+
+  if (static_cast<long>(now - session_feedback_until_ms) >= 0) {
+    session_feedback_active = false;
+    ui_draw_static_pomodoro_home();
+  }
+}
+
+void switchSession(unsigned long now) {
   toggleSessionMode();
   setRunning(false);
-  resetTimerForCurrentSession(millis());
-  ui_draw_static_pomodoro_home();
+  resetTimerForCurrentSession(now);
+  beginSessionFeedback(now);
   Serial.printf("Switched to %s\n", modeLabel());
 }
 
@@ -30,11 +51,15 @@ void updateCountdown(unsigned long now) {
 
   if (isTimerComplete()) {
     Serial.println("Session complete");
-    switchSession();
+    switchSession(now);
   }
 }
 
 void handleInput(unsigned long now) {
+  if (session_feedback_active) {
+    return;
+  }
+
   const InputEvent event = input_update(now);
   const TouchPoint touch = input_last_touch();
   if (event == InputEvent::LongPress) {
@@ -86,7 +111,10 @@ void setup() {
 void loop() {
   const unsigned long now = millis();
 
+  finishSessionFeedbackIfReady(now);
   handleInput(now);
-  updateCountdown(now);
+  if (!session_feedback_active) {
+    updateCountdown(now);
+  }
   printStatusEverySecond(now);
 }
