@@ -147,7 +147,7 @@ void ui_draw_static_pomodoro_home() {
   ui_draw_status_text();
 }
 
-void ui_draw_session_feedback(SessionMode next_mode) {
+void ui_draw_session_feedback(SessionMode next_mode, const char *message) {
   const uint16_t background = color565(5, 10, 18);
   const uint16_t outer = color565(16, 32, 52);
   const uint16_t accent = next_mode == SessionMode::Break ? color565(74, 172, 104) : color565(38, 150, 178);
@@ -165,8 +165,8 @@ void ui_draw_session_feedback(SessionMode next_mode) {
   display->print(next_mode == SessionMode::Break ? "Break Time" : "Focus Time");
 
   display->setTextSize(1);
-  display->setCursor(next_mode == SessionMode::Break ? 80 : 90, 128);
-  display->print(next_mode == SessionMode::Break ? "Stretch / Rest" : "Deep Work");
+  display->setCursor(next_mode == SessionMode::Break ? 78 : 90, 128);
+  display->print(message);
 
   last_rendered_seconds = UINT32_MAX;
   last_progress_angle = -90;

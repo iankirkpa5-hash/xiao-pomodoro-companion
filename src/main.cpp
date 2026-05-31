@@ -3,6 +3,7 @@
 #include "config.h"
 #include "input.h"
 #include "pomodoro_timer.h"
+#include "prompts.h"
 #include "ui.h"
 
 constexpr uint32_t SESSION_FEEDBACK_MS = 2000;
@@ -105,7 +106,8 @@ void saveSettingsAndExit(unsigned long now) {
 void beginSessionFeedback(unsigned long now) {
   session_feedback_active = true;
   session_feedback_until_ms = now + SESSION_FEEDBACK_MS;
-  ui_draw_session_feedback(mode);
+  const char *message = mode == SessionMode::Break ? prompts_next() : "Deep Work";
+  ui_draw_session_feedback(mode, message);
 }
 
 void finishSessionFeedbackIfReady(unsigned long now) {
@@ -197,6 +199,7 @@ void setup() {
   Serial.println();
   Serial.println("XIAO ESP32S3 Round Display Arduino_GFX test");
 
+  randomSeed(esp_random());
   config_begin();
   timer_begin(millis());
   ui_apply_brightness(config_get().brightness_percent);
