@@ -1,157 +1,15 @@
 #include <Arduino.h>
-#include <Arduino_GFX_Library.h>
-#include <math.h>
 #include "app_state.h"
 #include "input.h"
 #include "pomodoro_timer.h"
+#include "ui.h"
 
-// Round Display for XIAO uses XIAO D8/D10 for SPI and D1/D3 for LCD CS/DC.
-// XIAO ESP32S3 mapping: D8=GPIO7, D10=GPIO9, D1=GPIO2, D3=GPIO4, D6=GPIO43.
-constexpr int LCD_SCLK = 7;
-constexpr int LCD_MOSI = 9;
-constexpr int LCD_CS = 2;
-constexpr int LCD_DC = 4;
-constexpr int LCD_BL = 43;
-constexpr int BACKLIGHT_CHANNEL = 0;
 constexpr int BACKLIGHT_BRIGHTNESS = 150;
-
-uint32_t last_rendered_seconds = UINT32_MAX;
-int last_progress_angle = -90;
-
-Arduino_DataBus *bus = new Arduino_ESP32SPI(
-    LCD_DC,
-    LCD_CS,
-    LCD_SCLK,
-    LCD_MOSI,
-    GFX_NOT_DEFINED);
-
-Arduino_GFX *display = new Arduino_GC9A01(
-    bus,
-    GFX_NOT_DEFINED,
-    0,
-    true);
-
-uint16_t color565(uint8_t r, uint8_t g, uint8_t b) {
-  return display->color565(r, g, b);
-}
-
-void setBacklight(uint8_t brightness) {
-  ledcSetup(BACKLIGHT_CHANNEL, 5000, 8);
-  ledcAttachPin(LCD_BL, BACKLIGHT_CHANNEL);
-  ledcWrite(BACKLIGHT_CHANNEL, brightness);
-}
-
-uint16_t progressColor() {
-  return mode == SessionMode::Focus ? color565(38, 150, 178) : color565(74, 172, 104);
-}
-
-void formatTime(char *buffer, size_t buffer_size, uint32_t seconds) {
-  snprintf(buffer, buffer_size, "%02lu:%02lu", seconds / 60, seconds % 60);
-}
-
-void drawProgressArcSegment(int from_angle, int to_angle, uint16_t color) {
-  const int center_x = 120;
-  const int center_y = 120;
-  const int radius = 111;
-
-  for (int angle = from_angle; angle <= to_angle; angle += 2) {
-    const float rad = angle * DEG_TO_RAD;
-    const int x = center_x + static_cast<int>(cos(rad) * radius);
-    const int y = center_y + static_cast<int>(sin(rad) * radius);
-    display->fillCircle(x, y, 2, color);
-  }
-}
-
-void drawTimerText() {
-  const uint16_t face = color565(255, 242, 214);
-  const uint16_t ink = color565(35, 38, 42);
-  char time_text[6] = {0};
-  formatTime(time_text, sizeof(time_text), remaining_seconds);
-
-  display->fillRect(70, 88, 104, 34, face);
-  display->setTextColor(ink);
-  display->setTextSize(3);
-  display->setCursor(84, 92);
-  display->print(time_text);
-
-  last_rendered_seconds = remaining_seconds;
-}
-
-void drawStatusText() {
-  const uint16_t face = color565(255, 242, 214);
-  const uint16_t ink = color565(35, 38, 42);
-
-  display->fillRect(74, 128, 92, 32, face);
-  display->setTextColor(ink);
-  display->setTextSize(2);
-  display->setCursor(mode == SessionMode::Focus ? 78 : 78, 130);
-  display->print(modeLabel());
-
-  display->setTextSize(1);
-  display->setCursor(running ? 100 : 98, 152);
-  display->print(running ? "RUN" : "PAUSE");
-}
-
-void drawStaticPomodoroHome() {
-  const uint16_t background = color565(5, 10, 18);
-  const uint16_t outer = color565(16, 32, 52);
-  const uint16_t warm = color565(244, 182, 84);
-  const uint16_t face = color565(255, 242, 214);
-
-  display->fillScreen(background);
-  display->fillCircle(120, 120, 116, outer);
-  display->fillCircle(120, 120, 92, progressColor());
-  display->fillCircle(120, 120, 64, warm);
-  display->fillCircle(120, 120, 46, face);
-
-  display->drawCircle(120, 120, 111, color565(56, 72, 94));
-  display->drawCircle(120, 120, 112, color565(56, 72, 94));
-  last_progress_angle = -90;
-  last_rendered_seconds = UINT32_MAX;
-
-  const float progress = 1.0f - (static_cast<float>(remaining_seconds) / sessionSeconds());
-  const int target_angle = static_cast<int>(-90 + progress * 360.0f);
-  drawProgressArcSegment(-90, target_angle, color565(228, 244, 250));
-  last_progress_angle = target_angle;
-
-  drawTimerText();
-  drawStatusText();
-}
-
-void renderTick() {
-  if (remaining_seconds != last_rendered_seconds) {
-    drawTimerText();
-  }
-
-  const float progress = 1.0f - (static_cast<float>(remaining_seconds) / sessionSeconds());
-  const int target_angle = static_cast<int>(-90 + progress * 360.0f);
-  if (target_angle > last_progress_angle) {
-    drawProgressArcSegment(last_progress_angle + 1, target_angle, color565(228, 244, 250));
-    last_progress_angle = target_angle;
-  }
-}
-
-void redrawProgressTrack() {
-  display->drawCircle(120, 120, 111, color565(56, 72, 94));
-  display->drawCircle(120, 120, 112, color565(56, 72, 94));
-  last_progress_angle = -90;
-}
-
-void renderResetWithoutFullRedraw() {
-  const uint16_t outer = color565(16, 32, 52);
-
-  display->drawCircle(120, 120, 111, outer);
-  display->drawCircle(120, 120, 112, outer);
-  redrawProgressTrack();
-  last_rendered_seconds = UINT32_MAX;
-  drawTimerText();
-  drawStatusText();
-}
 
 void resetCurrentSession() {
   setRunning(false);
   resetTimerForCurrentSession(millis());
-  renderResetWithoutFullRedraw();
+  ui_render_reset_without_full_redraw();
   Serial.println("Session reset");
 }
 
@@ -159,7 +17,7 @@ void switchSession() {
   toggleSessionMode();
   setRunning(false);
   resetTimerForCurrentSession(millis());
-  drawStaticPomodoroHome();
+  ui_draw_static_pomodoro_home();
   Serial.printf("Switched to %s\n", modeLabel());
 }
 
@@ -167,7 +25,7 @@ void updateCountdown(unsigned long now) {
   const bool changed = advanceTimer(now);
 
   if (changed) {
-    renderTick();
+    ui_render_tick();
   }
 
   if (isTimerComplete()) {
@@ -185,16 +43,16 @@ void setup() {
   Serial.println();
   Serial.println("XIAO ESP32S3 Round Display Arduino_GFX test");
 
-  setBacklight(BACKLIGHT_BRIGHTNESS);
+  ui_set_backlight(BACKLIGHT_BRIGHTNESS);
   input_begin();
   input_scan_i2c();
 
-  if (!display->begin(10000000)) {
+  if (!ui_begin()) {
     Serial.println("Display init failed");
     return;
   }
 
-  drawStaticPomodoroHome();
+  ui_draw_static_pomodoro_home();
 
   Serial.println("Display initialized");
 }
@@ -213,7 +71,7 @@ void loop() {
   if (event == InputEvent::ShortPress) {
     toggleRunning();
     restartCountdownAt(now);
-    drawStatusText();
+    ui_draw_status_text();
 
     Serial.printf("Touch: x=%u y=%u, running=%s\n", touch.x, touch.y, running ? "true" : "false");
   }
