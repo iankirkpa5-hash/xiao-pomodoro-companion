@@ -2,6 +2,7 @@
 #include <Arduino_GFX_Library.h>
 #include <Wire.h>
 #include <math.h>
+#include "app_state.h"
 
 // Round Display for XIAO uses XIAO D8/D10 for SPI and D1/D3 for LCD CS/DC.
 // XIAO ESP32S3 mapping: D8=GPIO7, D10=GPIO9, D1=GPIO2, D3=GPIO4, D6=GPIO43.
@@ -22,13 +23,6 @@ constexpr uint32_t BREAK_SECONDS = 5UL * 60UL;
 constexpr uint32_t LONG_PRESS_MS = 900;
 constexpr uint32_t TOUCH_RELEASE_GAP_MS = 180;
 
-enum class SessionMode {
-  Focus,
-  Break,
-};
-
-SessionMode mode = SessionMode::Focus;
-bool running = false;
 uint32_t remaining_seconds = FOCUS_SECONDS;
 unsigned long last_countdown_ms = 0;
 uint32_t last_rendered_seconds = UINT32_MAX;
@@ -88,10 +82,6 @@ void setBacklight(uint8_t brightness) {
   ledcSetup(BACKLIGHT_CHANNEL, 5000, 8);
   ledcAttachPin(LCD_BL, BACKLIGHT_CHANNEL);
   ledcWrite(BACKLIGHT_CHANNEL, brightness);
-}
-
-const char *modeLabel() {
-  return mode == SessionMode::Focus ? "Focus" : "Break";
 }
 
 uint32_t sessionSeconds() {
@@ -206,7 +196,7 @@ void renderResetWithoutFullRedraw() {
 }
 
 void resetCurrentSession() {
-  running = false;
+  setRunning(false);
   remaining_seconds = sessionSeconds();
   last_countdown_ms = millis();
   renderResetWithoutFullRedraw();
@@ -214,8 +204,8 @@ void resetCurrentSession() {
 }
 
 void switchSession() {
-  mode = mode == SessionMode::Focus ? SessionMode::Break : SessionMode::Focus;
-  running = false;
+  toggleSessionMode();
+  setRunning(false);
   remaining_seconds = sessionSeconds();
   last_countdown_ms = millis();
   drawStaticPomodoroHome();
@@ -310,7 +300,7 @@ void loop() {
   const bool touch_released = touch_active && now - last_touch_seen_ms > TOUCH_RELEASE_GAP_MS;
   if (touch_released && !long_press_handled && now - last_touch_ms > 300) {
     last_touch_ms = now;
-    running = !running;
+    toggleRunning();
     last_countdown_ms = now;
     drawStatusText();
 
