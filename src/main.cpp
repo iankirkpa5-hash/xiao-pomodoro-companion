@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "app_state.h"
+#include "config.h"
 #include "input.h"
 #include "pomodoro_timer.h"
 #include "ui.h"
@@ -94,6 +95,8 @@ void setup() {
   Serial.println();
   Serial.println("XIAO ESP32S3 Round Display Arduino_GFX test");
 
+  config_begin();
+  timer_begin(millis());
   ui_set_backlight(BACKLIGHT_BRIGHTNESS);
   input_begin();
   input_scan_i2c();

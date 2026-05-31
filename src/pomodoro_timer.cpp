@@ -1,10 +1,17 @@
 #include "pomodoro_timer.h"
 
-uint32_t remaining_seconds = FOCUS_SECONDS;
+#include "config.h"
+
+uint32_t remaining_seconds = DEFAULT_FOCUS_MINUTES * 60UL;
 static unsigned long last_countdown_ms = 0;
 
+void timer_begin(unsigned long now) {
+  resetTimerForCurrentSession(now);
+}
+
 uint32_t sessionSeconds() {
-  return mode == SessionMode::Focus ? FOCUS_SECONDS : BREAK_SECONDS;
+  const PomodoroConfig &config = config_get();
+  return (mode == SessionMode::Focus ? config.focus_minutes : config.break_minutes) * 60UL;
 }
 
 void resetTimerForCurrentSession(unsigned long now) {

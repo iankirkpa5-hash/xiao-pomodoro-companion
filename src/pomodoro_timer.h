@@ -3,11 +3,9 @@
 #include <Arduino.h>
 #include "app_state.h"
 
-constexpr uint32_t FOCUS_SECONDS = 25UL * 60UL;
-constexpr uint32_t BREAK_SECONDS = 5UL * 60UL;
-
 extern uint32_t remaining_seconds;
 
+void timer_begin(unsigned long now);
 uint32_t sessionSeconds();
 void resetTimerForCurrentSession(unsigned long now);
 void restartCountdownAt(unsigned long now);
