@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <Arduino_GFX_Library.h>
-#include <Wire.h>
 #include <math.h>
 #include "app_state.h"
+#include "input.h"
 #include "pomodoro_timer.h"
 
 // Round Display for XIAO uses XIAO D8/D10 for SPI and D1/D3 for LCD CS/DC.
@@ -14,13 +14,6 @@ constexpr int LCD_DC = 4;
 constexpr int LCD_BL = 43;
 constexpr int BACKLIGHT_CHANNEL = 0;
 constexpr int BACKLIGHT_BRIGHTNESS = 150;
-
-constexpr int TOUCH_SDA = 5;       // XIAO D4
-constexpr int TOUCH_SCL = 6;       // XIAO D5
-constexpr int TOUCH_INT = 44;      // XIAO D7
-constexpr uint8_t TOUCH_ADDR = 0x2e;
-constexpr uint32_t LONG_PRESS_MS = 900;
-constexpr uint32_t TOUCH_RELEASE_GAP_MS = 180;
 
 uint32_t last_rendered_seconds = UINT32_MAX;
 int last_progress_angle = -90;
@@ -40,39 +33,6 @@ Arduino_GFX *display = new Arduino_GC9A01(
 
 uint16_t color565(uint8_t r, uint8_t g, uint8_t b) {
   return display->color565(r, g, b);
-}
-
-bool readTouch(uint8_t &x, uint8_t &y) {
-  uint8_t data[5] = {0};
-  const uint8_t read_len = Wire.requestFrom(TOUCH_ADDR, static_cast<uint8_t>(sizeof(data)));
-  if (read_len != sizeof(data)) {
-    while (Wire.available()) {
-      Wire.read();
-    }
-    return false;
-  }
-
-  for (uint8_t i = 0; i < sizeof(data); i++) {
-    data[i] = Wire.read();
-  }
-
-  if (data[0] != 0x01) {
-    return false;
-  }
-
-  x = data[2];
-  y = data[4];
-  return true;
-}
-
-void scanI2C() {
-  Serial.println("Scanning I2C...");
-  for (uint8_t address = 1; address < 127; address++) {
-    Wire.beginTransmission(address);
-    if (Wire.endTransmission() == 0) {
-      Serial.printf("I2C device found: 0x%02X\n", address);
-    }
-  }
 }
 
 void setBacklight(uint8_t brightness) {
@@ -226,9 +186,8 @@ void setup() {
   Serial.println("XIAO ESP32S3 Round Display Arduino_GFX test");
 
   setBacklight(BACKLIGHT_BRIGHTNESS);
-  pinMode(TOUCH_INT, INPUT_PULLUP);
-  Wire.begin(TOUCH_SDA, TOUCH_SCL);
-  scanI2C();
+  input_begin();
+  input_scan_i2c();
 
   if (!display->begin(10000000)) {
     Serial.println("Display init failed");
@@ -242,50 +201,21 @@ void setup() {
 
 void loop() {
   static unsigned long last_print_ms = 0;
-  static unsigned long last_touch_ms = 0;
-  static unsigned long touch_started_ms = 0;
-  static unsigned long last_touch_seen_ms = 0;
-  static bool touch_active = false;
-  static bool long_press_handled = false;
-  static uint8_t last_touch_x = 120;
-  static uint8_t last_touch_y = 120;
   const unsigned long now = millis();
 
-  uint8_t touch_x = 0;
-  uint8_t touch_y = 0;
-  const bool touched = readTouch(touch_x, touch_y);
-  if (touched) {
-    last_touch_x = touch_x;
-    last_touch_y = touch_y;
-
-    if (!touch_active) {
-      touch_active = true;
-      touch_started_ms = now;
-      long_press_handled = false;
-    }
-
-    last_touch_seen_ms = now;
-  }
-
-  if (touch_active && !long_press_handled && now - touch_started_ms >= LONG_PRESS_MS) {
-    long_press_handled = true;
-    last_touch_ms = now;
+  const InputEvent event = input_update(now);
+  const TouchPoint touch = input_last_touch();
+  if (event == InputEvent::LongPress) {
     resetCurrentSession();
-    Serial.printf("Long press reset: x=%u y=%u\n", last_touch_x, last_touch_y);
+    Serial.printf("Long press reset: x=%u y=%u\n", touch.x, touch.y);
   }
 
-  const bool touch_released = touch_active && now - last_touch_seen_ms > TOUCH_RELEASE_GAP_MS;
-  if (touch_released && !long_press_handled && now - last_touch_ms > 300) {
-    last_touch_ms = now;
+  if (event == InputEvent::ShortPress) {
     toggleRunning();
     restartCountdownAt(now);
     drawStatusText();
 
-    Serial.printf("Touch: x=%u y=%u, running=%s\n", last_touch_x, last_touch_y, running ? "true" : "false");
-  }
-
-  if (touch_released) {
-    touch_active = false;
+    Serial.printf("Touch: x=%u y=%u, running=%s\n", touch.x, touch.y, running ? "true" : "false");
   }
 
   updateCountdown(now);
