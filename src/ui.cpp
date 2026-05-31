@@ -201,12 +201,15 @@ void ui_draw_settings(uint32_t focus_minutes, uint32_t brightness_percent, uint8
   display->print(brightness_percent);
   display->print("%");
 
+  display->setCursor(62, 132);
+  display->print(selected_item == 2 ? "> Reset" : "  Reset");
+
   display->setTextSize(1);
-  display->setCursor(70, 140);
+  display->setCursor(70, 154);
   display->print("Left switch");
-  display->setCursor(68, 154);
+  display->setCursor(68, 168);
   display->print("Right change");
-  display->setCursor(84, 170);
+  display->setCursor(84, 182);
   display->print("Hold save");
 
   last_rendered_seconds = UINT32_MAX;

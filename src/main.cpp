@@ -19,7 +19,7 @@ constexpr uint32_t FOCUS_OPTIONS[] = {25, 45, 50};
 constexpr uint8_t FOCUS_OPTION_COUNT = sizeof(FOCUS_OPTIONS) / sizeof(FOCUS_OPTIONS[0]);
 constexpr uint32_t BRIGHTNESS_OPTIONS[] = {30, 60, 100};
 constexpr uint8_t BRIGHTNESS_OPTION_COUNT = sizeof(BRIGHTNESS_OPTIONS) / sizeof(BRIGHTNESS_OPTIONS[0]);
-constexpr uint8_t SETTINGS_ITEM_COUNT = 2;
+constexpr uint8_t SETTINGS_ITEM_COUNT = 3;
 
 uint8_t focusOptionIndexFor(uint32_t focus_minutes) {
   for (uint8_t i = 0; i < FOCUS_OPTION_COUNT; i++) {
@@ -73,6 +73,14 @@ void changeSelectedSetting() {
     brightness_option_index = (brightness_option_index + 1) % BRIGHTNESS_OPTION_COUNT;
     ui_apply_brightness(BRIGHTNESS_OPTIONS[brightness_option_index]);
     Serial.printf("Settings brightness=%lu%%\n", BRIGHTNESS_OPTIONS[brightness_option_index]);
+  } else if (settings_selected_item == 2) {
+    mode = SessionMode::Focus;
+    setRunning(false);
+    resetTimerForCurrentSession(millis());
+    settings_active = false;
+    ui_draw_static_pomodoro_home();
+    Serial.println("Settings reset");
+    return;
   } else {
     return;
   }
