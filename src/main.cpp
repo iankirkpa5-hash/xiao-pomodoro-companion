@@ -10,12 +10,51 @@ constexpr uint32_t SESSION_FEEDBACK_MS = 2000;
 
 bool session_feedback_active = false;
 unsigned long session_feedback_until_ms = 0;
+bool settings_active = false;
+uint8_t focus_option_index = 0;
+
+constexpr uint32_t FOCUS_OPTIONS[] = {25, 45, 50};
+constexpr uint8_t FOCUS_OPTION_COUNT = sizeof(FOCUS_OPTIONS) / sizeof(FOCUS_OPTIONS[0]);
+
+uint8_t focusOptionIndexFor(uint32_t focus_minutes) {
+  for (uint8_t i = 0; i < FOCUS_OPTION_COUNT; i++) {
+    if (FOCUS_OPTIONS[i] == focus_minutes) {
+      return i;
+    }
+  }
+
+  return 0;
+}
 
 void resetCurrentSession() {
   setRunning(false);
   resetTimerForCurrentSession(millis());
   ui_render_reset_without_full_redraw();
   Serial.println("Session reset");
+}
+
+void enterSettings() {
+  settings_active = true;
+  setRunning(false);
+  focus_option_index = focusOptionIndexFor(config_get().focus_minutes);
+  ui_draw_focus_settings(FOCUS_OPTIONS[focus_option_index]);
+  Serial.println("Settings: focus length");
+}
+
+void cycleFocusSetting() {
+  focus_option_index = (focus_option_index + 1) % FOCUS_OPTION_COUNT;
+  ui_draw_focus_settings(FOCUS_OPTIONS[focus_option_index]);
+  Serial.printf("Settings focus=%lu min\n", FOCUS_OPTIONS[focus_option_index]);
+}
+
+void saveSettingsAndExit(unsigned long now) {
+  config_save(FOCUS_OPTIONS[focus_option_index], config_get().break_minutes);
+  mode = SessionMode::Focus;
+  setRunning(false);
+  resetTimerForCurrentSession(now);
+  settings_active = false;
+  ui_draw_static_pomodoro_home();
+  Serial.printf("Settings saved: focus=%lu min\n", config_get().focus_minutes);
 }
 
 void beginSessionFeedback(unsigned long now) {
@@ -63,9 +102,23 @@ void handleInput(unsigned long now) {
 
   const InputEvent event = input_update(now);
   const TouchPoint touch = input_last_touch();
+  if (settings_active) {
+    if (event == InputEvent::LongPress) {
+      saveSettingsAndExit(now);
+      Serial.printf("Settings saved from touch: x=%u y=%u\n", touch.x, touch.y);
+    }
+
+    if (event == InputEvent::ShortPress) {
+      cycleFocusSetting();
+      Serial.printf("Settings tap: x=%u y=%u\n", touch.x, touch.y);
+    }
+
+    return;
+  }
+
   if (event == InputEvent::LongPress) {
-    resetCurrentSession();
-    Serial.printf("Long press reset: x=%u y=%u\n", touch.x, touch.y);
+    enterSettings();
+    Serial.printf("Long press settings: x=%u y=%u\n", touch.x, touch.y);
   }
 
   if (event == InputEvent::ShortPress) {
@@ -116,8 +169,10 @@ void loop() {
 
   finishSessionFeedbackIfReady(now);
   handleInput(now);
-  if (!session_feedback_active) {
+  if (!session_feedback_active && !settings_active) {
     updateCountdown(now);
   }
-  printStatusEverySecond(now);
+  if (!settings_active) {
+    printStatusEverySecond(now);
+  }
 }

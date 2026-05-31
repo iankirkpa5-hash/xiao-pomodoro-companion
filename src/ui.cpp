@@ -167,6 +167,40 @@ void ui_draw_session_feedback(SessionMode next_mode) {
   last_progress_angle = -90;
 }
 
+void ui_draw_focus_settings(uint32_t focus_minutes) {
+  const uint16_t background = color565(5, 10, 18);
+  const uint16_t outer = color565(16, 32, 52);
+  const uint16_t accent = color565(244, 182, 84);
+  const uint16_t face = color565(255, 242, 214);
+  const uint16_t ink = color565(35, 38, 42);
+
+  display->fillScreen(background);
+  display->fillCircle(120, 120, 116, outer);
+  display->fillCircle(120, 120, 90, accent);
+  display->fillCircle(120, 120, 64, face);
+
+  display->setTextColor(ink);
+  display->setTextSize(1);
+  display->setCursor(84, 74);
+  display->print("Focus Length");
+
+  display->setTextSize(3);
+  display->setCursor(focus_minutes < 10 ? 94 : 82, 96);
+  display->print(focus_minutes);
+  display->setTextSize(1);
+  display->setCursor(126, 106);
+  display->print("min");
+
+  display->setTextSize(1);
+  display->setCursor(82, 138);
+  display->print("Tap to change");
+  display->setCursor(84, 154);
+  display->print("Hold to save");
+
+  last_rendered_seconds = UINT32_MAX;
+  last_progress_angle = -90;
+}
+
 void ui_render_tick() {
   if (remaining_seconds != last_rendered_seconds) {
     drawTimerText();
