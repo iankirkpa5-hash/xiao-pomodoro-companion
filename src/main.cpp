@@ -48,7 +48,7 @@ void cycleFocusSetting() {
 }
 
 void saveSettingsAndExit(unsigned long now) {
-  config_save(FOCUS_OPTIONS[focus_option_index], config_get().break_minutes);
+  config_save(FOCUS_OPTIONS[focus_option_index], config_get().break_minutes, config_get().brightness_percent);
   mode = SessionMode::Focus;
   setRunning(false);
   resetTimerForCurrentSession(now);
