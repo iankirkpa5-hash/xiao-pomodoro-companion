@@ -20,6 +20,7 @@ constexpr uint8_t TOUCH_ADDR = 0x2e;
 constexpr uint32_t FOCUS_SECONDS = 25UL * 60UL;
 constexpr uint32_t BREAK_SECONDS = 5UL * 60UL;
 constexpr uint32_t LONG_PRESS_MS = 900;
+constexpr uint32_t TOUCH_RELEASE_GAP_MS = 180;
 
 enum class SessionMode {
   Focus,
@@ -51,10 +52,6 @@ uint16_t color565(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 bool readTouch(uint8_t &x, uint8_t &y) {
-  if (digitalRead(TOUCH_INT) != LOW) {
-    return false;
-  }
-
   uint8_t data[5] = {0};
   const uint8_t read_len = Wire.requestFrom(TOUCH_ADDR, static_cast<uint8_t>(sizeof(data)));
   if (read_len != sizeof(data)) {
@@ -191,11 +188,28 @@ void renderTick() {
   }
 }
 
+void redrawProgressTrack() {
+  display->drawCircle(120, 120, 111, color565(56, 72, 94));
+  display->drawCircle(120, 120, 112, color565(56, 72, 94));
+  last_progress_angle = -90;
+}
+
+void renderResetWithoutFullRedraw() {
+  const uint16_t outer = color565(16, 32, 52);
+
+  display->drawCircle(120, 120, 111, outer);
+  display->drawCircle(120, 120, 112, outer);
+  redrawProgressTrack();
+  last_rendered_seconds = UINT32_MAX;
+  drawTimerText();
+  drawStatusText();
+}
+
 void resetCurrentSession() {
   running = false;
   remaining_seconds = sessionSeconds();
   last_countdown_ms = millis();
-  drawStaticPomodoroHome();
+  renderResetWithoutFullRedraw();
   Serial.println("Session reset");
 }
 
@@ -263,7 +277,8 @@ void loop() {
   static unsigned long last_print_ms = 0;
   static unsigned long last_touch_ms = 0;
   static unsigned long touch_started_ms = 0;
-  static bool was_touched = false;
+  static unsigned long last_touch_seen_ms = 0;
+  static bool touch_active = false;
   static bool long_press_handled = false;
   static uint8_t last_touch_x = 120;
   static uint8_t last_touch_y = 120;
@@ -275,21 +290,25 @@ void loop() {
   if (touched) {
     last_touch_x = touch_x;
     last_touch_y = touch_y;
+
+    if (!touch_active) {
+      touch_active = true;
+      touch_started_ms = now;
+      long_press_handled = false;
+    }
+
+    last_touch_seen_ms = now;
   }
 
-  if (touched && !was_touched) {
-    touch_started_ms = now;
-    long_press_handled = false;
-  }
-
-  if (touched && !long_press_handled && now - touch_started_ms >= LONG_PRESS_MS) {
+  if (touch_active && !long_press_handled && now - touch_started_ms >= LONG_PRESS_MS) {
     long_press_handled = true;
     last_touch_ms = now;
     resetCurrentSession();
-    Serial.printf("Long press reset: x=%u y=%u\n", touch_x, touch_y);
+    Serial.printf("Long press reset: x=%u y=%u\n", last_touch_x, last_touch_y);
   }
 
-  if (!touched && was_touched && !long_press_handled && now - last_touch_ms > 300) {
+  const bool touch_released = touch_active && now - last_touch_seen_ms > TOUCH_RELEASE_GAP_MS;
+  if (touch_released && !long_press_handled && now - last_touch_ms > 300) {
     last_touch_ms = now;
     running = !running;
     last_countdown_ms = now;
@@ -298,7 +317,10 @@ void loop() {
     Serial.printf("Touch: x=%u y=%u, running=%s\n", last_touch_x, last_touch_y, running ? "true" : "false");
   }
 
-  was_touched = touched;
+  if (touch_released) {
+    touch_active = false;
+  }
+
   updateCountdown(now);
 
   if (now - last_print_ms >= 1000) {
