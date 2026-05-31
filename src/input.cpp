@@ -7,7 +7,7 @@ constexpr int TOUCH_SDA = 5;       // XIAO D4
 constexpr int TOUCH_SCL = 6;       // XIAO D5
 constexpr int TOUCH_INT = 44;      // XIAO D7
 constexpr uint8_t TOUCH_ADDR = 0x2e;
-constexpr uint32_t LONG_PRESS_MS = 900;
+constexpr uint32_t LONG_PRESS_MS = 650;
 constexpr uint32_t TOUCH_RELEASE_GAP_MS = 180;
 
 unsigned long last_touch_ms = 0;

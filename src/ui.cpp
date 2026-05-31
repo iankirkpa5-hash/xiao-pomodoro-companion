@@ -97,6 +97,11 @@ void ui_set_backlight(uint8_t brightness) {
   ledcWrite(BACKLIGHT_CHANNEL, brightness);
 }
 
+void ui_apply_brightness(uint32_t brightness_percent) {
+  const uint8_t brightness = static_cast<uint8_t>((brightness_percent * 255UL) / 100UL);
+  ui_set_backlight(brightness);
+}
+
 bool ui_begin() {
   return display->begin(10000000);
 }
@@ -167,7 +172,7 @@ void ui_draw_session_feedback(SessionMode next_mode) {
   last_progress_angle = -90;
 }
 
-void ui_draw_focus_settings(uint32_t focus_minutes) {
+void ui_draw_settings(uint32_t focus_minutes, uint32_t brightness_percent, uint8_t selected_item) {
   const uint16_t background = color565(5, 10, 18);
   const uint16_t outer = color565(16, 32, 52);
   const uint16_t accent = color565(244, 182, 84);
@@ -181,21 +186,28 @@ void ui_draw_focus_settings(uint32_t focus_minutes) {
 
   display->setTextColor(ink);
   display->setTextSize(1);
-  display->setCursor(84, 74);
-  display->print("Focus Length");
+  display->setCursor(92, 66);
+  display->print("Settings");
 
-  display->setTextSize(3);
-  display->setCursor(focus_minutes < 10 ? 94 : 82, 96);
+  display->setCursor(62, 90);
+  display->print(selected_item == 0 ? "> Focus" : "  Focus");
+  display->setCursor(132, 90);
   display->print(focus_minutes);
-  display->setTextSize(1);
-  display->setCursor(126, 106);
-  display->print("min");
+  display->print(" min");
+
+  display->setCursor(62, 112);
+  display->print(selected_item == 1 ? "> Bright" : "  Bright");
+  display->setCursor(132, 112);
+  display->print(brightness_percent);
+  display->print("%");
 
   display->setTextSize(1);
-  display->setCursor(82, 138);
-  display->print("Tap to change");
-  display->setCursor(84, 154);
-  display->print("Hold to save");
+  display->setCursor(70, 140);
+  display->print("Left switch");
+  display->setCursor(68, 154);
+  display->print("Right change");
+  display->setCursor(84, 170);
+  display->print("Hold save");
 
   last_rendered_seconds = UINT32_MAX;
   last_progress_angle = -90;
