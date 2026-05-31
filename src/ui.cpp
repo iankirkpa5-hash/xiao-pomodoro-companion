@@ -3,6 +3,7 @@
 #include <Arduino_GFX_Library.h>
 #include <math.h>
 #include "pomodoro_timer.h"
+#include "version.h"
 
 // Round Display for XIAO uses XIAO D8/D10 for SPI and D1/D3 for LCD CS/DC.
 // XIAO ESP32S3 mapping: D8=GPIO7, D10=GPIO9, D1=GPIO2, D3=GPIO4, D6=GPIO43.
@@ -211,6 +212,8 @@ void ui_draw_settings(uint32_t focus_minutes, uint32_t brightness_percent, uint8
   display->print("Right change");
   display->setCursor(84, 182);
   display->print("Hold save");
+  display->setCursor(106, 202);
+  display->print(APP_VERSION);
 
   last_rendered_seconds = UINT32_MAX;
   last_progress_angle = -90;
