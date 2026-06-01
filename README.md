@@ -142,9 +142,13 @@ Suggested future milestones:
 | --- | --- | --- |
 | ![Focus running](docs/images/focus-run.jpg) | ![Focus paused](docs/images/focus-pause.jpg) | ![Settings screen](docs/images/settings-v1.jpg) |
 
-| Break prompt | Focus transition | Hardware |
+| Session stats | Break prompt | Focus transition |
 | --- | --- | --- |
-| ![Break prompt](docs/images/break-prompt.jpg) | ![Focus transition](docs/images/focus-transition.jpg) | ![Hardware assembly](docs/images/hardware-back.jpg) |
+| ![Session stats](docs/images/settings-stats.png) | ![Break prompt](docs/images/break-prompt.jpg) | ![Focus transition](docs/images/focus-transition.jpg) |
+
+| Hardware |
+| --- |
+| ![Hardware assembly](docs/images/hardware-back.jpg) |
 
 ## Interaction
 
