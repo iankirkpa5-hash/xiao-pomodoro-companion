@@ -232,13 +232,10 @@ src/
 | `v0.7-brightness-settings` | Brightness configuration and settings UI        |
 | `v0.8-wellness-prompts`    | Break wellness prompts                          |
 | `v0.9-settings-reset-item` | Reset item in Settings                          |
+| `v1.0-polish`              | README, gallery, hardware notes, and v1.0 UI version display |
 
 ## Next Steps
 
-* Finish `v1.0-polish`
-* Add final project photos
-* Improve README with screenshots
-* Update the displayed app version before the `v1.0` tag
 * Consider hardware feedback with a buzzer or vibration motor
 * Explore battery and power management
 * Explore microphone-based ambient sensing as a separate experiment
