@@ -23,7 +23,7 @@ constexpr uint32_t FOCUS_OPTIONS[] = {25, 45, 50};
 constexpr uint8_t FOCUS_OPTION_COUNT = sizeof(FOCUS_OPTIONS) / sizeof(FOCUS_OPTIONS[0]);
 constexpr uint32_t BRIGHTNESS_OPTIONS[] = {30, 60, 100};
 constexpr uint8_t BRIGHTNESS_OPTION_COUNT = sizeof(BRIGHTNESS_OPTIONS) / sizeof(BRIGHTNESS_OPTIONS[0]);
-constexpr uint8_t SETTINGS_ITEM_COUNT = 3;
+constexpr uint8_t SETTINGS_ITEM_COUNT = 4;
 
 uint8_t focusOptionIndexFor(uint32_t focus_minutes) {
   for (uint8_t i = 0; i < FOCUS_OPTION_COUNT; i++) {
@@ -90,6 +90,9 @@ void changeSelectedSetting() {
     ui_draw_static_pomodoro_home();
     Serial.println("Settings reset");
     return;
+  } else if (settings_selected_item == 3) {
+    stats_clear_completed_focus();
+    Serial.println("Settings stats cleared");
   } else {
     return;
   }

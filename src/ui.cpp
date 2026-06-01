@@ -233,19 +233,22 @@ void ui_draw_settings(
   display->print(brightness_percent);
   display->print("%");
 
-  display->setCursor(62, 132);
+  display->setCursor(62, 130);
   display->print(selected_item == 2 ? "> Reset" : "  Reset");
 
-  display->setTextSize(1);
-  display->setCursor(70, 154);
-  display->print("Left switch");
-  display->setCursor(68, 168);
-  display->print("Right change");
-  display->setCursor(84, 182);
-  display->print("Hold save");
-  display->setCursor(86, 194);
-  display->print("Done: ");
+  display->setCursor(62, 148);
+  display->print(selected_item == 3 ? "> Stats" : "  Stats");
+  display->setCursor(132, 148);
+  display->print("Done ");
   display->print(completed_focus_count);
+
+  display->setTextSize(1);
+  display->setCursor(70, 166);
+  display->print("Left switch");
+  display->setCursor(68, 178);
+  display->print("Right action");
+  display->setCursor(84, 190);
+  display->print("Hold save");
   display->setCursor(106, 202);
   display->print(APP_VERSION);
 

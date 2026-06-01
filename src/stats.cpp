@@ -32,3 +32,8 @@ uint32_t stats_increment_completed_focus() {
   preferences.putUInt(COMPLETED_FOCUS_KEY, completed_focus_count);
   return completed_focus_count;
 }
+
+void stats_clear_completed_focus() {
+  completed_focus_count = 0;
+  preferences.putUInt(COMPLETED_FOCUS_KEY, completed_focus_count);
+}

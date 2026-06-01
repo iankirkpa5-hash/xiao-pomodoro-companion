@@ -131,6 +131,7 @@ Suggested future milestones:
 * Focus duration setting: 25 / 45 / 50 minutes
 * Brightness setting: 30 / 60 / 100 percent
 * Reset menu item
+* Stats reset item
 * NVS persisted settings
 * Wellness prompts when entering Break
 * Session transition feedback
@@ -163,10 +164,11 @@ Suggested future milestones:
 
 | Action                   | Result                                         |
 | ------------------------ | ---------------------------------------------- |
-| Left-half tap            | Switch item: Focus / Bright / Reset            |
+| Left-half tap            | Switch item: Focus / Bright / Reset / Stats    |
 | Right-half tap on Focus  | Cycle 25 / 45 / 50 minutes                     |
 | Right-half tap on Bright | Cycle 30 / 60 / 100 percent                    |
 | Right-half tap on Reset  | Reset Pomodoro and return to the normal screen |
+| Right-half tap on Stats  | Clear completed Focus counter                  |
 | Long press               | Save settings and exit                         |
 
 ## Settings
@@ -241,6 +243,7 @@ src/
 | `v1.0-polish`              | README, gallery, hardware notes, and v1.0 UI version display |
 | `v1.1-idle-screen`         | Idle screen for paused inactivity               |
 | `v1.2-session-stats`       | Completed Focus session counter                 |
+| `v1.3-stats-reset`         | Clear completed Focus counter from Settings     |
 
 ## Next Steps
 
