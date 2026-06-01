@@ -148,6 +148,33 @@ void ui_draw_static_pomodoro_home() {
   ui_draw_status_text();
 }
 
+void ui_draw_idle_screen() {
+  const uint16_t background = color565(5, 10, 18);
+  const uint16_t outer = color565(16, 32, 52);
+  const uint16_t accent = color565(38, 150, 178);
+  const uint16_t face = color565(255, 242, 214);
+  const uint16_t ink = color565(35, 38, 42);
+
+  display->fillScreen(background);
+  display->fillCircle(120, 120, 116, outer);
+  display->fillCircle(120, 120, 86, accent);
+  display->fillCircle(120, 120, 58, face);
+
+  display->setTextColor(ink);
+  display->setTextSize(2);
+  display->setCursor(92, 82);
+  display->print("XIAO");
+  display->setCursor(62, 110);
+  display->print("Companion");
+
+  display->setTextSize(1);
+  display->setCursor(84, 144);
+  display->print("Tap to focus");
+
+  last_rendered_seconds = UINT32_MAX;
+  last_progress_angle = -90;
+}
+
 void ui_draw_session_feedback(SessionMode next_mode, const char *message) {
   const uint16_t background = color565(5, 10, 18);
   const uint16_t outer = color565(16, 32, 52);

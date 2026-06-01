@@ -7,10 +7,13 @@
 #include "ui.h"
 
 constexpr uint32_t SESSION_FEEDBACK_MS = 2000;
+constexpr uint32_t IDLE_SCREEN_DELAY_MS = 60000;
 
 bool session_feedback_active = false;
 unsigned long session_feedback_until_ms = 0;
 bool settings_active = false;
+bool idle_screen_active = false;
+unsigned long paused_since_ms = 0;
 uint8_t focus_option_index = 0;
 uint8_t brightness_option_index = 0;
 uint8_t settings_selected_item = 0;
@@ -49,14 +52,17 @@ void drawSettings() {
 }
 
 void resetCurrentSession() {
+  const unsigned long now = millis();
   setRunning(false);
-  resetTimerForCurrentSession(millis());
+  resetTimerForCurrentSession(now);
+  paused_since_ms = now;
   ui_render_reset_without_full_redraw();
   Serial.println("Session reset");
 }
 
 void enterSettings() {
   settings_active = true;
+  idle_screen_active = false;
   setRunning(false);
   focus_option_index = focusOptionIndexFor(config_get().focus_minutes);
   brightness_option_index = brightnessOptionIndexFor(config_get().brightness_percent);
@@ -78,6 +84,7 @@ void changeSelectedSetting() {
     setRunning(false);
     resetTimerForCurrentSession(millis());
     settings_active = false;
+    paused_since_ms = millis();
     ui_draw_static_pomodoro_home();
     Serial.println("Settings reset");
     return;
@@ -104,6 +111,8 @@ void saveSettingsAndExit(unsigned long now) {
   setRunning(false);
   resetTimerForCurrentSession(now);
   settings_active = false;
+  idle_screen_active = false;
+  paused_since_ms = now;
   ui_draw_static_pomodoro_home();
   Serial.printf(
       "Settings saved: focus=%lu min brightness=%lu%%\n",
@@ -125,6 +134,7 @@ void finishSessionFeedbackIfReady(unsigned long now) {
 
   if (static_cast<long>(now - session_feedback_until_ms) >= 0) {
     session_feedback_active = false;
+    paused_since_ms = now;
     ui_draw_static_pomodoro_home();
   }
 }
@@ -133,8 +143,38 @@ void switchSession(unsigned long now) {
   toggleSessionMode();
   setRunning(false);
   resetTimerForCurrentSession(now);
+  paused_since_ms = now;
   beginSessionFeedback(now);
   Serial.printf("Switched to %s\n", modeLabel());
+}
+
+void updateIdleScreen(unsigned long now) {
+  if (settings_active || session_feedback_active || running) {
+    paused_since_ms = now;
+    return;
+  }
+
+  if (idle_screen_active) {
+    return;
+  }
+
+  if (now - paused_since_ms >= IDLE_SCREEN_DELAY_MS) {
+    idle_screen_active = true;
+    ui_draw_idle_screen();
+    Serial.println("Idle screen");
+  }
+}
+
+void wakeFromIdleToFocus(unsigned long now) {
+  idle_screen_active = false;
+  if (mode != SessionMode::Focus) {
+    mode = SessionMode::Focus;
+    resetTimerForCurrentSession(now);
+  }
+  setRunning(true);
+  restartCountdownAt(now);
+  ui_draw_static_pomodoro_home();
+  Serial.println("Idle wake to focus");
 }
 
 void updateCountdown(unsigned long now) {
@@ -176,14 +216,24 @@ void handleInput(unsigned long now) {
   }
 
   if (event == InputEvent::LongPress) {
+    idle_screen_active = false;
     enterSettings();
     Serial.printf("Long press settings: x=%u y=%u\n", touch.x, touch.y);
   }
 
   if (event == InputEvent::ShortPress) {
+    if (idle_screen_active) {
+      wakeFromIdleToFocus(now);
+      Serial.printf("Idle tap: x=%u y=%u\n", touch.x, touch.y);
+      return;
+    }
+
     toggleRunning();
     restartCountdownAt(now);
     ui_draw_status_text();
+    if (!running) {
+      paused_since_ms = now;
+    }
 
     Serial.printf("Touch: x=%u y=%u, running=%s\n", touch.x, touch.y, running ? "true" : "false");
   }
@@ -220,6 +270,7 @@ void setup() {
   }
 
   ui_draw_static_pomodoro_home();
+  paused_since_ms = millis();
 
   Serial.println("Display initialized");
 }
@@ -232,6 +283,7 @@ void loop() {
   if (!session_feedback_active && !settings_active) {
     updateCountdown(now);
   }
+  updateIdleScreen(now);
   if (!settings_active) {
     printStatusEverySecond(now);
   }

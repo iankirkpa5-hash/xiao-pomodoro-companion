@@ -126,6 +126,7 @@ Suggested future milestones:
 * Round progress ring
 * Touch controls
 * Settings menu
+* Idle screen after paused inactivity
 * Focus duration setting: 25 / 45 / 50 minutes
 * Brightness setting: 30 / 60 / 100 percent
 * Reset menu item
@@ -233,6 +234,7 @@ src/
 | `v0.8-wellness-prompts`    | Break wellness prompts                          |
 | `v0.9-settings-reset-item` | Reset item in Settings                          |
 | `v1.0-polish`              | README, gallery, hardware notes, and v1.0 UI version display |
+| `v1.1-idle-screen`         | Idle screen for paused inactivity               |
 
 ## Next Steps
 
