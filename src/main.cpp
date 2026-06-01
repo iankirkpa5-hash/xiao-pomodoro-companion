@@ -4,6 +4,7 @@
 #include "input.h"
 #include "pomodoro_timer.h"
 #include "prompts.h"
+#include "stats.h"
 #include "ui.h"
 
 constexpr uint32_t SESSION_FEEDBACK_MS = 2000;
@@ -48,6 +49,7 @@ void drawSettings() {
   ui_draw_settings(
       FOCUS_OPTIONS[focus_option_index],
       BRIGHTNESS_OPTIONS[brightness_option_index],
+      stats_completed_focus_count(),
       settings_selected_item);
 }
 
@@ -186,6 +188,10 @@ void updateCountdown(unsigned long now) {
 
   if (isTimerComplete()) {
     Serial.println("Session complete");
+    if (mode == SessionMode::Focus) {
+      const uint32_t completed = stats_increment_completed_focus();
+      Serial.printf("Completed focus sessions=%lu\n", completed);
+    }
     switchSession(now);
   }
 }
@@ -259,6 +265,7 @@ void setup() {
 
   randomSeed(esp_random());
   config_begin();
+  stats_begin();
   timer_begin(millis());
   ui_apply_brightness(config_get().brightness_percent);
   input_begin();

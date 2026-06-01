@@ -127,6 +127,7 @@ Suggested future milestones:
 * Touch controls
 * Settings menu
 * Idle screen after paused inactivity
+* Completed Focus session counter
 * Focus duration setting: 25 / 45 / 50 minutes
 * Brightness setting: 30 / 60 / 100 percent
 * Reset menu item
@@ -235,6 +236,7 @@ src/
 | `v0.9-settings-reset-item` | Reset item in Settings                          |
 | `v1.0-polish`              | README, gallery, hardware notes, and v1.0 UI version display |
 | `v1.1-idle-screen`         | Idle screen for paused inactivity               |
+| `v1.2-session-stats`       | Completed Focus session counter                 |
 
 ## Next Steps
 

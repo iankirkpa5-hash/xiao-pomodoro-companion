@@ -200,7 +200,11 @@ void ui_draw_session_feedback(SessionMode next_mode, const char *message) {
   last_progress_angle = -90;
 }
 
-void ui_draw_settings(uint32_t focus_minutes, uint32_t brightness_percent, uint8_t selected_item) {
+void ui_draw_settings(
+    uint32_t focus_minutes,
+    uint32_t brightness_percent,
+    uint32_t completed_focus_count,
+    uint8_t selected_item) {
   const uint16_t background = color565(5, 10, 18);
   const uint16_t outer = color565(16, 32, 52);
   const uint16_t accent = color565(244, 182, 84);
@@ -239,6 +243,9 @@ void ui_draw_settings(uint32_t focus_minutes, uint32_t brightness_percent, uint8
   display->print("Right change");
   display->setCursor(84, 182);
   display->print("Hold save");
+  display->setCursor(86, 194);
+  display->print("Done: ");
+  display->print(completed_focus_count);
   display->setCursor(106, 202);
   display->print(APP_VERSION);
 
