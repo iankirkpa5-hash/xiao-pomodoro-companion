@@ -134,6 +134,16 @@ Suggested future milestones:
 * Session transition feedback
 * Settings screen version display
 
+## Gallery
+
+| Focus running | Focus paused | Settings |
+| --- | --- | --- |
+| ![Focus running](docs/images/focus-run.jpg) | ![Focus paused](docs/images/focus-pause.jpg) | ![Settings screen](docs/images/settings-v1.jpg) |
+
+| Break prompt | Focus transition | Hardware |
+| --- | --- | --- |
+| ![Break prompt](docs/images/break-prompt.jpg) | ![Focus transition](docs/images/focus-transition.jpg) | ![Hardware assembly](docs/images/hardware-back.jpg) |
+
 ## Interaction
 
 ### Normal Screen
