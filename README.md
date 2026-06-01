@@ -166,12 +166,13 @@ Suggested future milestones:
 
 | Action                   | Result                                         |
 | ------------------------ | ---------------------------------------------- |
-| Left-half tap            | Switch item: Focus / Bright / Reset / Stats    |
+| Left-half tap            | Switch item: Focus / Bright / Reset / Stats / Save |
 | Right-half tap on Focus  | Cycle 25 / 45 / 50 minutes                     |
 | Right-half tap on Bright | Cycle 30 / 60 / 100 percent                    |
 | Right-half tap on Reset  | Reset Pomodoro and return to the normal screen |
 | Right-half tap on Stats  | Clear completed Focus counter                  |
-| Long press               | Save settings and exit                         |
+| Right-half tap on Save   | Save settings and exit                         |
+| Long press               | Ignored on Settings screen                     |
 
 ## Settings
 

@@ -19,11 +19,13 @@ uint8_t focus_option_index = 0;
 uint8_t brightness_option_index = 0;
 uint8_t settings_selected_item = 0;
 
+void saveSettingsAndExit(unsigned long now);
+
 constexpr uint32_t FOCUS_OPTIONS[] = {25, 45, 50};
 constexpr uint8_t FOCUS_OPTION_COUNT = sizeof(FOCUS_OPTIONS) / sizeof(FOCUS_OPTIONS[0]);
 constexpr uint32_t BRIGHTNESS_OPTIONS[] = {30, 60, 100};
 constexpr uint8_t BRIGHTNESS_OPTION_COUNT = sizeof(BRIGHTNESS_OPTIONS) / sizeof(BRIGHTNESS_OPTIONS[0]);
-constexpr uint8_t SETTINGS_ITEM_COUNT = 4;
+constexpr uint8_t SETTINGS_ITEM_COUNT = 5;
 
 uint8_t focusOptionIndexFor(uint32_t focus_minutes) {
   for (uint8_t i = 0; i < FOCUS_OPTION_COUNT; i++) {
@@ -93,6 +95,10 @@ void changeSelectedSetting() {
   } else if (settings_selected_item == 3) {
     stats_clear_completed_focus();
     Serial.println("Settings stats cleared");
+  } else if (settings_selected_item == 4) {
+    saveSettingsAndExit(millis());
+    Serial.println("Settings save item");
+    return;
   } else {
     return;
   }
@@ -208,8 +214,7 @@ void handleInput(unsigned long now) {
   const TouchPoint touch = input_last_touch();
   if (settings_active) {
     if (event == InputEvent::LongPress) {
-      saveSettingsAndExit(now);
-      Serial.printf("Settings saved from touch: x=%u y=%u\n", touch.x, touch.y);
+      Serial.printf("Settings long press ignored: x=%u y=%u\n", touch.x, touch.y);
     }
 
     if (event == InputEvent::ShortPress) {

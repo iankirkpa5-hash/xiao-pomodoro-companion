@@ -221,35 +221,36 @@ void ui_draw_settings(
   display->setCursor(92, 66);
   display->print("Settings");
 
-  display->setCursor(62, 90);
+  display->setCursor(62, 80);
   display->print(selected_item == 0 ? "> Focus" : "  Focus");
-  display->setCursor(132, 90);
+  display->setCursor(132, 80);
   display->print(focus_minutes);
   display->print(" min");
 
-  display->setCursor(62, 112);
+  display->setCursor(62, 100);
   display->print(selected_item == 1 ? "> Bright" : "  Bright");
-  display->setCursor(132, 112);
+  display->setCursor(132, 100);
   display->print(brightness_percent);
   display->print("%");
 
-  display->setCursor(62, 130);
+  display->setCursor(62, 120);
   display->print(selected_item == 2 ? "> Reset" : "  Reset");
 
-  display->setCursor(62, 148);
+  display->setCursor(62, 140);
   display->print(selected_item == 3 ? "> Stats" : "  Stats");
-  display->setCursor(132, 148);
+  display->setCursor(132, 140);
   display->print("Done ");
   display->print(completed_focus_count);
 
+  display->setCursor(62, 160);
+  display->print(selected_item == 4 ? "> Save" : "  Save");
+
   display->setTextSize(1);
-  display->setCursor(70, 166);
+  display->setCursor(72, 180);
   display->print("Left switch");
-  display->setCursor(68, 178);
+  display->setCursor(70, 192);
   display->print("Right action");
-  display->setCursor(84, 190);
-  display->print("Hold save");
-  display->setCursor(106, 202);
+  display->setCursor(106, 206);
   display->print(APP_VERSION);
 
   last_rendered_seconds = UINT32_MAX;
