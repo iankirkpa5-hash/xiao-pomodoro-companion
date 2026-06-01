@@ -75,6 +75,8 @@ The Sense camera uses several GPIO pins:
 
 This project does not currently use the camera, but these pins should be considered reserved if camera support is added later.
 
+In the current v1.x Pomodoro build, the camera module is removed from the hardware stack. The timer does not need camera features, and removing the module reduces heat, power draw, and mechanical stack height. Camera support should be treated as a separate future experiment rather than part of the main Pomodoro firmware.
+
 ### microSD / SPI Pin Sharing
 
 The Sense expansion board includes microSD-related circuitry that shares SPI-related pins:
