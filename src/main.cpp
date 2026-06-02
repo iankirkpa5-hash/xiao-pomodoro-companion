@@ -9,12 +9,14 @@
 
 constexpr uint32_t SESSION_FEEDBACK_MS = 2000;
 constexpr uint32_t IDLE_SCREEN_DELAY_MS = 60000;
+constexpr uint32_t POST_SETTINGS_IDLE_BLOCK_MS = 5000;
 
 bool session_feedback_active = false;
 unsigned long session_feedback_until_ms = 0;
 bool settings_active = false;
 bool idle_screen_active = false;
 unsigned long paused_since_ms = 0;
+unsigned long idle_block_until_ms = 0;
 uint8_t focus_option_index = 0;
 uint8_t brightness_option_index = 0;
 uint8_t settings_selected_item = 0;
@@ -84,11 +86,15 @@ void changeSelectedSetting() {
     ui_apply_brightness(BRIGHTNESS_OPTIONS[brightness_option_index]);
     Serial.printf("Settings brightness=%lu%%\n", BRIGHTNESS_OPTIONS[brightness_option_index]);
   } else if (settings_selected_item == 2) {
+    const unsigned long now = millis();
     mode = SessionMode::Focus;
     setRunning(false);
-    resetTimerForCurrentSession(millis());
+    resetTimerForCurrentSession(now);
     settings_active = false;
-    paused_since_ms = millis();
+    idle_screen_active = false;
+    session_feedback_active = false;
+    paused_since_ms = now;
+    idle_block_until_ms = now + POST_SETTINGS_IDLE_BLOCK_MS;
     ui_draw_static_pomodoro_home();
     Serial.println("Settings reset");
     return;
@@ -123,7 +129,9 @@ void saveSettingsAndExit(unsigned long now) {
   resetTimerForCurrentSession(now);
   settings_active = false;
   idle_screen_active = false;
+  session_feedback_active = false;
   paused_since_ms = now;
+  idle_block_until_ms = now + POST_SETTINGS_IDLE_BLOCK_MS;
   ui_draw_static_pomodoro_home();
   Serial.printf(
       "Settings saved: focus=%lu min brightness=%lu%%\n",
@@ -161,6 +169,11 @@ void switchSession(unsigned long now) {
 
 void updateIdleScreen(unsigned long now) {
   if (settings_active || session_feedback_active || running) {
+    paused_since_ms = now;
+    return;
+  }
+
+  if (static_cast<long>(now - idle_block_until_ms) < 0) {
     paused_since_ms = now;
     return;
   }
