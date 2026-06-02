@@ -261,6 +261,7 @@ src/
 | `v1.3-stats-reset`         | Clear completed Focus counter from Settings     |
 | `v1.4-settings-save-item`  | Explicit Save item to avoid Settings long-press misfires |
 | `v1.4.1-idle-reset-fix`    | Idle state cleanup after Settings Reset         |
+| `v1.5-stability-pass`      | Real-device stability pass for daily desk use   |
 
 ## Next Steps
 
