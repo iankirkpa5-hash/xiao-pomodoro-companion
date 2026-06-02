@@ -114,12 +114,12 @@ For future expansion:
 * Do not cut J1 / J2 / J3 unless the hardware modification is intentional and documented.
 * Keep camera, microphone, and microSD support as separate experimental milestones.
 
-Suggested future milestones:
+Suggested future experimental branches:
 
-* `v1.1-microphone-test`: read PDM microphone audio level and display Quiet / Loud.
-* `v1.2-camera-test`: validate camera capture independently.
-* `v1.3-hardware-feedback`: add buzzer or vibration motor.
-* `v1.4-battery-power`: add LiPo battery support and power management.
+* `experiment/microphone-test`: read PDM microphone audio level and display Quiet / Loud.
+* `experiment/camera-test`: validate camera capture independently.
+* `feature/hardware-feedback`: add buzzer or vibration motor.
+* `feature/battery-power`: add LiPo battery support and power management.
 
 ## Features
 
