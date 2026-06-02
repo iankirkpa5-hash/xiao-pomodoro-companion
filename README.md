@@ -250,6 +250,7 @@ src/
 
 ## Next Steps
 
+* Use [Release Checklist](docs/release-checklist.md) before tagging new versions
 * Consider hardware feedback with a buzzer or vibration motor
 * Explore battery and power management
 * Explore microphone-based ambient sensing as a separate experiment
