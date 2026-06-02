@@ -259,10 +259,13 @@ src/
 | `v1.1-idle-screen`         | Idle screen for paused inactivity               |
 | `v1.2-session-stats`       | Completed Focus session counter                 |
 | `v1.3-stats-reset`         | Clear completed Focus counter from Settings     |
+| `v1.4-settings-save-item`  | Explicit Save item to avoid Settings long-press misfires |
+| `v1.4.1-idle-reset-fix`    | Idle state cleanup after Settings Reset         |
 
 ## Next Steps
 
 * Use [Release Checklist](docs/release-checklist.md) before tagging new versions
+* Follow the long-term [Roadmap](docs/roadmap.md)
 * Consider hardware feedback with a buzzer or vibration motor
 * Explore battery and power management
 * Explore microphone-based ambient sensing as a separate experiment
