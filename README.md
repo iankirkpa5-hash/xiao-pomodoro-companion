@@ -92,6 +92,18 @@ The Round Display also depends on display/touch communication, so avoid changing
 
 This project does not currently use the Sense microSD slot.
 
+### Round Display KE Switch
+
+Brightness control depends on the Round Display back-side KE switch. For this firmware, both switch positions should be set to **ON / KE** so the display backlight control path is connected to the XIAO.
+
+With this switch state, the firmware can control the screen backlight through:
+
+```cpp
+constexpr int LCD_BL = 43; // XIAO D6 / GPIO43
+```
+
+If the Settings `Bright` value changes but the physical screen brightness does not, check the Round Display KE switch first.
+
 ### Do Not Cut J1 / J2 / J3 for This Project
 
 The Sense board exposes solder jumpers such as J1, J2, and J3 for advanced hardware configuration.

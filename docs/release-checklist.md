@@ -29,12 +29,14 @@ git checkout -b release/vX.Y.Z-name
 - [ ] Upload passes
 - [ ] Real device smoke test passes
 - [ ] Settings screen shows the expected version
+- [ ] Round Display KE switch is set to ON / KE for backlight control
 - [ ] Core interactions still work:
   - [ ] Short tap starts / pauses / resumes
   - [ ] Long press enters Settings from the normal screen
   - [ ] Settings `Save` exits correctly
   - [ ] Settings `Reset` returns to the normal Pomodoro screen
   - [ ] Settings `Stats` clears `Done`
+  - [ ] Settings `Bright` visibly changes backlight brightness
   - [ ] Idle screen still appears only after paused inactivity
 
 ## Commit, Tag, Push
