@@ -488,6 +488,87 @@ Pi Camera + Raspberry Pi
 Jetson / Hailo vision device
 ```
 
+## Build System Strategy
+
+Do not migrate the current firmware project to Bazel yet.
+
+For the current firmware-only line, PlatformIO remains the right tool:
+
+```text
+v1.x / v2.x:
+PlatformIO builds, uploads, board config, Arduino framework, and serial monitor
+```
+
+The main bottleneck for this hardware project is not software rebuild time. It is:
+
+```text
+Firmware upload
+Real display behavior
+Touch interaction
+Backlight / switch / pin validation
+Power and thermal behavior
+Manual device smoke tests
+```
+
+Bazel cannot cache the physical parts of that workflow.
+
+When the project reaches the local gateway stage, start with a simple Makefile instead of a full Bazel migration:
+
+```makefile
+firmware-build:
+	pio run
+
+firmware-upload:
+	pio run -t upload
+
+gateway-test:
+	cd gateway && pytest
+
+webui-dev:
+	cd webui && npm run dev
+```
+
+This is enough for the first multi-component layout:
+
+```text
+firmware/
+gateway/
+webui/
+protocol/
+tools/
+tests/
+docs/
+```
+
+Bazel becomes worth evaluating only after the repository grows into a true multi-language system:
+
+```text
+v3.x / v4.x / v5.x:
+Firmware + Python gateway + React dashboard + protocol schemas + mock device tests
+```
+
+Useful Bazel targets at that stage:
+
+```text
+Python gateway tests
+React build / lint
+Protocol schema validation
+Shared command code generation
+Mock device tests
+Gateway integration tests
+Documentation checks
+Firmware build wrapper
+```
+
+If Bazel is introduced, prefer a low-risk wrapper first:
+
+```text
+Bazel target -> PlatformIO build
+Bazel target -> PlatformIO upload
+```
+
+Avoid fully Bazelizing the ESP32 / Arduino toolchain unless the firmware and CI complexity clearly justify it.
+
 ## Recommended Next Order
 
 Do not jump to v2 yet.
