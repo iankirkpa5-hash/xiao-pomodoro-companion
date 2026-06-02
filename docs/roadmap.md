@@ -2,13 +2,16 @@
 
 This roadmap keeps the project direction clear without overloading the current firmware branch.
 
+The long-term architecture is inspired by projects such as OpenBuddy: an ESP32-class physical terminal connected to a Python backend, a web dashboard, and eventually a voice / AI pipeline. The XIAO device should remain a reliable local terminal. Heavy AI, voice processing, API keys, dashboards, and multi-device orchestration should live outside the microcontroller.
+
 ## Version Strategy
 
 ```text
-v1.x = Offline desktop device
-v2.x = Lightweight Wi-Fi features on XIAO ESP32S3
-v3.x = Local gateway, API, and AI orchestration
-v4.x = Local models, dedicated AI hardware, and multi-device systems
+v1.x = Offline desktop terminal
+v2.x = XIAO Wi-Fi event layer
+v3.x = Local Gateway / Dashboard layer
+v4.x = Voice / AI / Coding Companion layer
+v5.x = Local model and multi-device system layer
 ```
 
 ## Current Status
@@ -17,7 +20,7 @@ v4.x = Local models, dedicated AI hardware, and multi-device systems
 
 ```text
 Main branch: main
-Current stable line: v1.4.x
+Current stable line: v1.5
 ```
 
 Implemented capabilities:
@@ -51,11 +54,18 @@ Round Display KE switch set to ON / KE
 No battery
 No microSD
 No RTC coin cell
+USB-C power
 ```
 
-## v1.x: Mature Offline Device
+## v1.x: Offline Desktop Terminal
 
 Goal: make the standalone desk companion reliable enough for long-term daily use.
+
+Current stable release:
+
+```text
+v1.5-stability-pass
+```
 
 ### v1.5-stability-pass
 
@@ -75,8 +85,6 @@ Break prompt still works
 NVS restores correctly after restart
 Long USB-powered run is stable
 ```
-
-If no bugs are found, this can be a test log only. If bugs are found, fix only those bugs.
 
 ### v1.6-hardware-feedback
 
@@ -140,7 +148,9 @@ USB-C strain relief
 Antenna mounting
 ```
 
-## v2.x: Lightweight Wi-Fi On XIAO
+## v2.x: XIAO Wi-Fi Event Layer
+
+Goal: let the XIAO become a lightweight network endpoint while keeping Pomodoro fully usable offline.
 
 The ESP32S3 already has Wi-Fi, so v2.x does not need to start with a Raspberry Pi or Mini PC.
 
@@ -195,8 +205,8 @@ Example payload:
 Possible integrations:
 
 ```text
-IFTTT
 Home Assistant webhook
+IFTTT
 Telegram Bot relay
 LINE Bot
 Cloud functions
@@ -263,68 +273,104 @@ External systems send structured commands only.
 The XIAO local state machine makes the final execution decision.
 ```
 
-## v3.x: Local Gateway / API / AI Orchestration
+## v3.x: Local Gateway / Dashboard Layer
 
-After Wi-Fi is stable, introduce a local gateway such as a Raspberry Pi, N100 Mini PC, old laptop, or Mac mini.
+Goal: build a middle layer similar in shape to OpenBuddy, but without full AI at first.
 
-### v3.0-local-gateway
-
-The gateway handles:
+Reference architecture:
 
 ```text
-API key management
-Device command queue
-Logs
-Database
-Multi-device status
-Webhook forwarding
-MQTT broker
-Home Assistant integration
+ESP32 firmware
+        <-> WebSocket / HTTP
+Python FastAPI backend
+        <-> REST / WebSocket
+React WebUI
 ```
 
-The XIAO still receives only simple validated commands.
+### v3.0-local-gateway-mvp
 
-### v3.1-ai-command-adapter
-
-AI can translate natural language into structured commands, but it should not directly control hardware.
-
-Flow:
+Gateway scope:
 
 ```text
-User natural language
-        ↓
-AI / LLM
-        ↓
-Structured command
-        ↓
-Gateway validation
-        ↓
-XIAO execution
+Python FastAPI
+WebSocket
+REST API
+Device registry
+Command queue
+SQLite logs
 ```
 
-Example:
+XIAO state report:
+
+```json
+{
+  "mode": "Focus",
+  "running": true,
+  "remaining": 1480,
+  "done": 3,
+  "brightness": 60
+}
+```
+
+Gateway command example:
+
+```json
+{
+  "action": "SHOW_MESSAGE",
+  "text": "Take a short break"
+}
+```
+
+### v3.1-web-dashboard
+
+Simple dashboard scope:
+
+```text
+Show current status
+Show Done stats
+Show device online / offline
+Send START / PAUSE / RESET
+Send SHOW_MESSAGE
+View event logs
+```
+
+This turns the project from one device into a small system.
+
+### v3.2-mdns-autodiscovery
+
+Goal:
+
+```text
+xiao-pomodoro.local
+gateway.local
+Automatic device discovery
+No manual IP entry
+```
+
+## v4.x: Voice / AI / Coding Companion Layer
+
+Goal: add OpenBuddy-like interaction patterns: voice, agent, TTS, and coding hooks.
+
+Reference voice pipeline:
+
+```text
+Mic -> STT -> cleanup -> Agent -> cleanup -> TTS -> Speaker
+```
+
+### v4.0-ai-command-adapter
+
+Natural language to structured commands:
 
 ```text
 "Start a 45 minute focus session"
+        ->
+{ "action": "SET_FOCUS_45" }
+{ "action": "START" }
 ```
 
-Converted to:
+AI should not directly control hardware. It should output commands for the gateway to validate.
 
-```json
-{
-  "action": "SET_FOCUS_45"
-}
-```
-
-or:
-
-```json
-{
-  "action": "START"
-}
-```
-
-### v3.2-voice-control
+### v4.1-voice-control
 
 Voice input can come from:
 
@@ -332,64 +378,79 @@ Voice input can come from:
 Computer microphone
 Mobile web page
 Telegram / LINE voice
-ElevenLabs
-OpenAI speech-to-text
+ElevenLabs / OpenAI STT
 Whisper / faster-whisper
 ```
 
 The XIAO should not run speech recognition. It should only display results and execute validated commands.
 
-### v3.3-ai-companion
+### v4.2-tts-feedback
 
-Start adding companion behavior:
+Voice output can happen through the web app, local gateway, or speaker device.
 
-```text
-Generate encouragement based on Done count
-Suggest breaks based on continuous focus time
-Summarize a day of focus sessions
-Dynamically generate wellness prompts
-Suggest focus blocks from a schedule
-```
-
-Rule:
+Example prompts:
 
 ```text
-AI suggests or outputs commands only.
-The device does not execute unvalidated actions.
+Focus started
+Break time
+You completed 3 sessions today
 ```
 
-## v4.x: Local Models / Dedicated AI Hardware / Multi-Device System
+### v4.3-coding-companion-mode
 
-Only consider stronger hardware at this stage.
+Inspired by coding hooks in desktop companion projects.
+
+Possible behavior:
+
+```text
+Claude Code starts a task -> XIAO shows Thinking
+Task completes -> XIAO shows Done
+Task errors -> XIAO shows Error
+Long-running task -> XIAO shows Working
+```
+
+This expands the device from Pomodoro companion into a coding desk companion.
+
+## v5.x: Local Models / Multi-Device System Layer
+
+Goal: use dedicated hardware for local models and make the gateway the real system brain.
 
 Possible hardware:
 
 ```text
-Intel N100 / Ryzen Mini PC
-Small PC with discrete GPU
-Raspberry Pi 5 + Hailo
+Intel N100 Mini PC
+Ryzen Mini PC
+Old laptop
+Mac mini
+Raspberry Pi 5
 Jetson Orin Nano
-Coral TPU
-Future RISC-V / NPU / AI accelerator boards
+Hailo / Coral / NPU device
 ```
 
-Goals:
+Possible runtime stack:
 
 ```text
-Local LLM
-Local speech recognition
-Local TTS
-Vision models
-Multi-device coordination
-Long-term logs and memory
+Ollama / llama.cpp
+Whisper
+TTS
+FastAPI Gateway
+MQTT broker
+Home Assistant
+SQLite / Postgres
+Device memory
 ```
 
-System shape:
+Final system shape:
 
 ```text
-Local AI Gateway = brain
-XIAO Pomodoro Companion = desktop terminal
-Other devices = lights, speakers, sensors, reminders, Home Assistant
+XIAO Pomodoro Companion
+        ->
+Local AI Gateway
+        ->
+LLM / STT / TTS / Database / Rules
+        ->
+Other devices:
+lights, speakers, sensors, reminders, Home Assistant
 ```
 
 ## Camera Route
@@ -442,6 +503,12 @@ v2.0-wifi-status
 Principles:
 
 ```text
+XIAO does not run large models
+XIAO is the stable physical terminal
+Wi-Fi is an enhancement layer and must not break offline Pomodoro
+The gateway handles API, AI, voice, logs, and command queues
+AI outputs structured commands only
+The local device state machine decides whether to execute
 Add one capability at a time
 Validate on real hardware every time
 Update README every time
