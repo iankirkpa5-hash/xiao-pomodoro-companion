@@ -90,6 +90,23 @@ void redrawProgressTrack() {
   display->drawCircle(120, 120, 112, color565(56, 72, 94));
   last_progress_angle = -90;
 }
+
+int progressTargetAngle() {
+  const uint32_t total_seconds = sessionSeconds();
+  float progress = 0.0f;
+
+  if (total_seconds > 0 && remaining_seconds < total_seconds) {
+    progress = 1.0f - (static_cast<float>(remaining_seconds) / total_seconds);
+  }
+
+  if (progress < 0.0f) {
+    progress = 0.0f;
+  } else if (progress > 1.0f) {
+    progress = 1.0f;
+  }
+
+  return static_cast<int>(-90 + progress * 360.0f);
+}
 }  // namespace
 
 void ui_set_backlight(uint8_t brightness) {
@@ -139,8 +156,7 @@ void ui_draw_static_pomodoro_home() {
   last_progress_angle = -90;
   last_rendered_seconds = UINT32_MAX;
 
-  const float progress = 1.0f - (static_cast<float>(remaining_seconds) / sessionSeconds());
-  const int target_angle = static_cast<int>(-90 + progress * 360.0f);
+  const int target_angle = progressTargetAngle();
   drawProgressArcSegment(-90, target_angle, color565(228, 244, 250));
   last_progress_angle = target_angle;
 
@@ -262,8 +278,7 @@ void ui_render_tick() {
     drawTimerText();
   }
 
-  const float progress = 1.0f - (static_cast<float>(remaining_seconds) / sessionSeconds());
-  const int target_angle = static_cast<int>(-90 + progress * 360.0f);
+  const int target_angle = progressTargetAngle();
   if (target_angle > last_progress_angle) {
     drawProgressArcSegment(last_progress_angle + 1, target_angle, color565(228, 244, 250));
     last_progress_angle = target_angle;

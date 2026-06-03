@@ -20,6 +20,11 @@ unsigned long idle_block_until_ms = 0;
 uint8_t focus_option_index = 0;
 uint8_t brightness_option_index = 0;
 uint8_t settings_selected_item = 0;
+bool settings_snapshot_valid = false;
+SessionMode settings_entry_mode = SessionMode::Focus;
+bool settings_entry_running = false;
+uint32_t settings_entry_session_seconds = 0;
+uint32_t settings_entry_remaining_seconds = 0;
 
 void saveSettingsAndExit(unsigned long now);
 
@@ -69,6 +74,11 @@ void resetCurrentSession() {
 void enterSettings() {
   settings_active = true;
   idle_screen_active = false;
+  settings_entry_mode = mode;
+  settings_entry_running = running;
+  settings_entry_session_seconds = sessionSeconds();
+  settings_entry_remaining_seconds = remaining_seconds;
+  settings_snapshot_valid = true;
   setRunning(false);
   focus_option_index = focusOptionIndexFor(config_get().focus_minutes);
   brightness_option_index = brightnessOptionIndexFor(config_get().brightness_percent);
@@ -77,7 +87,7 @@ void enterSettings() {
   Serial.println("Settings");
 }
 
-void changeSelectedSetting() {
+void changeSelectedSetting(unsigned long now) {
   if (settings_selected_item == 0) {
     focus_option_index = (focus_option_index + 1) % FOCUS_OPTION_COUNT;
     Serial.printf("Settings focus=%lu min\n", FOCUS_OPTIONS[focus_option_index]);
@@ -86,10 +96,10 @@ void changeSelectedSetting() {
     ui_apply_brightness(BRIGHTNESS_OPTIONS[brightness_option_index]);
     Serial.printf("Settings brightness=%lu%%\n", BRIGHTNESS_OPTIONS[brightness_option_index]);
   } else if (settings_selected_item == 2) {
-    const unsigned long now = millis();
     mode = SessionMode::Focus;
     setRunning(false);
     resetTimerForCurrentSession(now);
+    settings_snapshot_valid = false;
     settings_active = false;
     idle_screen_active = false;
     session_feedback_active = false;
@@ -102,7 +112,7 @@ void changeSelectedSetting() {
     stats_clear_completed_focus();
     Serial.println("Settings stats cleared");
   } else if (settings_selected_item == 4) {
-    saveSettingsAndExit(millis());
+    saveSettingsAndExit(now);
     Serial.println("Settings save item");
     return;
   } else {
@@ -124,9 +134,22 @@ void saveSettingsAndExit(unsigned long now) {
       config_get().break_minutes,
       BRIGHTNESS_OPTIONS[brightness_option_index]);
   ui_apply_brightness(config_get().brightness_percent);
-  mode = SessionMode::Focus;
-  setRunning(false);
-  resetTimerForCurrentSession(now);
+  if (settings_snapshot_valid) {
+    mode = settings_entry_mode;
+    const uint32_t new_session_seconds = sessionSeconds();
+    const uint32_t elapsed_seconds =
+        settings_entry_session_seconds > settings_entry_remaining_seconds
+            ? settings_entry_session_seconds - settings_entry_remaining_seconds
+            : 0;
+    remaining_seconds =
+        new_session_seconds > elapsed_seconds ? new_session_seconds - elapsed_seconds : 0;
+    setRunning(settings_entry_running && remaining_seconds > 0);
+    restartCountdownAt(now);
+  } else {
+    setRunning(false);
+    resetTimerForCurrentSession(now);
+  }
+  settings_snapshot_valid = false;
   settings_active = false;
   idle_screen_active = false;
   session_feedback_active = false;
@@ -234,7 +257,7 @@ void handleInput(unsigned long now) {
       if (touch.x < 120) {
         switchSettingsItem();
       } else {
-        changeSelectedSetting();
+        changeSelectedSetting(now);
       }
       Serial.printf("Settings tap: x=%u y=%u\n", touch.x, touch.y);
     }

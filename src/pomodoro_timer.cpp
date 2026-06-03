@@ -29,11 +29,12 @@ bool advanceTimer(unsigned long now) {
     return false;
   }
 
-  if (now - last_countdown_ms < 1000) {
+  const unsigned long delta_ms = now - last_countdown_ms;
+  if (static_cast<long>(delta_ms) < 1000) {
     return false;
   }
 
-  const uint32_t elapsed = (now - last_countdown_ms) / 1000;
+  const uint32_t elapsed = delta_ms / 1000;
   last_countdown_ms += elapsed * 1000;
 
   if (elapsed >= remaining_seconds) {
