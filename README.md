@@ -206,6 +206,16 @@ Settings are saved with ESP32 Preferences / NVS.
 
 Saved settings are restored after power loss or USB reconnect.
 
+### Active Session Save Behavior
+
+When saving a new Focus duration during an active session:
+
+* Bright-only changes do not affect the countdown.
+* Increasing Focus duration preserves elapsed time and extends the current session.
+* Decreasing Focus duration recalculates the current session under the new duration if the old remaining time is larger than the new duration.
+* If the current remaining time already fits within the new duration, it is preserved.
+* Future Focus sessions always use the saved Focus duration.
+
 ## Development Environment
 
 * Windows
