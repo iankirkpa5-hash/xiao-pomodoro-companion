@@ -17,6 +17,16 @@ Current development setup does not require a battery, TF card, or RTC coin cell.
 
 The XIAO ESP32S3 Sense is not just a basic ESP32S3 board. The Sense expansion board also includes an onboard camera, a PDM digital microphone, and microSD-related circuitry. These onboard features reserve or share several GPIO pins, so future hardware expansion should be planned carefully.
 
+### Official Pinout References
+
+Seeed Studio maintains official XIAO pinout sheets in the OSHW XIAO Series repository:
+
+* [XIAO ESP32S3 Sense front pinout](https://github.com/Seeed-Studio/OSHW-XIAO-Series/blob/main/pinout/XIAO_ESP32-S3_Sense_front_pinout.png)
+* [XIAO ESP32S3 Sense back pinout](https://github.com/Seeed-Studio/OSHW-XIAO-Series/blob/main/pinout/XIAO_ESP32-S3_Sense_back_pinout.png)
+* [OSHW XIAO Series pinout directory](https://github.com/Seeed-Studio/OSHW-XIAO-Series/tree/main/pinout)
+
+Use these official pinout sheets as the first reference before adding hardware, changing GPIO assignments, or cutting solder jumpers.
+
 ### Currently Used in This Project
 
 This firmware currently uses:
