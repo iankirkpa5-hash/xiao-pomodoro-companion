@@ -129,6 +129,8 @@ void switchSettingsItem() {
 }
 
 void saveSettingsAndExit(unsigned long now) {
+  const uint32_t saved_focus_seconds = FOCUS_OPTIONS[focus_option_index] * 60UL;
+  const uint32_t saved_break_seconds = config_get().break_minutes * 60UL;
   config_save(
       FOCUS_OPTIONS[focus_option_index],
       config_get().break_minutes,
@@ -136,13 +138,30 @@ void saveSettingsAndExit(unsigned long now) {
   ui_apply_brightness(config_get().brightness_percent);
   if (settings_snapshot_valid) {
     mode = settings_entry_mode;
-    const uint32_t new_session_seconds = sessionSeconds();
     const uint32_t elapsed_seconds =
         settings_entry_session_seconds > settings_entry_remaining_seconds
             ? settings_entry_session_seconds - settings_entry_remaining_seconds
             : 0;
-    remaining_seconds =
-        new_session_seconds > elapsed_seconds ? new_session_seconds - elapsed_seconds : 0;
+
+    if (mode == SessionMode::Focus) {
+      setCurrentSessionSeconds(saved_focus_seconds);
+
+      if (saved_focus_seconds >= settings_entry_session_seconds ||
+          settings_entry_remaining_seconds > saved_focus_seconds) {
+        // Preserve elapsed Focus time when extending, or when the old
+        // remaining time is still longer than the newly saved Focus length.
+        remaining_seconds =
+            saved_focus_seconds > elapsed_seconds ? saved_focus_seconds - elapsed_seconds : 0;
+      } else {
+        // If the current remaining time already fits inside the newly saved
+        // shorter Focus length, keep the user's current countdown position.
+        remaining_seconds = settings_entry_remaining_seconds;
+      }
+    } else {
+      setCurrentSessionSeconds(saved_break_seconds);
+      remaining_seconds = settings_entry_remaining_seconds;
+    }
+
     setRunning(settings_entry_running && remaining_seconds > 0);
     restartCountdownAt(now);
   } else {

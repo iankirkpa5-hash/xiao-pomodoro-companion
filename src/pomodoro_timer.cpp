@@ -4,18 +4,28 @@
 
 uint32_t remaining_seconds = DEFAULT_FOCUS_MINUTES * 60UL;
 static unsigned long last_countdown_ms = 0;
+static uint32_t current_session_seconds = DEFAULT_FOCUS_MINUTES * 60UL;
+
+uint32_t configuredSessionSeconds() {
+  const PomodoroConfig &config = config_get();
+  return (mode == SessionMode::Focus ? config.focus_minutes : config.break_minutes) * 60UL;
+}
 
 void timer_begin(unsigned long now) {
   resetTimerForCurrentSession(now);
 }
 
 uint32_t sessionSeconds() {
-  const PomodoroConfig &config = config_get();
-  return (mode == SessionMode::Focus ? config.focus_minutes : config.break_minutes) * 60UL;
+  return current_session_seconds;
+}
+
+void setCurrentSessionSeconds(uint32_t seconds) {
+  current_session_seconds = seconds;
 }
 
 void resetTimerForCurrentSession(unsigned long now) {
-  remaining_seconds = sessionSeconds();
+  current_session_seconds = configuredSessionSeconds();
+  remaining_seconds = current_session_seconds;
   last_countdown_ms = now;
 }
 

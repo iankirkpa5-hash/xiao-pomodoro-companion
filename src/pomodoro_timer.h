@@ -7,6 +7,7 @@ extern uint32_t remaining_seconds;
 
 void timer_begin(unsigned long now);
 uint32_t sessionSeconds();
+void setCurrentSessionSeconds(uint32_t seconds);
 void resetTimerForCurrentSession(unsigned long now);
 void restartCountdownAt(unsigned long now);
 bool advanceTimer(unsigned long now);
