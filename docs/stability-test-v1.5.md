@@ -5,9 +5,10 @@ This release is a stability pass for the current offline Pomodoro desk companion
 ## Release
 
 ```text
-Tag: v1.5-stability-pass
+Tag: v1.5.1-stability-pass
 Branch: main
 Displayed version: v1.5
+Includes: v1.4.2-timer-continuity
 ```
 
 ## Scope
@@ -45,6 +46,17 @@ Power: USB-C
 - [x] Break wellness prompt still works
 - [x] NVS settings restore after restart
 - [x] Camera removal keeps the current hardware stack cooler and simpler
+
+## Timer Continuity Regression
+
+Settings `Save` must preserve active session continuity. This was validated after the `v1.4.2-timer-continuity` bugfix.
+
+- [x] Bright-only changes keep the current countdown running
+- [x] `25 -> 45 / 50` preserves elapsed time and extends the current Focus session
+- [x] `50 -> 25` with old remaining time greater than 25 minutes recalculates the current session under the new duration
+- [x] `50 -> 25` with old remaining time less than 25 minutes preserves the current remaining time
+- [x] `Save` does not trigger an accidental Break transition
+- [x] Future Focus sessions use the saved Focus duration
 
 ## Notes
 
