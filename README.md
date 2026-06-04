@@ -138,8 +138,8 @@ For future expansion:
 
 Suggested future experimental branches:
 
-* `experiment/microphone-test`: read PDM microphone audio level and display Quiet / Loud.
-* `experiment/camera-test`: validate camera capture independently.
+* `feature/microphone-test`: read PDM microphone audio level and display Quiet / Normal / Loud.
+* `feature/camera-test`: validate camera capture independently.
 * `feature/hardware-feedback`: add buzzer or vibration motor.
 * `feature/battery-power`: add LiPo battery support and power management.
 
@@ -289,6 +289,7 @@ src/
 
 * Use [Release Checklist](docs/release-checklist.md) before tagging new versions
 * Follow the long-term [Roadmap](docs/roadmap.md)
+* Validate the onboard PDM microphone as `v1.6-microphone-test`
+* Validate the removable camera module separately as `v1.7-camera-test`
 * Consider hardware feedback with a buzzer or vibration motor
 * Explore battery and power management
-* Explore microphone-based ambient sensing as a separate experiment

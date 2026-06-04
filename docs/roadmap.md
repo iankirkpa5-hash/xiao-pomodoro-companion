@@ -86,7 +86,48 @@ NVS restores correctly after restart
 Long USB-powered run is stable
 ```
 
-### v1.6-hardware-feedback
+### v1.6-microphone-test
+
+Goal: validate the onboard PDM digital microphone on the XIAO ESP32S3 Sense.
+
+Scope:
+
+```text
+Read PDM microphone samples
+Calculate RMS / peak noise level
+Print noise level over serial
+Optionally show Quiet / Normal / Loud on the screen as a second step
+```
+
+Hardware constraints:
+
+```text
+GPIO41 = PDM DATA
+GPIO42 = PDM CLK
+Do not cut J1 / J2
+Do not use D11 / D12 for other peripherals during this test
+```
+
+This is an experiment branch. It should not change Pomodoro behavior until the microphone is proven stable.
+
+### v1.7-camera-test
+
+Goal: independently validate the Sense camera module without merging camera behavior into the Pomodoro mainline.
+
+Scope:
+
+```text
+Power down before reconnecting the camera module
+Verify the FPC cable and lock
+Initialize the camera
+Capture one frame
+Run for 5-10 minutes and check temperature
+Confirm display / touch / power stability
+```
+
+If the camera still becomes uncomfortably hot, keep it removed from the v1.x Pomodoro hardware stack.
+
+### v1.8-hardware-feedback
 
 Goal: add physical feedback.
 
@@ -110,7 +151,7 @@ Invalid action: different feedback
 
 Use modules first instead of directly driving bare motors, to reduce electrical risk.
 
-### v1.7-battery-power
+### v1.9-battery-power
 
 Goal: let the device run without USB power.
 
@@ -133,7 +174,7 @@ README battery safety notes
 
 Battery polarity must be verified before connecting.
 
-### v1.8-enclosure-polish
+### v1.10-enclosure-polish
 
 Goal: move from exposed boards to a product-like object.
 
@@ -453,6 +494,52 @@ Other devices:
 lights, speakers, sensors, reminders, Home Assistant
 ```
 
+## Microphone Route
+
+The onboard PDM microphone is the safest next built-in hardware experiment.
+
+Positioning:
+
+```text
+Independent experiment
+Does not change Pomodoro behavior by default
+Useful as a future AI / voice / ambient sensing prerequisite
+```
+
+Future branch:
+
+```text
+feature/microphone-test
+```
+
+Only validate:
+
+```text
+PDM input works on GPIO41 / GPIO42
+RMS / peak noise level can be calculated
+Serial output is stable
+Screen can optionally show Quiet / Normal / Loud
+No impact on display / touch / Settings / NVS
+```
+
+Hardware constraints:
+
+```text
+GPIO41 = PDM DATA
+GPIO42 = PDM CLK
+Do not cut J1 / J2
+Do not repurpose D11 / D12 during this test
+```
+
+If the microphone is stable, possible later features include:
+
+```text
+Ambient noise reminder
+Clap detection
+Break breathing guide
+Voice wake pre-test
+```
+
 ## Camera Route
 
 The Sense camera does not belong in the current Pomodoro mainline.
@@ -575,9 +662,11 @@ Do not jump to v2 yet.
 
 ```text
 v1.5-stability-pass
-v1.6-hardware-feedback
-v1.7-battery-power
-v1.8-enclosure-polish
+v1.6-microphone-test
+v1.7-camera-test
+v1.8-hardware-feedback
+v1.9-battery-power
+v1.10-enclosure-polish
 v2.0-wifi-status
 ```
 
