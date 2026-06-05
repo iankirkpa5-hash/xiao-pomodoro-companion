@@ -2,6 +2,7 @@
 #include "app_state.h"
 #include "config.h"
 #include "input.h"
+#include "microphone.h"
 #include "pomodoro_timer.h"
 #include "prompts.h"
 #include "stats.h"
@@ -331,6 +332,7 @@ void setup() {
   stats_begin();
   timer_begin(millis());
   ui_apply_brightness(config_get().brightness_percent);
+  microphone_begin();
   input_begin();
   input_scan_i2c();
 
@@ -357,4 +359,5 @@ void loop() {
   if (!settings_active) {
     printStatusEverySecond(now);
   }
+  microphone_print_level(now);
 }
