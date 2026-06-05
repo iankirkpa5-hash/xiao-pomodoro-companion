@@ -7,11 +7,76 @@ namespace {
 constexpr int MIC_DATA_PIN = 41;
 constexpr int MIC_CLK_PIN = 42;
 constexpr uint32_t MIC_SAMPLE_RATE = 16000;
-constexpr size_t MIC_SAMPLE_COUNT = 256;
+constexpr size_t MIC_SAMPLE_COUNT = 160;  // 10 ms at 16 kHz.
+constexpr uint32_t MIC_UPDATE_INTERVAL_MS = 40;
 constexpr uint32_t MIC_PRINT_INTERVAL_MS = 500;
+constexpr uint32_t MIC_LOUD_HOLD_MS = 600;
+constexpr float MIC_LOUD_RAW_RMS = 350.0f;
+constexpr int32_t MIC_LOUD_RAW_PEAK = 3200;
+constexpr int32_t MIC_TRANSIENT_PEAK = 4800;
+constexpr int32_t MIC_IMPULSE_PEAK = 2600;
+constexpr float MIC_IMPULSE_MAX_RMS = 280.0f;
+constexpr float MIC_IMPULSE_MIN_PEAK_RMS_RATIO = 12.0f;
+constexpr float MIC_NORMAL_RAW_RMS = 120.0f;
+constexpr int32_t MIC_NORMAL_RAW_PEAK = 1200;
+constexpr uint8_t MIC_QUIET_DEBOUNCE_FRAMES = 5;
+constexpr uint8_t MIC_NORMAL_DEBOUNCE_FRAMES = 2;
+
+enum class MicrophoneLabelState {
+  Quiet,
+  Normal,
+  Loud,
+};
 
 bool mic_ready = false;
+unsigned long last_update_ms = 0;
+unsigned long loud_hold_until_ms = 0;
+MicrophoneLevel latest_level{false, 0.0f, 0, 0, 0};
+MicrophoneLabelState label_state = MicrophoneLabelState::Quiet;
+uint8_t quiet_counter = 0;
+uint8_t normal_counter = 0;
 int16_t sample_buffer[MIC_SAMPLE_COUNT];
+
+void updateLabelState(unsigned long now) {
+  const bool impulse_loud =
+      latest_level.peak > MIC_IMPULSE_PEAK &&
+      latest_level.rms < MIC_IMPULSE_MAX_RMS &&
+      latest_level.peak > latest_level.rms * MIC_IMPULSE_MIN_PEAK_RMS_RATIO;
+  const bool transient_loud = latest_level.peak >= MIC_TRANSIENT_PEAK;
+  const bool sustained_loud =
+      latest_level.rms >= MIC_LOUD_RAW_RMS && latest_level.peak >= MIC_LOUD_RAW_PEAK;
+  const bool normal_frame =
+      latest_level.rms >= MIC_NORMAL_RAW_RMS || latest_level.peak >= MIC_NORMAL_RAW_PEAK;
+
+  if (impulse_loud || transient_loud || sustained_loud) {
+    label_state = MicrophoneLabelState::Loud;
+    loud_hold_until_ms = now + MIC_LOUD_HOLD_MS;
+    quiet_counter = 0;
+    normal_counter = 0;
+    return;
+  }
+
+  if (label_state == MicrophoneLabelState::Loud) {
+    if (static_cast<long>(now - loud_hold_until_ms) < 0) {
+      return;
+    }
+  }
+
+  if (normal_frame) {
+    normal_counter++;
+    quiet_counter = 0;
+    if (normal_counter >= MIC_NORMAL_DEBOUNCE_FRAMES) {
+      label_state = MicrophoneLabelState::Normal;
+    }
+    return;
+  }
+
+  quiet_counter++;
+  normal_counter = 0;
+  if (quiet_counter >= MIC_QUIET_DEBOUNCE_FRAMES) {
+    label_state = MicrophoneLabelState::Quiet;
+  }
+}
 }  // namespace
 
 bool microphone_begin() {
@@ -27,6 +92,24 @@ bool microphone_begin() {
   mic_ready = true;
   Serial.println("Mic initialized: PDM DATA=GPIO41 CLK=GPIO42");
   return true;
+}
+
+bool microphone_update(unsigned long now) {
+  if (!mic_ready) {
+    latest_level = MicrophoneLevel{false, 0.0f, 0, 0, 0};
+    return false;
+  }
+
+  if (latest_level.ok && now - last_update_ms < MIC_UPDATE_INTERVAL_MS) {
+    return false;
+  }
+
+  last_update_ms = now;
+  latest_level = microphone_read_level();
+  if (latest_level.ok) {
+    updateLabelState(now);
+  }
+  return latest_level.ok;
 }
 
 MicrophoneLevel microphone_read_level() {
@@ -76,6 +159,26 @@ MicrophoneLevel microphone_read_level() {
   return level;
 }
 
+MicrophoneLevel microphone_level() {
+  return latest_level;
+}
+
+const char *microphone_level_label() {
+  if (!latest_level.ok) {
+    return "Off";
+  }
+
+  switch (label_state) {
+    case MicrophoneLabelState::Loud:
+      return "Loud";
+    case MicrophoneLabelState::Normal:
+      return "Normal";
+    case MicrophoneLabelState::Quiet:
+    default:
+      return "Quiet";
+  }
+}
+
 void microphone_print_level(unsigned long now) {
   static unsigned long last_print_ms = 0;
   if (now - last_print_ms < MIC_PRINT_INTERVAL_MS) {
@@ -83,7 +186,8 @@ void microphone_print_level(unsigned long now) {
   }
   last_print_ms = now;
 
-  const MicrophoneLevel level = microphone_read_level();
+  microphone_update(now);
+  const MicrophoneLevel level = microphone_level();
   if (!level.ok) {
     Serial.println("Mic: read failed");
     return;

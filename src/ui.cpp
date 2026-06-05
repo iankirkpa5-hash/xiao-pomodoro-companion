@@ -2,6 +2,7 @@
 
 #include <Arduino_GFX_Library.h>
 #include <math.h>
+#include <string.h>
 #include "pomodoro_timer.h"
 #include "version.h"
 
@@ -17,6 +18,7 @@ constexpr int BACKLIGHT_CHANNEL = 0;
 
 uint32_t last_rendered_seconds = UINT32_MAX;
 int last_progress_angle = -90;
+char last_microphone_label[12] = "";
 
 Arduino_DataBus *bus = new Arduino_ESP32SPI(
     LCD_DC,
@@ -139,6 +141,29 @@ void ui_draw_status_text() {
   display->print(running ? "RUN" : "PAUSE");
 }
 
+void ui_draw_microphone_status(const char *label) {
+  if (label == nullptr) {
+    label = "Off";
+  }
+
+  if (strncmp(last_microphone_label, label, sizeof(last_microphone_label)) == 0) {
+    return;
+  }
+
+  strncpy(last_microphone_label, label, sizeof(last_microphone_label) - 1);
+  last_microphone_label[sizeof(last_microphone_label) - 1] = '\0';
+
+  const uint16_t warm = color565(244, 182, 84);
+  const uint16_t ink = color565(35, 38, 42);
+
+  display->fillRect(76, 166, 92, 10, warm);
+  display->setTextColor(ink);
+  display->setTextSize(1);
+  display->setCursor(82, 166);
+  display->print("Mic: ");
+  display->print(last_microphone_label);
+}
+
 void ui_draw_static_pomodoro_home() {
   const uint16_t background = color565(5, 10, 18);
   const uint16_t outer = color565(16, 32, 52);
@@ -155,6 +180,7 @@ void ui_draw_static_pomodoro_home() {
   display->drawCircle(120, 120, 112, color565(56, 72, 94));
   last_progress_angle = -90;
   last_rendered_seconds = UINT32_MAX;
+  last_microphone_label[0] = '\0';
 
   const int target_angle = progressTargetAngle();
   drawProgressArcSegment(-90, target_angle, color565(228, 244, 250));
@@ -189,6 +215,7 @@ void ui_draw_idle_screen() {
 
   last_rendered_seconds = UINT32_MAX;
   last_progress_angle = -90;
+  last_microphone_label[0] = '\0';
 }
 
 void ui_draw_session_feedback(SessionMode next_mode, const char *message) {
@@ -214,6 +241,7 @@ void ui_draw_session_feedback(SessionMode next_mode, const char *message) {
 
   last_rendered_seconds = UINT32_MAX;
   last_progress_angle = -90;
+  last_microphone_label[0] = '\0';
 }
 
 void ui_draw_settings(
@@ -271,6 +299,7 @@ void ui_draw_settings(
 
   last_rendered_seconds = UINT32_MAX;
   last_progress_angle = -90;
+  last_microphone_label[0] = '\0';
 }
 
 void ui_render_tick() {

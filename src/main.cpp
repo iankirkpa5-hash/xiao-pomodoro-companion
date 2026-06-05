@@ -356,6 +356,10 @@ void loop() {
     updateCountdown(now);
   }
   updateIdleScreen(now);
+  microphone_update(now);
+  if (!settings_active && !session_feedback_active && !idle_screen_active) {
+    ui_draw_microphone_status(microphone_level_label());
+  }
   if (!settings_active) {
     printStatusEverySecond(now);
   }
