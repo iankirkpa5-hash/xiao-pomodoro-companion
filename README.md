@@ -156,6 +156,7 @@ Suggested future experimental branches:
 * Brightness setting: 30 / 60 / 100 percent
 * Reset menu item
 * Stats reset item
+* Passive microphone sound indicator: Quiet / Normal / Loud
 * NVS persisted settings
 * Wellness prompts when entering Break
 * Session transition feedback
@@ -257,7 +258,9 @@ src/
 +-- input.h/.cpp          # touch events
 +-- ui.h/.cpp             # display rendering
 +-- config.h/.cpp         # NVS-backed settings
++-- microphone.h/.cpp     # PDM microphone sound level indicator
 +-- prompts.h/.cpp        # break wellness prompts
++-- stats.h/.cpp          # completed Focus counter
 +-- version.h             # app version string
 +-- driver.h              # display driver reference/config
 ```
@@ -284,12 +287,12 @@ src/
 | `v1.4.2-timer-continuity`  | Active-session Settings Save timer continuity   |
 | `v1.5-stability-pass`      | Real-device stability pass for daily desk use   |
 | `v1.5.1-stability-pass`    | Stability pass including timer continuity regression checks |
+| `v1.6-microphone-test`     | Verified onboard PDM microphone and added passive Quiet / Normal / Loud sound indicator |
 
 ## Next Steps
 
 * Use [Release Checklist](docs/release-checklist.md) before tagging new versions
 * Follow the long-term [Roadmap](docs/roadmap.md)
-* Validate the onboard PDM microphone as `v1.6-microphone-test`
 * Validate the removable camera module separately as `v1.7-camera-test`
 * Consider hardware feedback with a buzzer or vibration motor
 * Explore battery and power management
