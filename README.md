@@ -33,13 +33,13 @@ This firmware currently uses:
 
 * Round display
 * Touch input from the Round Display
+* PDM microphone passive sound indicator
 * ESP32 internal NVS storage for settings
 * USB-C for power, upload, and serial debugging
 
 This firmware currently does **not** use:
 
 * Camera
-* PDM microphone
 * microSD card
 * External battery
 * RTC coin cell
