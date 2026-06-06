@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "app_state.h"
+#include "camera_test.h"
 #include "config.h"
 #include "input.h"
 #include "microphone.h"
@@ -331,6 +332,7 @@ void setup() {
   config_begin();
   stats_begin();
   timer_begin(millis());
+  camera_test_begin_configured_mode();
   ui_apply_brightness(config_get().brightness_percent);
   microphone_begin();
   input_begin();
@@ -357,6 +359,7 @@ void loop() {
   }
   updateIdleScreen(now);
   microphone_update(now);
+  camera_test_update(now);
   if (!settings_active && !session_feedback_active && !idle_screen_active) {
     ui_draw_microphone_status(microphone_level_label());
   }

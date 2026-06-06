@@ -33,13 +33,13 @@ This firmware currently uses:
 
 * Round display
 * Touch input from the Round Display
+* PDM microphone passive sound indicator
 * ESP32 internal NVS storage for settings
 * USB-C for power, upload, and serial debugging
 
 This firmware currently does **not** use:
 
 * Camera
-* PDM microphone
 * microSD card
 * External battery
 * RTC coin cell
@@ -83,9 +83,11 @@ The Sense camera uses several GPIO pins:
 | DVP_HREF      | GPIO47 |
 | DVP_Y9        | GPIO48 |
 
-This project does not currently use the camera, but these pins should be considered reserved if camera support is added later.
+This project does not currently use the camera as part of the daily Pomodoro firmware, but these pins should be considered reserved if camera support is added later.
 
-In the current v1.x Pomodoro build, the camera module is removed from the hardware stack. The timer does not need camera features, and removing the module reduces heat, power draw, and mechanical stack height. Camera support should be treated as a separate future experiment rather than part of the main Pomodoro firmware.
+In the current v1.x Pomodoro build, the camera module is removed from the hardware stack. The timer does not need camera features, and removing the module reduces heat, power draw, and mechanical stack height.
+
+The `v1.7-camera-test` experiment confirmed that the camera can initialize and capture one frame, but the camera reached heat grade 3 when held initialized and idle. It is therefore not recommended for always-installed daily Pomodoro use. Camera support should remain a separate experiment rather than part of the main Pomodoro firmware.
 
 ### microSD / SPI Pin Sharing
 
@@ -288,11 +290,11 @@ src/
 | `v1.5-stability-pass`      | Real-device stability pass for daily desk use   |
 | `v1.5.1-stability-pass`    | Stability pass including timer continuity regression checks |
 | `v1.6-microphone-test`     | Verified onboard PDM microphone and added passive Quiet / Normal / Loud sound indicator |
+| `v1.7-camera-test`         | Verified camera init/capture and documented idle heat boundary |
 
 ## Next Steps
 
 * Use [Release Checklist](docs/release-checklist.md) before tagging new versions
 * Follow the long-term [Roadmap](docs/roadmap.md)
-* Validate the removable camera module separately as `v1.7-camera-test`
 * Consider hardware feedback with a buzzer or vibration motor
 * Explore battery and power management
