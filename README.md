@@ -296,3 +296,7 @@ src/
 * Validate the removable camera module separately as `v1.7-camera-test`
 * Consider hardware feedback with a buzzer or vibration motor
 * Explore battery and power management
+
+## 实机反馈工具
+
+新增的本地工具可读取 v1.6 麦克风日志，或依次编译、上传和限时采集，保存原始日志、CSV 与 JSON 检查报告。开始使用请看 [实机反馈闭环](docs/hardware-feedback-loop.md)。串口检查通过不等于屏幕、触摸、计时和声音响应已通过实机验收。
