@@ -2,6 +2,8 @@
 
 This engineering roadmap records implemented features, experiment results, current work, and optional product extensions. The [Flexible Learning Map](esp32-flexible-learning-roadmap.md) is the broader, evolving direction for circuits, mathematics, embedded systems, FPGA, and AI. Its imported progress notes are a dated snapshot; this document and the README track subsequent repository changes.
 
+The [2026-10-13 Project and Learning Plan](xiao-linux-mini-plan.md) is the current execution guide. It separates T01-T04 project work from L01-L09 learning and optional branches. The version-family ideas below are candidates, not a required development sequence.
+
 The long-term architecture is inspired by projects such as OpenBuddy: an ESP32-class physical terminal connected to a Python backend, a web dashboard, and eventually a voice / AI pipeline. The XIAO device should remain a reliable local terminal. Heavy AI, voice processing, API keys, dashboards, and multi-device orchestration should live outside the microcontroller.
 
 ## Version Strategy
@@ -25,7 +27,7 @@ Main branch: main
 Current daily-use line: v1.6
 Displayed version: v1.6 (corrected in fc32445)
 Camera experiment: v1.7-camera-test, separate from main
-Current task: sound data, starting with complete serial rows
+Current task: sound-group retests recorded; final clap run 13/13 operator-confirmed
 Later candidate: v1.8-hardware-feedback, not implemented
 ```
 
@@ -70,17 +72,22 @@ USB-C power
 
 Tag `v1.6-microphone-test` points to `b033798`. It contains the microphone feature, but its Settings screen still displays `v1.5`. Commit `fc32445` subsequently corrected `src/version.h` to `v1.6` and updated the hardware notes. Keep the published tag unchanged to preserve history; the display mismatch does not apply to current `main`.
 
-### Current Task: Sound Data and Curves
+### Current Task: Validate Sound After the Touch-IRQ Fix
 
-Start with the working v1.6 microphone module and add one observable step at a time:
+Keep the daily-use baseline separate from the local experiment:
 
-1. Emit a complete serial row containing `timestamp_ms,rms,peak,level`, using centered RMS / peak and the same debounced Quiet / Normal / Loud state as the normal screen.
-2. Check complete rows, increasing timestamps during a run, and agreement with the visible screen state. Observe quiet, speech, and clap examples while confirming normal touch and timer behavior.
-3. After device validation, add computer-side plotting and CSV capture. These tools are not implemented yet.
+1. Local HEAD is `a26959e` on `codex/microphone-serial-data`, with uncommitted continuous sampling, interval aggregation, timestamped CSV, and [web monitor](../tools/microphone-monitor/README.md) work. Do not overwrite it with remote main or assume it identifies the board firmware.
+2. [PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1) remains a draft at `e7c73dd`. Its [capture tool](hardware-feedback-loop.md) was brought into this workspace without merging, then adapted for both serial formats. Local changes are not yet in that PR.
+3. T01 reads the currently running firmware only: preserve raw logs, CSV and reports for quiet, speech and clap, plus user observations. Do not flash just to capture a baseline. Only one program may own the serial port.
+4. T02 compares recorded data and reuses the existing visualization. T03 validates the full build/upload/capture workflow after baseline collection. T04 makes only evidence-supported firmware changes; timestamps and aggregation already implemented locally must be tested, not recreated.
 
 This task does not require another microphone classifier, a new UI, or AI. The sound levels describe intensity, not a reliable identification of the sound source. Debounce and the Loud hold interval mean the label can briefly outlast the high-energy sample that triggered it.
 
-An earlier serial log contained I2C read errors. Their current presence has not been rechecked; record any recurrence during the next device test. Camera heat was assessed by touch, not by a temperature or power measurement.
+The [serial-data record](microphone-serial-data.md) includes earlier format checks and the September continuous-capture work. On October 13, a 30-second uncontrolled preflight received 50 CSV rows and six throughput diagnostics of about 80,000 samples per five seconds, with zero microphone read errors. It also retained 221 I2C read errors, so the capture was not marked passed. This is not evidence for a particular sound action or proof of the exact running binary. The user reports normal screen, touch, and countdown before the controlled tests; the I2C cause remains unresolved. Camera heat was assessed by touch, not by a temperature or power measurement.
+
+Three subsequent 30-second quiet / speech / clap captures are preserved in the [T01 record](experiments/2026-10-13-t01-sound-baseline.md). All retained I2C errors; the quiet run also contains a high outlier. The user confirmed following the prompts at very close range, without an exact distance or clap count. The [T02 offline comparison](experiments/2026-10-14-t02-sound-comparison.md) plots all three runs with host time, device intervals, gap markers and firmware labels. It found 6 / 2 / 16 microphone payloads embedded in I2C error lines. Every internal valid-CSV gap has corresponding mixed-line evidence; the plots do not silently recover these candidates. No firmware was changed in T02.
+
+On October 16, a single [touch-IRQ guard](experiments/2026-10-16-t04-touch-irq-serial.md) in `input.cpp` prevented coordinate reads when touch INT was inactive. Before: 222 I2C errors / 19 mixed payloads in 30 seconds. After build/upload: zero errors / zero mixed payloads in 30 seconds and a separate 60-second follow-up, with 500 ms device report spacing. The user confirmed basic touch, Settings, Bright and Save; the confirmation was not synchronized with the follow-up capture. This provides a T03 real cycle and a bounded T04 fix, not full PR or acoustic acceptance. The [October 16 quiet retest](experiments/2026-10-16-t05-quiet-retest.md) then produced a clean Quiet-only baseline, and the [October 17 clap retest](experiments/2026-10-17-t02-clap-retest.md) closed with an operator-confirmed 13/13 final run; speech completion is operator-confirmed. A second evidence-led T04 change on October 17 raised the quiet debounce from 5 to 15 frames after screen-sync captures showed Quiet/Normal flicker during word gaps; the [debounce record](experiments/2026-10-17-t06-quiet-debounce.md) documents the rebuilt firmware and its 30-second verification capture. The [manual Reset / Stats / NVS checks](experiments/2026-10-17-t07-manual-reset-stats-nvs.md) then passed with serial and operator confirmation. Keep original FAILED records and investigate any returning errors instead of suppressing logs.
 
 ## v1.x: Offline Desktop Terminal
 
@@ -528,8 +535,8 @@ Positioning:
 
 ```text
 Passive sound indicator completed
-Timestamped serial rows are the current first step
-Computer curves and CSV capture follow device validation
+Continuous capture and timestamped interval reports implemented locally; formal acceptance pending
+Local web curves and CSV download are available for device validation
 ```
 
 Completed milestone:
@@ -538,7 +545,7 @@ Completed milestone:
 v1.6-microphone-test (merged into main)
 ```
 
-Already implemented and device-tested:
+Previously device-tested on the v1.6 baseline (not a blanket acceptance of newer local changes):
 
 ```text
 PDM input works on GPIO41 / GPIO42
@@ -693,8 +700,10 @@ Choose work using the flexible learning map; this is the current sequence for th
 ```text
 Current baseline: v1.6 daily-use mainline
 Preserved experiment: v1.7 camera test and thermal findings
-Current step: verify timestamp_ms,rms,peak,level over serial
-Following step: computer curves and CSV capture
+Current step: touch-IRQ guard passed; quiet/speech/clap retests recorded; clap 13/13, screen-label sync, and Reset/Stats/NVS manual checks operator-confirmed; quiet debounce raised with evidence
+Remaining: T03 PR review/merge; further T04 changes only from evidence
+Available locally: web curves and CSV, dual-format CLI capture, I2C error reporting
+Deferred: bidirectional serial, keyboard, FFT/PCM and other product changes
 Later candidates: v1.8 hardware feedback, battery, enclosure, Wi-Fi
 ```
 

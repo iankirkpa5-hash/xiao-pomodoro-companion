@@ -12,6 +12,7 @@ struct MicrophoneLevel {
 
 bool microphone_begin();
 bool microphone_update(unsigned long now);
+// Non-blocking snapshot; the I2S receive task owns PCM reads.
 MicrophoneLevel microphone_read_level();
 MicrophoneLevel microphone_level();
 const char *microphone_level_label();

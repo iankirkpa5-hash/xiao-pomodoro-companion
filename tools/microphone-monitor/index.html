@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XIAO 聲音觀測室</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="monitor.mjs"></script>
+</head>
+<body>
+  <div class="workspace">
+    <aside class="sidebar">
+      <a class="brand" href="./" aria-label="XIAO 聲音觀測室首頁"><span class="brand-mark" aria-hidden="true"></span>XIAO / LAB</a>
+      <div class="intro"><p class="eyebrow">SOUND OBSERVATION · 01</p><h1>看見聲音。</h1><p>從板上的麥克風，到眼前的曲線。<br>一次觀察一個變化。</p></div>
+      <section class="connection" aria-labelledby="connection-heading">
+        <h2 id="connection-heading">設備連線</h2>
+        <p id="connection-state" class="connection-state" role="status">尚未連線</p>
+        <button id="connect" class="primary">連接 XIAO</button>
+        <button id="disconnect" class="secondary" disabled>中斷連線</button>
+        <p id="connection-help" class="small">點擊連接後，選擇 COM11 或 XIAO 的 USB 串口。請先關閉其他串口監視器。</p>
+        <p id="message" class="message" role="alert" hidden></p>
+      </section>
+      <section class="steps" aria-labelledby="steps-heading"><h2 id="steps-heading">試著這樣測</h2>
+        <ol><li><strong>安靜 10 秒</strong><span>記住底噪與 Quiet 的狀態。</span></li><li><strong>正常說話</strong><span>觀察 RMS 和分級如何變化。</span></li><li><strong>拍手，再停下</strong><span>看 peak 的跳動與回靜過程。</span></li></ol>
+      </section>
+      <p class="local-note">USB 串口 · 115200 baud<br>資料留在此瀏覽器，不上傳雲端。<br>電腦麥克風不會被開啟。</p>
+    </aside>
+    <main>
+      <header class="topbar"><div><p class="eyebrow">XIAO POMODORO COMPANION</p><h2>聲音觀測室</h2></div><span id="freshness" class="freshness">等待設備資料</span></header>
+      <section class="readout" aria-label="目前麥克風數據">
+        <div class="level-block"><p class="metric-label">設備狀態</p><strong id="level" data-level="Off">等待資料</strong><p id="level-note">與圓屏使用同一個音量分級</p></div>
+        <div><p class="metric-label">RMS <span>平均能量</span></p><strong id="rms" class="number">—</strong><p class="unit">centered · PCM units</p></div>
+        <div><p class="metric-label">PEAK <span>瞬間峰值</span></p><strong id="peak" class="number">—</strong><p class="unit">centered · PCM units</p></div>
+      </section>
+      <section class="chart-panel" aria-labelledby="chart-heading">
+        <div class="panel-title"><h2 id="chart-heading">最近 60 秒</h2><span>獨立自動刻度 · 非分貝值</span></div>
+        <div class="chart"><span class="chart-name rms-color">RMS</span><canvas id="rms-chart" role="img" aria-label="最近 60 秒 RMS 折線圖"></canvas></div>
+        <div class="chart"><span class="chart-name peak-color">PEAK</span><canvas id="peak-chart" role="img" aria-label="最近 60 秒 peak 折線圖"></canvas></div>
+        <p id="chart-note" class="chart-note">連接設備後開始繪圖。線段中斷代表資料間隔超過 1.2 秒。</p>
+      </section>
+      <section class="health" aria-label="資料品質">
+        <div><span>有效資料</span><strong id="row-count">0</strong></div><div><span>最近間隔</span><strong id="interval">—</strong></div><div><span>最長間隔</span><strong id="max-gap">—</strong></div><div id="i2c-stat"><span>I2C 錯誤</span><strong id="i2c-count">0</strong></div>
+      </section>
+      <section class="data-actions"><div><h2>留下這次觀察</h2><p id="retention">尚無可下載的資料。最多保留最近 10,000 行。</p></div><button id="download" class="secondary" disabled>下載 CSV</button></section>
+      <details class="diagnostics"><summary>串口記錄與診斷 <span id="diagnostic-summary">尚無記錄</span></summary><p class="small">保留最近 120 行。I2C 訊息會計數，不會當成音量資料；網頁不會自動判定硬體測試通過。</p><pre id="raw-log" tabindex="0" aria-label="最近串口記錄"></pre></details>
+      <footer>Quiet / Normal / Loud 由固件判斷；網頁不改門檻。新版測試固件保留每個上報區間的最大 peak，同區間的多次聲音仍合併為一筆。Loud 有短暫保留時間。</footer>
+    </main>
+  </div>
+</body>
+</html>
