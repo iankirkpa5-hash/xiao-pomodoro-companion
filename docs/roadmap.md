@@ -1,6 +1,6 @@
 # Roadmap
 
-This engineering roadmap records implemented features, experiment results, current work, and optional product extensions. The [Flexible Learning Map](esp32-flexible-learning-roadmap.md) is the broader, evolving direction for circuits, mathematics, embedded systems, FPGA, and AI. Its imported progress notes are a dated snapshot; this document and the README track subsequent repository changes.
+This engineering roadmap records implemented features, experiment results, current work, and optional product extensions. The [Flexible Learning Map](esp32-flexible-learning-roadmap.md) is the maintained, evolving direction for circuits, mathematics, embedded systems, FPGA, and AI; it is expected to change further, and each new revision replaces the file while a short repository-sync note keeps the stated status current. This document and the README track repository progress and are synced whenever the map changes.
 
 The [2026-10-13 Project and Learning Plan](xiao-linux-mini-plan.md) is the current execution guide. It separates T01-T04 project work from L01-L09 learning and optional branches. The version-family ideas below are candidates, not a required development sequence.
 
