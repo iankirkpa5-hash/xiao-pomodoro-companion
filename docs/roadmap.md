@@ -1,10 +1,14 @@
 # Roadmap
 
-This roadmap keeps the project direction clear without overloading the current firmware branch.
+This engineering roadmap records implemented features, experiment results, current work, and optional product extensions. The [Flexible Learning Map](esp32-flexible-learning-roadmap.md) is the broader, evolving direction for circuits, mathematics, embedded systems, FPGA, and AI. Its imported progress notes are a dated snapshot; this document and the README track subsequent repository changes.
+
+The [2026-10-13 Project and Learning Plan](xiao-linux-mini-plan.md) is the current execution guide. It separates T01-T04 project work from L01-L09 learning and optional branches. The version-family ideas below are candidates, not a required development sequence.
 
 The long-term architecture is inspired by projects such as OpenBuddy: an ESP32-class physical terminal connected to a Python backend, a web dashboard, and eventually a voice / AI pipeline. The XIAO device should remain a reliable local terminal. Heavy AI, voice processing, API keys, dashboards, and multi-device orchestration should live outside the microcontroller.
 
 ## Version Strategy
+
+These version families describe possible product directions, not a required learning order or delivery schedule. Experiments can branch off and return to the daily-use firmware as interest and evidence develop.
 
 ```text
 v1.x = Offline desktop terminal
@@ -16,11 +20,15 @@ v5.x = Local model and multi-device system layer
 
 ## Current Status
 
-`XIAO Pomodoro Companion` is now a stable offline desktop terminal rather than a one-off demo.
+`XIAO Pomodoro Companion` has a daily-use offline firmware baseline with a passive microphone sound indicator.
 
 ```text
 Main branch: main
-Current stable line: v1.5
+Current daily-use line: v1.6
+Displayed version: v1.6 (corrected in fc32445)
+Camera experiment: v1.7-camera-test, separate from main
+Current task: sound-group retests recorded; final clap run 13/13 operator-confirmed
+Later candidate: v1.8-hardware-feedback, not implemented
 ```
 
 Implemented capabilities:
@@ -37,6 +45,8 @@ Done counter
 Stats clear
 Idle screen
 Wellness prompts
+PDM microphone with centered RMS / peak
+Passive Quiet / Normal / Loud indicator
 Release checklist
 README / GitHub gallery
 Camera module removal notes
@@ -47,9 +57,10 @@ Current hardware state:
 
 ```text
 Seeed Studio XIAO ESP32S3 Sense
+Sense expansion board installed for the PDM microphone
 Seeed Round Display for XIAO
 External 2.4 GHz antenna
-Camera module removed
+Only the removable camera module is disconnected
 Round Display KE switch set to ON / KE
 No battery
 No microSD
@@ -57,19 +68,40 @@ No RTC coin cell
 USB-C power
 ```
 
+### Historical Tag Note
+
+Tag `v1.6-microphone-test` points to `b033798`. It contains the microphone feature, but its Settings screen still displays `v1.5`. Commit `fc32445` subsequently corrected `src/version.h` to `v1.6` and updated the hardware notes. Keep the published tag unchanged to preserve history; the display mismatch does not apply to current `main`.
+
+### Current Task: Validate Sound After the Touch-IRQ Fix
+
+Keep the daily-use baseline separate from the local experiment:
+
+1. Local HEAD is `a26959e` on `codex/microphone-serial-data`, with uncommitted continuous sampling, interval aggregation, timestamped CSV, and [web monitor](../tools/microphone-monitor/README.md) work. Do not overwrite it with remote main or assume it identifies the board firmware.
+2. [PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1) remains a draft at `e7c73dd`. Its [capture tool](hardware-feedback-loop.md) was brought into this workspace without merging, then adapted for both serial formats. Local changes are not yet in that PR.
+3. T01 reads the currently running firmware only: preserve raw logs, CSV and reports for quiet, speech and clap, plus user observations. Do not flash just to capture a baseline. Only one program may own the serial port.
+4. T02 compares recorded data and reuses the existing visualization. T03 validates the full build/upload/capture workflow after baseline collection. T04 makes only evidence-supported firmware changes; timestamps and aggregation already implemented locally must be tested, not recreated.
+
+This task does not require another microphone classifier, a new UI, or AI. The sound levels describe intensity, not a reliable identification of the sound source. Debounce and the Loud hold interval mean the label can briefly outlast the high-energy sample that triggered it.
+
+The [serial-data record](microphone-serial-data.md) includes earlier format checks and the September continuous-capture work. On October 13, a 30-second uncontrolled preflight received 50 CSV rows and six throughput diagnostics of about 80,000 samples per five seconds, with zero microphone read errors. It also retained 221 I2C read errors, so the capture was not marked passed. This is not evidence for a particular sound action or proof of the exact running binary. The user reports normal screen, touch, and countdown before the controlled tests; the I2C cause remains unresolved. Camera heat was assessed by touch, not by a temperature or power measurement.
+
+Three subsequent 30-second quiet / speech / clap captures are preserved in the [T01 record](experiments/2026-10-13-t01-sound-baseline.md). All retained I2C errors; the quiet run also contains a high outlier. The user confirmed following the prompts at very close range, without an exact distance or clap count. The [T02 offline comparison](experiments/2026-10-14-t02-sound-comparison.md) plots all three runs with host time, device intervals, gap markers and firmware labels. It found 6 / 2 / 16 microphone payloads embedded in I2C error lines. Every internal valid-CSV gap has corresponding mixed-line evidence; the plots do not silently recover these candidates. No firmware was changed in T02.
+
+On October 16, a single [touch-IRQ guard](experiments/2026-10-16-t04-touch-irq-serial.md) in `input.cpp` prevented coordinate reads when touch INT was inactive. Before: 222 I2C errors / 19 mixed payloads in 30 seconds. After build/upload: zero errors / zero mixed payloads in 30 seconds and a separate 60-second follow-up, with 500 ms device report spacing. The user confirmed basic touch, Settings, Bright and Save; the confirmation was not synchronized with the follow-up capture. This provides a T03 real cycle and a bounded T04 fix, not full PR or acoustic acceptance. The [October 16 quiet retest](experiments/2026-10-16-t05-quiet-retest.md) then produced a clean Quiet-only baseline, and the [October 17 clap retest](experiments/2026-10-17-t02-clap-retest.md) closed with an operator-confirmed 13/13 final run; speech completion is operator-confirmed. A second evidence-led T04 change on October 17 raised the quiet debounce from 5 to 15 frames after screen-sync captures showed Quiet/Normal flicker during word gaps; the [debounce record](experiments/2026-10-17-t06-quiet-debounce.md) documents the rebuilt firmware and its 30-second verification capture. The [manual Reset / Stats / NVS checks](experiments/2026-10-17-t07-manual-reset-stats-nvs.md) then passed with serial and operator confirmation. Keep original FAILED records and investigate any returning errors instead of suppressing logs.
+
 ## v1.x: Offline Desktop Terminal
 
 Goal: make the standalone desk companion reliable enough for long-term daily use.
 
-Current stable release:
+Daily-use baseline:
 
 ```text
-v1.5-stability-pass
+v1.6-microphone-test plus the fc32445 version-display correction
 ```
 
 ### v1.5-stability-pass
 
-No new features. Only validation and small fixes.
+Completed stability work, followed by `v1.5.1-stability-pass` including timer-continuity regression checks. See the [stability test record](stability-test-v1.5.md).
 
 Test focus:
 
@@ -88,15 +120,15 @@ Long USB-powered run is stable
 
 ### v1.6-microphone-test
 
-Goal: validate the onboard PDM digital microphone on the XIAO ESP32S3 Sense.
+Completed and merged into `main`. See the [microphone test record](microphone-test-v1.6.md).
 
-Scope:
+Implemented:
 
 ```text
 Read PDM microphone samples
-Calculate RMS / peak noise level
+Calculate centered RMS / peak after removing DC offset
 Print noise level over serial
-Optionally show Quiet / Normal / Loud on the screen as a second step
+Show passive Quiet / Normal / Loud on the normal Pomodoro screen
 ```
 
 Hardware constraints:
@@ -108,26 +140,27 @@ Do not cut J1 / J2
 Do not use D11 / D12 for other peripherals during this test
 ```
 
-This is an experiment branch. It should not change Pomodoro behavior until the microphone is proven stable.
+The Sense expansion board must remain installed. Removing only the camera module leaves the microphone available. The mainline does not implement recording, speech recognition, or clap-based control.
 
 ### v1.7-camera-test
 
-Goal: independently validate the Sense camera module without merging camera behavior into the Pomodoro mainline.
+Experiment recorded on `feature/camera-test`, tagged `v1.7-camera-test`, and kept outside `main`. See the [camera test record at the tag](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/blob/v1.7-camera-test/docs/camera-test-v1.7.md).
 
-Scope:
+Observed results:
 
 ```text
-Power down before reconnecting the camera module
-Verify the FPC cable and lock
-Initialize the camera
-Capture one frame
-Run for 5-10 minutes and check temperature
-Confirm display / touch / power stability
+Initialization and single-frame capture succeeded
+Captured frame: 320x240, len=2464, format=4
+Keeping the camera initialized produced subjective heat grade 3
+Periodic capture was skipped after the heat observation
+Camera module remains removed from the daily setup
 ```
 
-If the camera still becomes uncomfortably hot, keep it removed from the v1.x Pomodoro hardware stack.
+The experiment established a thermal limitation for the current daily-use setup, not a proven hardware defect. The temperature and cause were not measured. Deinitializing the driver must not be treated as proof that the sensor supply is switched off. Further camera investigation is optional.
 
 ### v1.8-hardware-feedback
+
+Later candidate, not implemented and not required before continuing sound-data experiments. Select an actual device and review the occupied pins before designing the connection.
 
 Goal: add physical feedback.
 
@@ -496,29 +529,29 @@ lights, speakers, sensors, reminders, Home Assistant
 
 ## Microphone Route
 
-The onboard PDM microphone is the safest next built-in hardware experiment.
+The onboard PDM microphone is already working in the v1.6 mainline. The current learning branch uses its data to connect firmware behavior with RMS, peaks, time windows, and plotting.
 
 Positioning:
 
 ```text
-Independent experiment
-Does not change Pomodoro behavior by default
-Useful as a future AI / voice / ambient sensing prerequisite
+Passive sound indicator completed
+Continuous capture and timestamped interval reports implemented locally; formal acceptance pending
+Local web curves and CSV download are available for device validation
 ```
 
-Future branch:
+Completed milestone:
 
 ```text
-feature/microphone-test
+v1.6-microphone-test (merged into main)
 ```
 
-Only validate:
+Previously device-tested on the v1.6 baseline (not a blanket acceptance of newer local changes):
 
 ```text
 PDM input works on GPIO41 / GPIO42
 RMS / peak noise level can be calculated
 Serial output is stable
-Screen can optionally show Quiet / Normal / Loud
+Screen shows Quiet / Normal / Loud
 No impact on display / touch / Settings / NVS
 ```
 
@@ -531,9 +564,11 @@ Do not cut J1 / J2
 Do not repurpose D11 / D12 during this test
 ```
 
-If the microphone is stable, possible later features include:
+Optional later directions, not implemented:
 
 ```text
+Raw audio recording and repeatable data replay
+Sound-data / TinyML experiments
 Ambient noise reminder
 Clap detection
 Break breathing guide
@@ -542,7 +577,7 @@ Voice wake pre-test
 
 ## Camera Route
 
-The Sense camera does not belong in the current Pomodoro mainline.
+The Sense camera experiment has a recorded conclusion; its code remains outside the current Pomodoro mainline.
 
 Positioning:
 
@@ -552,19 +587,21 @@ Does not affect the Pomodoro mainline
 Does not stay connected long-term if it causes heat
 ```
 
-Future branch:
+Preserved experiment branch and tag:
 
 ```text
 feature/camera-test
+v1.7-camera-test
 ```
 
-Only validate:
+Recorded outcome:
 
 ```text
-Can initialize
-Can capture one frame
-Temperature is acceptable after 5-10 minutes
-Does not affect display / touch
+Initialization succeeded
+Single-frame capture succeeded
+Initialized-idle heat reached subjective grade 3
+Periodic capture skipped; continuous operation not validated
+Daily-use camera module removed; Sense microphone board retained
 ```
 
 If vision AI becomes a real goal, prefer:
@@ -658,17 +695,19 @@ Avoid fully Bazelizing the ESP32 / Arduino toolchain unless the firmware and CI 
 
 ## Recommended Next Order
 
-Do not jump to v2 yet.
+Choose work using the flexible learning map; this is the current sequence for the sound-data branch, not a fixed version ladder:
 
 ```text
-v1.5-stability-pass
-v1.6-microphone-test
-v1.7-camera-test
-v1.8-hardware-feedback
-v1.9-battery-power
-v1.10-enclosure-polish
-v2.0-wifi-status
+Current baseline: v1.6 daily-use mainline
+Preserved experiment: v1.7 camera test and thermal findings
+Current step: touch-IRQ guard passed; quiet/speech/clap retests recorded; clap 13/13, screen-label sync, and Reset/Stats/NVS manual checks operator-confirmed; quiet debounce raised with evidence
+Remaining: T03 PR review/merge; further T04 changes only from evidence
+Available locally: web curves and CSV, dual-format CLI capture, I2C error reporting
+Deferred: bidirectional serial, keyboard, FFT/PCM and other product changes
+Later candidates: v1.8 hardware feedback, battery, enclosure, Wi-Fi
 ```
+
+Circuits, mathematics, FPGA simulation, and Linux learning can progress independently. No new release tag is needed just to update the learning map or prepare an unvalidated experiment.
 
 Principles:
 

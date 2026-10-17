@@ -4,6 +4,20 @@ A small Pomodoro desk companion built with a Seeed Studio XIAO ESP32S3 Sense and
 
 The project focuses on a stable embedded workflow first: PlatformIO, Arduino framework, round LCD rendering, touch input, persistent settings, and a simple product-like interaction model.
 
+## Current Status
+
+The current daily-use firmware is **v1.6** on `main`, including the passive PDM microphone sound indicator. Commit `fc32445` updated the displayed version to `v1.6` and synchronized the hardware notes.
+
+The daily hardware setup is the XIAO ESP32S3 Sense with its **Sense expansion board installed**, the Round Display, and USB-C power. The microphone remains available; only the removable camera module is disconnected. The Round Display KE switch is set to ON / KE for backlight control. No battery, microSD card, or RTC coin cell is installed.
+
+The separate `v1.7-camera-test` experiment initialized the camera and captured one frame, but keeping it initialized produced uncomfortable heat. It remains outside `main`; periodic capture was skipped.
+
+The [Flexible Learning Map](docs/esp32-flexible-learning-roadmap.md) connects this project with circuits, mathematics, sound data, embedded systems, FPGA, and AI. It is an evolving map, not a mandatory sequence. The [Engineering Roadmap](docs/roadmap.md) tracks current work and candidate product extensions.
+
+The updated [Project and Learning Plan](docs/xiao-linux-mini-plan.md) separates current tasks, learning exercises, pending validation, and optional branches. The near-term sequence is capture evidence, compare curves, validate the full workflow, then make evidence-led changes. The local `codex/microphone-serial-data` experiment already contains continuous microphone capture and a web monitor; these are not a new daily-use release. The [hardware feedback CLI](docs/hardware-feedback-loop.md) now accepts both legacy Mic records and experimental timestamped CSV. Its checks do not replace human screen, touch, and sound-response checks.
+
+The [October 13 T01 record](docs/experiments/2026-10-13-t01-sound-baseline.md) contains quiet / speech / clap captures. The [October 14 T02 comparison](docs/experiments/2026-10-14-t02-sound-comparison.md) found microphone payloads mixed into I2C error lines. The [October 16 touch-IRQ fix and retest](docs/experiments/2026-10-16-t04-touch-irq-serial.md) now gates coordinate reads on the touch interrupt: two post-upload observations had zero I2C errors and zero mixed records, and the user confirmed basic touch / Settings / Bright / Save operation. The [October 16 quiet retest](docs/experiments/2026-10-16-t05-quiet-retest.md) produced a clean Quiet-only baseline, and the [October 17 clap retest](docs/experiments/2026-10-17-t02-clap-retest.md) closed with an operator-confirmed 13/13 final run. Screen-label sync was confirmed on device on October 17, and the [quiet debounce change](docs/experiments/2026-10-17-t06-quiet-debounce.md) stabilized the Normal label during speech. The [manual Reset / Stats / NVS checks](docs/experiments/2026-10-17-t07-manual-reset-stats-nvs.md) passed the same day. The original FAILED reports are preserved. PR #1 review and merge remain open; full acceptance and PCM / AI remain separate work.
+
 ## Hardware
 
 * Seeed Studio XIAO ESP32S3 Sense
@@ -85,7 +99,7 @@ The Sense camera uses several GPIO pins:
 
 This project does not currently use the camera, but these pins should be considered reserved if camera support is added later.
 
-In the current v1.x Pomodoro build, the camera module is removed from the hardware stack. The timer does not need camera features, and removing the module reduces heat, power draw, and mechanical stack height. Camera support should be treated as a separate future experiment rather than part of the main Pomodoro firmware.
+In the current daily Pomodoro build, only the removable camera module is disconnected; the Sense expansion board stays installed for the microphone. The `v1.7-camera-test` experiment confirmed initialization and single-frame capture, but the initialized-idle test produced uncomfortable heat (subjective grade 3). Periodic capture was skipped. This observation does not establish a defective module or a measured temperature. See the [camera experiment record](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/blob/v1.7-camera-test/docs/camera-test-v1.7.md). Camera code has not been merged into `main`.
 
 ### microSD / SPI Pin Sharing
 
@@ -136,12 +150,13 @@ For future expansion:
 * Do not cut J1 / J2 / J3 unless the hardware modification is intentional and documented.
 * Keep camera, microphone, and microSD support as separate experimental milestones.
 
-Suggested future experimental branches:
+Experiment status and future candidates:
 
-* `feature/microphone-test`: read PDM microphone audio level and display Quiet / Normal / Loud.
-* `feature/camera-test`: validate camera capture independently.
-* `feature/hardware-feedback`: add buzzer or vibration motor.
-* `feature/battery-power`: add LiPo battery support and power management.
+* `v1.6-microphone-test`: completed and merged; centered RMS / peak and Quiet / Normal / Loud are available.
+* `feature/camera-test` / `v1.7-camera-test`: recorded initialization, single-frame capture, and a thermal limitation; kept separate from `main`.
+* Current sound-data task: produce timestamped RMS / peak / level rows over serial, verify them, then add computer plotting and CSV capture.
+* `feature/hardware-feedback`: a later candidate for buzzer or vibration feedback; hardware and implementation are still to be selected.
+* `feature/battery-power`: a later candidate for battery support and power management.
 
 ## Features
 
@@ -289,10 +304,16 @@ src/
 | `v1.5.1-stability-pass`    | Stability pass including timer continuity regression checks |
 | `v1.6-microphone-test`     | Verified onboard PDM microphone and added passive Quiet / Normal / Loud sound indicator |
 
+Separate experiment: [`v1.7-camera-test`](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/tree/v1.7-camera-test) is preserved on `feature/camera-test` and is not part of the daily-use mainline.
+
+Historical version note: tag `v1.6-microphone-test` points to `b033798`, whose Settings screen still displays `v1.5`. The subsequent `fc32445` commit corrected `APP_VERSION` to `v1.6`. The historical tag is unchanged; current `main` displays `v1.6`.
+
 ## Next Steps
 
 * Use [Release Checklist](docs/release-checklist.md) before tagging new versions
-* Follow the long-term [Roadmap](docs/roadmap.md)
-* Validate the removable camera module separately as `v1.7-camera-test`
-* Consider hardware feedback with a buzzer or vibration motor
-* Explore battery and power management
+* Use the [Flexible Learning Map](docs/esp32-flexible-learning-roadmap.md) to choose experiments by interest and available hardware
+* Review the completed [T02 offline comparison](docs/experiments/2026-10-14-t02-sound-comparison.md): quiet outlier, clap peaks, and serial records interleaved with I2C diagnostics
+* Review the [touch-IRQ retest](docs/experiments/2026-10-16-t04-touch-irq-serial.md): a real build/upload/capture cycle passed, but controlled sound retesting and complete PR acceptance remain open
+* Use the experimental [Microphone Web Monitor](tools/microphone-monitor/README.md) for local USB serial curves, diagnostics, and CSV download; real microphone validation is still pending
+* Keep the camera experiment separate and the camera module removed from the daily setup
+* Consider `v1.8-hardware-feedback`, battery power, and enclosure work as later candidates

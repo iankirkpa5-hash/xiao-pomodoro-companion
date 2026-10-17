@@ -18,6 +18,11 @@ bool long_press_handled = false;
 TouchPoint last_touch = {120, 120};
 
 bool readTouch(uint8_t &x, uint8_t &y) {
+  // CHSC6X only supplies touch coordinates while its active-low INT is asserted.
+  if (digitalRead(TOUCH_INT) != LOW) {
+    return false;
+  }
+
   uint8_t data[5] = {0};
   const uint8_t read_len = Wire.requestFrom(TOUCH_ADDR, static_cast<uint8_t>(sizeof(data)));
   if (read_len != sizeof(data)) {

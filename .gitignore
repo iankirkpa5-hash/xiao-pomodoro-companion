@@ -1,4 +1,7 @@
 .pio/
 .pio-core/
 .vscode/
+test-runs/
+__pycache__/
+*.pyc
 

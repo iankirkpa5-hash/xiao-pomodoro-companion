@@ -1,0 +1,584 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="960" viewBox="0 0 1380 960">
+<title>T02 sound comparison</title>
+<style>text{font-family:Verdana,sans-serif;fill:#203d39} .small{font-size:12px} .body{font-size:14px} .title{font-size:28px;font-weight:bold} .heading{font-size:18px;font-weight:bold}</style>
+<rect width="1380" height="960" fill="#faf9f4"/>
+<text x="40.00" y="48.00" class="title" text-anchor="start">T02 / Sound comparison</text>
+<text x="40.00" y="78.00" class="body" text-anchor="start">Shared linear scales. Centered PCM units, not dB SPL. Capture: 2026-10-13.</text>
+<text x="40.00" y="103.00" class="small" text-anchor="start">Dots = valid CSV rows. Orange = report gap &gt;750 ms on either clock; gray = no valid edge report. No gap filling.</text>
+<text x="95.00" y="142.00" class="heading" text-anchor="start">QUIET  /  54 rows  /  I2C errors 221  /  FAILED</text>
+<text x="95.00" y="164.00" class="small" text-anchor="start">RMS   median 13.05   max 327</text>
+<rect x="95.00" y="174.00" width="570.00" height="155.00" fill="#ffffff"/>
+<rect x="186.35" y="174.00" width="24.43" height="155.00" fill="#f9e5d9"/>
+<rect x="251.49" y="174.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="316.63" y="174.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="332.92" y="174.00" width="16.81" height="155.00" fill="#f9e5d9"/>
+<rect x="536.49" y="174.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="95.00" y="174.00" width="1.78" height="155.00" fill="#edf0ee"/>
+<rect x="577.20" y="174.00" width="7.13" height="155.00" fill="#edf0ee"/>
+<path d="M95.00,329.00 L665.00,329.00" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="333.00" class="small" text-anchor="end">0</text>
+<path d="M95.00,290.25 L665.00,290.25" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="294.25" class="small" text-anchor="end">750</text>
+<path d="M95.00,251.50 L665.00,251.50" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="255.50" class="small" text-anchor="end">1500</text>
+<path d="M95.00,212.75 L665.00,212.75" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="216.75" class="small" text-anchor="end">2250</text>
+<path d="M95.00,174.00 L665.00,174.00" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="178.00" class="small" text-anchor="end">3000</text>
+<path d="M95.00,174.00 L95.00,329.00" stroke="#dce3df" fill="none"/>
+<text x="95.00" y="349.00" class="small" text-anchor="middle">0</text>
+<path d="M176.43,174.00 L176.43,329.00" stroke="#dce3df" fill="none"/>
+<text x="176.43" y="349.00" class="small" text-anchor="middle">5</text>
+<path d="M257.86,174.00 L257.86,329.00" stroke="#dce3df" fill="none"/>
+<text x="257.86" y="349.00" class="small" text-anchor="middle">10</text>
+<path d="M339.29,174.00 L339.29,329.00" stroke="#dce3df" fill="none"/>
+<text x="339.29" y="349.00" class="small" text-anchor="middle">15</text>
+<path d="M420.71,174.00 L420.71,329.00" stroke="#dce3df" fill="none"/>
+<text x="420.71" y="349.00" class="small" text-anchor="middle">20</text>
+<path d="M502.14,174.00 L502.14,329.00" stroke="#dce3df" fill="none"/>
+<text x="502.14" y="349.00" class="small" text-anchor="middle">25</text>
+<path d="M583.57,174.00 L583.57,329.00" stroke="#dce3df" fill="none"/>
+<text x="583.57" y="349.00" class="small" text-anchor="middle">30</text>
+<path d="M665.00,174.00 L665.00,329.00" stroke="#dce3df" fill="none"/>
+<text x="665.00" y="349.00" class="small" text-anchor="middle">35</text>
+<circle cx="96.78" cy="328.16" r="3" fill="#157e80"><title>CSV line 2: host 0.109s, device 2416262ms, rms 16.2, Quiet</title></circle>
+<circle cx="104.92" cy="328.21" r="3" fill="#157e80"><title>CSV line 3: host 0.609s, device 2416762ms, rms 15.2, Quiet</title></circle>
+<circle cx="113.06" cy="327.86" r="3" fill="#157e80"><title>CSV line 4: host 1.109s, device 2417262ms, rms 22.0, Quiet</title></circle>
+<circle cx="121.20" cy="328.31" r="3" fill="#157e80"><title>CSV line 5: host 1.609s, device 2417762ms, rms 13.4, Quiet</title></circle>
+<circle cx="129.35" cy="327.67" r="3" fill="#157e80"><title>CSV line 6: host 2.109s, device 2418262ms, rms 25.8, Quiet</title></circle>
+<circle cx="137.49" cy="327.43" r="3" fill="#157e80"><title>CSV line 7: host 2.609s, device 2418762ms, rms 30.3, Quiet</title></circle>
+<circle cx="145.63" cy="327.43" r="3" fill="#157e80"><title>CSV line 8: host 3.109s, device 2419262ms, rms 30.4, Quiet</title></circle>
+<circle cx="153.78" cy="327.60" r="3" fill="#157e80"><title>CSV line 9: host 3.609s, device 2419762ms, rms 27.1, Quiet</title></circle>
+<circle cx="161.92" cy="328.12" r="3" fill="#157e80"><title>CSV line 10: host 4.109s, device 2420262ms, rms 17.0, Quiet</title></circle>
+<circle cx="170.06" cy="327.98" r="3" fill="#157e80"><title>CSV line 11: host 4.609s, device 2420762ms, rms 19.7, Quiet</title></circle>
+<circle cx="178.20" cy="327.36" r="3" fill="#157e80"><title>CSV line 12: host 5.109s, device 2421262ms, rms 31.7, Quiet</title></circle>
+<circle cx="186.35" cy="312.11" r="3" fill="#157e80"><title>CSV line 13: host 5.609s, device 2421762ms, rms 327.0, Loud</title></circle>
+<polyline points="96.78,328.16 104.92,328.21 113.06,327.86 121.20,328.31 129.35,327.67 137.49,327.43 145.63,327.43 153.78,327.60 161.92,328.12 170.06,327.98 178.20,327.36 186.35,312.11" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="210.78" cy="327.82" r="3" fill="#157e80"><title>CSV line 14: host 7.109s, device 2423262ms, rms 22.9, Quiet</title></circle>
+<circle cx="218.92" cy="327.86" r="3" fill="#157e80"><title>CSV line 15: host 7.609s, device 2423762ms, rms 22.0, Quiet</title></circle>
+<circle cx="227.06" cy="327.93" r="3" fill="#157e80"><title>CSV line 16: host 8.109s, device 2424262ms, rms 20.7, Quiet</title></circle>
+<circle cx="235.72" cy="327.97" r="3" fill="#157e80"><title>CSV line 17: host 8.641s, device 2424762ms, rms 19.9, Quiet</title></circle>
+<circle cx="243.35" cy="327.64" r="3" fill="#157e80"><title>CSV line 18: host 9.109s, device 2425262ms, rms 26.3, Quiet</title></circle>
+<circle cx="251.49" cy="327.82" r="3" fill="#157e80"><title>CSV line 19: host 9.609s, device 2425762ms, rms 22.9, Quiet</title></circle>
+<polyline points="210.78,327.82 218.92,327.86 227.06,327.93 235.72,327.97 243.35,327.64 251.49,327.82" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="267.78" cy="328.44" r="3" fill="#157e80"><title>CSV line 20: host 10.609s, device 2426762ms, rms 10.9, Quiet</title></circle>
+<circle cx="275.92" cy="328.33" r="3" fill="#157e80"><title>CSV line 21: host 11.109s, device 2427262ms, rms 12.9, Quiet</title></circle>
+<circle cx="284.58" cy="327.74" r="3" fill="#157e80"><title>CSV line 22: host 11.641s, device 2427762ms, rms 24.4, Quiet</title></circle>
+<circle cx="292.20" cy="325.54" r="3" fill="#157e80"><title>CSV line 23: host 12.109s, device 2428262ms, rms 66.9, Quiet</title></circle>
+<circle cx="300.35" cy="319.60" r="3" fill="#157e80"><title>CSV line 24: host 12.609s, device 2428762ms, rms 181.9, Normal</title></circle>
+<circle cx="308.49" cy="327.67" r="3" fill="#157e80"><title>CSV line 25: host 13.109s, device 2429262ms, rms 25.7, Quiet</title></circle>
+<circle cx="316.63" cy="328.32" r="3" fill="#157e80"><title>CSV line 26: host 13.609s, device 2429762ms, rms 13.2, Quiet</title></circle>
+<polyline points="267.78,328.44 275.92,328.33 284.58,327.74 292.20,325.54 300.35,319.60 308.49,327.67 316.63,328.32" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="332.92" cy="328.30" r="3" fill="#157e80"><title>CSV line 27: host 14.609s, device 2430762ms, rms 13.5, Quiet</title></circle>
+<polyline points="332.92,328.30" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="349.72" cy="328.40" r="3" fill="#157e80"><title>CSV line 28: host 15.641s, device 2431762ms, rms 11.7, Quiet</title></circle>
+<circle cx="357.35" cy="328.46" r="3" fill="#157e80"><title>CSV line 29: host 16.109s, device 2432262ms, rms 10.5, Quiet</title></circle>
+<circle cx="365.49" cy="328.46" r="3" fill="#157e80"><title>CSV line 30: host 16.609s, device 2432762ms, rms 10.5, Quiet</title></circle>
+<circle cx="373.39" cy="327.45" r="3" fill="#157e80"><title>CSV line 31: host 17.094s, device 2433262ms, rms 30.0, Quiet</title></circle>
+<circle cx="382.04" cy="328.18" r="3" fill="#157e80"><title>CSV line 32: host 17.625s, device 2433762ms, rms 15.9, Quiet</title></circle>
+<circle cx="389.92" cy="328.47" r="3" fill="#157e80"><title>CSV line 33: host 18.109s, device 2434262ms, rms 10.2, Quiet</title></circle>
+<circle cx="398.06" cy="328.48" r="3" fill="#157e80"><title>CSV line 34: host 18.609s, device 2434762ms, rms 10.0, Quiet</title></circle>
+<circle cx="406.20" cy="328.39" r="3" fill="#157e80"><title>CSV line 35: host 19.109s, device 2435262ms, rms 11.9, Quiet</title></circle>
+<circle cx="414.35" cy="328.54" r="3" fill="#157e80"><title>CSV line 36: host 19.609s, device 2435762ms, rms 9.0, Quiet</title></circle>
+<circle cx="422.49" cy="328.55" r="3" fill="#157e80"><title>CSV line 37: host 20.109s, device 2436262ms, rms 8.7, Quiet</title></circle>
+<circle cx="430.63" cy="328.52" r="3" fill="#157e80"><title>CSV line 38: host 20.609s, device 2436762ms, rms 9.2, Quiet</title></circle>
+<circle cx="438.78" cy="328.54" r="3" fill="#157e80"><title>CSV line 39: host 21.109s, device 2437262ms, rms 8.9, Quiet</title></circle>
+<circle cx="447.44" cy="328.52" r="3" fill="#157e80"><title>CSV line 40: host 21.641s, device 2437762ms, rms 9.2, Quiet</title></circle>
+<circle cx="455.06" cy="328.55" r="3" fill="#157e80"><title>CSV line 41: host 22.109s, device 2438262ms, rms 8.7, Quiet</title></circle>
+<circle cx="463.20" cy="328.59" r="3" fill="#157e80"><title>CSV line 42: host 22.609s, device 2438762ms, rms 8.0, Quiet</title></circle>
+<circle cx="471.35" cy="328.26" r="3" fill="#157e80"><title>CSV line 43: host 23.109s, device 2439262ms, rms 14.4, Quiet</title></circle>
+<circle cx="479.49" cy="328.54" r="3" fill="#157e80"><title>CSV line 44: host 23.609s, device 2439762ms, rms 8.9, Quiet</title></circle>
+<circle cx="487.63" cy="328.60" r="3" fill="#157e80"><title>CSV line 45: host 24.109s, device 2440262ms, rms 7.8, Quiet</title></circle>
+<circle cx="495.78" cy="328.56" r="3" fill="#157e80"><title>CSV line 46: host 24.609s, device 2440762ms, rms 8.6, Quiet</title></circle>
+<circle cx="503.92" cy="328.54" r="3" fill="#157e80"><title>CSV line 47: host 25.109s, device 2441262ms, rms 9.0, Quiet</title></circle>
+<circle cx="512.06" cy="328.57" r="3" fill="#157e80"><title>CSV line 48: host 25.609s, device 2441762ms, rms 8.4, Quiet</title></circle>
+<circle cx="520.20" cy="328.50" r="3" fill="#157e80"><title>CSV line 49: host 26.109s, device 2442262ms, rms 9.7, Quiet</title></circle>
+<circle cx="528.35" cy="328.55" r="3" fill="#157e80"><title>CSV line 50: host 26.609s, device 2442762ms, rms 8.7, Quiet</title></circle>
+<circle cx="536.49" cy="328.52" r="3" fill="#157e80"><title>CSV line 51: host 27.109s, device 2443262ms, rms 9.2, Quiet</title></circle>
+<polyline points="349.72,328.40 357.35,328.46 365.49,328.46 373.39,327.45 382.04,328.18 389.92,328.47 398.06,328.48 406.20,328.39 414.35,328.54 422.49,328.55 430.63,328.52 438.78,328.54 447.44,328.52 455.06,328.55 463.20,328.59 471.35,328.26 479.49,328.54 487.63,328.60 495.78,328.56 503.92,328.54 512.06,328.57 520.20,328.50 528.35,328.55 536.49,328.52" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="552.78" cy="328.57" r="3" fill="#157e80"><title>CSV line 52: host 28.109s, device 2444262ms, rms 8.4, Quiet</title></circle>
+<circle cx="561.44" cy="328.57" r="3" fill="#157e80"><title>CSV line 53: host 28.641s, device 2444762ms, rms 8.3, Quiet</title></circle>
+<circle cx="569.06" cy="328.44" r="3" fill="#157e80"><title>CSV line 54: host 29.109s, device 2445262ms, rms 10.9, Quiet</title></circle>
+<circle cx="577.20" cy="328.39" r="3" fill="#157e80"><title>CSV line 55: host 29.609s, device 2445762ms, rms 11.8, Quiet</title></circle>
+<polyline points="552.78,328.57 561.44,328.57 569.06,328.44 577.20,328.39" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<text x="765.00" y="164.00" class="small" text-anchor="start">PEAK   median 51.5   max 6260</text>
+<rect x="765.00" y="174.00" width="570.00" height="155.00" fill="#ffffff"/>
+<rect x="856.35" y="174.00" width="24.43" height="155.00" fill="#f9e5d9"/>
+<rect x="921.49" y="174.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="986.63" y="174.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="1002.92" y="174.00" width="16.81" height="155.00" fill="#f9e5d9"/>
+<rect x="1206.49" y="174.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="765.00" y="174.00" width="1.78" height="155.00" fill="#edf0ee"/>
+<rect x="1247.20" y="174.00" width="7.13" height="155.00" fill="#edf0ee"/>
+<path d="M765.00,329.00 L1335.00,329.00" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="333.00" class="small" text-anchor="end">0</text>
+<path d="M765.00,290.25 L1335.00,290.25" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="294.25" class="small" text-anchor="end">12500</text>
+<path d="M765.00,251.50 L1335.00,251.50" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="255.50" class="small" text-anchor="end">25000</text>
+<path d="M765.00,212.75 L1335.00,212.75" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="216.75" class="small" text-anchor="end">37500</text>
+<path d="M765.00,174.00 L1335.00,174.00" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="178.00" class="small" text-anchor="end">50000</text>
+<path d="M765.00,174.00 L765.00,329.00" stroke="#dce3df" fill="none"/>
+<text x="765.00" y="349.00" class="small" text-anchor="middle">0</text>
+<path d="M846.43,174.00 L846.43,329.00" stroke="#dce3df" fill="none"/>
+<text x="846.43" y="349.00" class="small" text-anchor="middle">5</text>
+<path d="M927.86,174.00 L927.86,329.00" stroke="#dce3df" fill="none"/>
+<text x="927.86" y="349.00" class="small" text-anchor="middle">10</text>
+<path d="M1009.29,174.00 L1009.29,329.00" stroke="#dce3df" fill="none"/>
+<text x="1009.29" y="349.00" class="small" text-anchor="middle">15</text>
+<path d="M1090.71,174.00 L1090.71,329.00" stroke="#dce3df" fill="none"/>
+<text x="1090.71" y="349.00" class="small" text-anchor="middle">20</text>
+<path d="M1172.14,174.00 L1172.14,329.00" stroke="#dce3df" fill="none"/>
+<text x="1172.14" y="349.00" class="small" text-anchor="middle">25</text>
+<path d="M1253.57,174.00 L1253.57,329.00" stroke="#dce3df" fill="none"/>
+<text x="1253.57" y="349.00" class="small" text-anchor="middle">30</text>
+<path d="M1335.00,174.00 L1335.00,329.00" stroke="#dce3df" fill="none"/>
+<text x="1335.00" y="349.00" class="small" text-anchor="middle">35</text>
+<circle cx="766.78" cy="328.57" r="3" fill="#ba4539"><title>CSV line 2: host 0.109s, device 2416262ms, peak 138, Quiet</title></circle>
+<circle cx="774.92" cy="328.84" r="3" fill="#ba4539"><title>CSV line 3: host 0.609s, device 2416762ms, peak 53, Quiet</title></circle>
+<circle cx="783.06" cy="328.55" r="3" fill="#ba4539"><title>CSV line 4: host 1.109s, device 2417262ms, peak 145, Quiet</title></circle>
+<circle cx="791.20" cy="328.70" r="3" fill="#ba4539"><title>CSV line 5: host 1.609s, device 2417762ms, peak 96, Quiet</title></circle>
+<circle cx="799.35" cy="328.61" r="3" fill="#ba4539"><title>CSV line 6: host 2.109s, device 2418262ms, peak 125, Quiet</title></circle>
+<circle cx="807.49" cy="328.47" r="3" fill="#ba4539"><title>CSV line 7: host 2.609s, device 2418762ms, peak 171, Quiet</title></circle>
+<circle cx="815.63" cy="328.53" r="3" fill="#ba4539"><title>CSV line 8: host 3.109s, device 2419262ms, peak 153, Quiet</title></circle>
+<circle cx="823.78" cy="328.63" r="3" fill="#ba4539"><title>CSV line 9: host 3.609s, device 2419762ms, peak 120, Quiet</title></circle>
+<circle cx="831.92" cy="328.80" r="3" fill="#ba4539"><title>CSV line 10: host 4.109s, device 2420262ms, peak 66, Quiet</title></circle>
+<circle cx="840.06" cy="328.81" r="3" fill="#ba4539"><title>CSV line 11: host 4.609s, device 2420762ms, peak 60, Quiet</title></circle>
+<circle cx="848.20" cy="328.46" r="3" fill="#ba4539"><title>CSV line 12: host 5.109s, device 2421262ms, peak 175, Quiet</title></circle>
+<circle cx="856.35" cy="309.59" r="3" fill="#ba4539"><title>CSV line 13: host 5.609s, device 2421762ms, peak 6260, Loud</title></circle>
+<polyline points="766.78,328.57 774.92,328.84 783.06,328.55 791.20,328.70 799.35,328.61 807.49,328.47 815.63,328.53 823.78,328.63 831.92,328.80 840.06,328.81 848.20,328.46 856.35,309.59" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="880.78" cy="328.77" r="3" fill="#ba4539"><title>CSV line 14: host 7.109s, device 2423262ms, peak 74, Quiet</title></circle>
+<circle cx="888.92" cy="328.76" r="3" fill="#ba4539"><title>CSV line 15: host 7.609s, device 2423762ms, peak 78, Quiet</title></circle>
+<circle cx="897.06" cy="328.12" r="3" fill="#ba4539"><title>CSV line 16: host 8.109s, device 2424262ms, peak 283, Quiet</title></circle>
+<circle cx="905.72" cy="328.23" r="3" fill="#ba4539"><title>CSV line 17: host 8.641s, device 2424762ms, peak 248, Quiet</title></circle>
+<circle cx="913.35" cy="328.52" r="3" fill="#ba4539"><title>CSV line 18: host 9.109s, device 2425262ms, peak 156, Quiet</title></circle>
+<circle cx="921.49" cy="328.64" r="3" fill="#ba4539"><title>CSV line 19: host 9.609s, device 2425762ms, peak 116, Quiet</title></circle>
+<polyline points="880.78,328.77 888.92,328.76 897.06,328.12 905.72,328.23 913.35,328.52 921.49,328.64" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="937.78" cy="328.87" r="3" fill="#ba4539"><title>CSV line 20: host 10.609s, device 2426762ms, peak 43, Quiet</title></circle>
+<circle cx="945.92" cy="328.83" r="3" fill="#ba4539"><title>CSV line 21: host 11.109s, device 2427262ms, peak 55, Quiet</title></circle>
+<circle cx="954.58" cy="328.01" r="3" fill="#ba4539"><title>CSV line 22: host 11.641s, device 2427762ms, peak 320, Quiet</title></circle>
+<circle cx="962.20" cy="325.65" r="3" fill="#ba4539"><title>CSV line 23: host 12.109s, device 2428262ms, peak 1082, Quiet</title></circle>
+<circle cx="970.35" cy="322.65" r="3" fill="#ba4539"><title>CSV line 24: host 12.609s, device 2428762ms, peak 2048, Normal</title></circle>
+<circle cx="978.49" cy="328.35" r="3" fill="#ba4539"><title>CSV line 25: host 13.109s, device 2429262ms, peak 211, Quiet</title></circle>
+<circle cx="986.63" cy="328.85" r="3" fill="#ba4539"><title>CSV line 26: host 13.609s, device 2429762ms, peak 50, Quiet</title></circle>
+<polyline points="937.78,328.87 945.92,328.83 954.58,328.01 962.20,325.65 970.35,322.65 978.49,328.35 986.63,328.85" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1002.92" cy="328.86" r="3" fill="#ba4539"><title>CSV line 27: host 14.609s, device 2430762ms, peak 44, Quiet</title></circle>
+<polyline points="1002.92,328.86" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1019.72" cy="328.86" r="3" fill="#ba4539"><title>CSV line 28: host 15.641s, device 2431762ms, peak 44, Quiet</title></circle>
+<circle cx="1027.35" cy="328.86" r="3" fill="#ba4539"><title>CSV line 29: host 16.109s, device 2432262ms, peak 45, Quiet</title></circle>
+<circle cx="1035.49" cy="328.88" r="3" fill="#ba4539"><title>CSV line 30: host 16.609s, device 2432762ms, peak 39, Quiet</title></circle>
+<circle cx="1043.39" cy="328.45" r="3" fill="#ba4539"><title>CSV line 31: host 17.094s, device 2433262ms, peak 178, Quiet</title></circle>
+<circle cx="1052.04" cy="328.79" r="3" fill="#ba4539"><title>CSV line 32: host 17.625s, device 2433762ms, peak 68, Quiet</title></circle>
+<circle cx="1059.92" cy="328.86" r="3" fill="#ba4539"><title>CSV line 33: host 18.109s, device 2434262ms, peak 46, Quiet</title></circle>
+<circle cx="1068.06" cy="328.88" r="3" fill="#ba4539"><title>CSV line 34: host 18.609s, device 2434762ms, peak 40, Quiet</title></circle>
+<circle cx="1076.20" cy="328.87" r="3" fill="#ba4539"><title>CSV line 35: host 19.109s, device 2435262ms, peak 41, Quiet</title></circle>
+<circle cx="1084.35" cy="328.89" r="3" fill="#ba4539"><title>CSV line 36: host 19.609s, device 2435762ms, peak 37, Quiet</title></circle>
+<circle cx="1092.49" cy="328.89" r="3" fill="#ba4539"><title>CSV line 37: host 20.109s, device 2436262ms, peak 36, Quiet</title></circle>
+<circle cx="1100.63" cy="328.90" r="3" fill="#ba4539"><title>CSV line 38: host 20.609s, device 2436762ms, peak 33, Quiet</title></circle>
+<circle cx="1108.78" cy="328.89" r="3" fill="#ba4539"><title>CSV line 39: host 21.109s, device 2437262ms, peak 36, Quiet</title></circle>
+<circle cx="1117.44" cy="328.90" r="3" fill="#ba4539"><title>CSV line 40: host 21.641s, device 2437762ms, peak 33, Quiet</title></circle>
+<circle cx="1125.06" cy="328.89" r="3" fill="#ba4539"><title>CSV line 41: host 22.109s, device 2438262ms, peak 34, Quiet</title></circle>
+<circle cx="1133.20" cy="328.89" r="3" fill="#ba4539"><title>CSV line 42: host 22.609s, device 2438762ms, peak 36, Quiet</title></circle>
+<circle cx="1141.35" cy="328.77" r="3" fill="#ba4539"><title>CSV line 43: host 23.109s, device 2439262ms, peak 73, Quiet</title></circle>
+<circle cx="1149.49" cy="328.89" r="3" fill="#ba4539"><title>CSV line 44: host 23.609s, device 2439762ms, peak 34, Quiet</title></circle>
+<circle cx="1157.63" cy="328.91" r="3" fill="#ba4539"><title>CSV line 45: host 24.109s, device 2440262ms, peak 28, Quiet</title></circle>
+<circle cx="1165.78" cy="328.89" r="3" fill="#ba4539"><title>CSV line 46: host 24.609s, device 2440762ms, peak 34, Quiet</title></circle>
+<circle cx="1173.92" cy="328.90" r="3" fill="#ba4539"><title>CSV line 47: host 25.109s, device 2441262ms, peak 32, Quiet</title></circle>
+<circle cx="1182.06" cy="328.89" r="3" fill="#ba4539"><title>CSV line 48: host 25.609s, device 2441762ms, peak 35, Quiet</title></circle>
+<circle cx="1190.20" cy="328.89" r="3" fill="#ba4539"><title>CSV line 49: host 26.109s, device 2442262ms, peak 35, Quiet</title></circle>
+<circle cx="1198.35" cy="328.89" r="3" fill="#ba4539"><title>CSV line 50: host 26.609s, device 2442762ms, peak 37, Quiet</title></circle>
+<circle cx="1206.49" cy="328.89" r="3" fill="#ba4539"><title>CSV line 51: host 27.109s, device 2443262ms, peak 34, Quiet</title></circle>
+<polyline points="1019.72,328.86 1027.35,328.86 1035.49,328.88 1043.39,328.45 1052.04,328.79 1059.92,328.86 1068.06,328.88 1076.20,328.87 1084.35,328.89 1092.49,328.89 1100.63,328.90 1108.78,328.89 1117.44,328.90 1125.06,328.89 1133.20,328.89 1141.35,328.77 1149.49,328.89 1157.63,328.91 1165.78,328.89 1173.92,328.90 1182.06,328.89 1190.20,328.89 1198.35,328.89 1206.49,328.89" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1222.78" cy="328.89" r="3" fill="#ba4539"><title>CSV line 52: host 28.109s, device 2444262ms, peak 35, Quiet</title></circle>
+<circle cx="1231.44" cy="328.89" r="3" fill="#ba4539"><title>CSV line 53: host 28.641s, device 2444762ms, peak 34, Quiet</title></circle>
+<circle cx="1239.06" cy="328.88" r="3" fill="#ba4539"><title>CSV line 54: host 29.109s, device 2445262ms, peak 38, Quiet</title></circle>
+<circle cx="1247.20" cy="328.70" r="3" fill="#ba4539"><title>CSV line 55: host 29.609s, device 2445762ms, peak 98, Quiet</title></circle>
+<polyline points="1222.78,328.89 1231.44,328.89 1239.06,328.88 1247.20,328.70" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<text x="95.00" y="387.00" class="heading" text-anchor="start">SPEECH  /  58 rows  /  I2C errors 222  /  FAILED</text>
+<text x="95.00" y="409.00" class="small" text-anchor="start">RMS   median 39.2   max 217.4</text>
+<rect x="95.00" y="419.00" width="570.00" height="155.00" fill="#ffffff"/>
+<rect x="363.21" y="419.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="517.92" y="419.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="95.00" y="419.00" width="7.39" height="155.00" fill="#edf0ee"/>
+<rect x="583.07" y="419.00" width="2.54" height="155.00" fill="#edf0ee"/>
+<path d="M95.00,574.00 L665.00,574.00" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="578.00" class="small" text-anchor="end">0</text>
+<path d="M95.00,535.25 L665.00,535.25" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="539.25" class="small" text-anchor="end">750</text>
+<path d="M95.00,496.50 L665.00,496.50" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="500.50" class="small" text-anchor="end">1500</text>
+<path d="M95.00,457.75 L665.00,457.75" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="461.75" class="small" text-anchor="end">2250</text>
+<path d="M95.00,419.00 L665.00,419.00" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="423.00" class="small" text-anchor="end">3000</text>
+<path d="M95.00,419.00 L95.00,574.00" stroke="#dce3df" fill="none"/>
+<text x="95.00" y="594.00" class="small" text-anchor="middle">0</text>
+<path d="M176.43,419.00 L176.43,574.00" stroke="#dce3df" fill="none"/>
+<text x="176.43" y="594.00" class="small" text-anchor="middle">5</text>
+<path d="M257.86,419.00 L257.86,574.00" stroke="#dce3df" fill="none"/>
+<text x="257.86" y="594.00" class="small" text-anchor="middle">10</text>
+<path d="M339.29,419.00 L339.29,574.00" stroke="#dce3df" fill="none"/>
+<text x="339.29" y="594.00" class="small" text-anchor="middle">15</text>
+<path d="M420.71,419.00 L420.71,574.00" stroke="#dce3df" fill="none"/>
+<text x="420.71" y="594.00" class="small" text-anchor="middle">20</text>
+<path d="M502.14,419.00 L502.14,574.00" stroke="#dce3df" fill="none"/>
+<text x="502.14" y="594.00" class="small" text-anchor="middle">25</text>
+<path d="M583.57,419.00 L583.57,574.00" stroke="#dce3df" fill="none"/>
+<text x="583.57" y="594.00" class="small" text-anchor="middle">30</text>
+<path d="M665.00,419.00 L665.00,574.00" stroke="#dce3df" fill="none"/>
+<text x="665.00" y="594.00" class="small" text-anchor="middle">35</text>
+<circle cx="102.39" cy="573.33" r="3" fill="#157e80"><title>CSV line 2: host 0.454s, device 2654792ms, rms 12.9, Quiet</title></circle>
+<circle cx="110.78" cy="570.21" r="3" fill="#157e80"><title>CSV line 3: host 0.969s, device 2655292ms, rms 73.4, Quiet</title></circle>
+<circle cx="118.92" cy="568.71" r="3" fill="#157e80"><title>CSV line 4: host 1.469s, device 2655792ms, rms 102.3, Quiet</title></circle>
+<circle cx="127.07" cy="572.45" r="3" fill="#157e80"><title>CSV line 5: host 1.969s, device 2656292ms, rms 30.0, Quiet</title></circle>
+<circle cx="135.21" cy="570.18" r="3" fill="#157e80"><title>CSV line 6: host 2.469s, device 2656792ms, rms 74.0, Quiet</title></circle>
+<circle cx="143.35" cy="568.72" r="3" fill="#157e80"><title>CSV line 7: host 2.969s, device 2657292ms, rms 102.2, Quiet</title></circle>
+<circle cx="151.50" cy="569.70" r="3" fill="#157e80"><title>CSV line 8: host 3.469s, device 2657792ms, rms 83.2, Quiet</title></circle>
+<circle cx="159.64" cy="569.84" r="3" fill="#157e80"><title>CSV line 9: host 3.969s, device 2658292ms, rms 80.5, Quiet</title></circle>
+<circle cx="167.54" cy="568.67" r="3" fill="#157e80"><title>CSV line 10: host 4.454s, device 2658792ms, rms 103.2, Quiet</title></circle>
+<circle cx="175.68" cy="569.98" r="3" fill="#157e80"><title>CSV line 11: host 4.954s, device 2659292ms, rms 77.8, Quiet</title></circle>
+<circle cx="184.07" cy="571.95" r="3" fill="#157e80"><title>CSV line 12: host 5.469s, device 2659792ms, rms 39.7, Quiet</title></circle>
+<circle cx="191.97" cy="572.69" r="3" fill="#157e80"><title>CSV line 13: host 5.954s, device 2660292ms, rms 25.3, Quiet</title></circle>
+<circle cx="200.11" cy="568.80" r="3" fill="#157e80"><title>CSV line 14: host 6.454s, device 2660792ms, rms 100.7, Quiet</title></circle>
+<circle cx="208.50" cy="567.81" r="3" fill="#157e80"><title>CSV line 15: host 6.969s, device 2661302ms, rms 119.9, Normal</title></circle>
+<circle cx="216.64" cy="571.10" r="3" fill="#157e80"><title>CSV line 16: host 7.469s, device 2661802ms, rms 56.2, Quiet</title></circle>
+<circle cx="224.78" cy="569.19" r="3" fill="#157e80"><title>CSV line 17: host 7.969s, device 2662302ms, rms 93.1, Quiet</title></circle>
+<circle cx="232.92" cy="563.19" r="3" fill="#157e80"><title>CSV line 18: host 8.469s, device 2662802ms, rms 209.3, Normal</title></circle>
+<circle cx="241.07" cy="572.28" r="3" fill="#157e80"><title>CSV line 19: host 8.969s, device 2663302ms, rms 33.3, Quiet</title></circle>
+<circle cx="249.21" cy="573.55" r="3" fill="#157e80"><title>CSV line 20: host 9.469s, device 2663802ms, rms 8.7, Quiet</title></circle>
+<circle cx="257.35" cy="573.61" r="3" fill="#157e80"><title>CSV line 21: host 9.969s, device 2664302ms, rms 7.6, Quiet</title></circle>
+<circle cx="265.50" cy="573.51" r="3" fill="#157e80"><title>CSV line 22: host 10.469s, device 2664802ms, rms 9.4, Quiet</title></circle>
+<circle cx="273.64" cy="566.41" r="3" fill="#157e80"><title>CSV line 23: host 10.969s, device 2665302ms, rms 146.9, Normal</title></circle>
+<circle cx="281.78" cy="569.64" r="3" fill="#157e80"><title>CSV line 24: host 11.469s, device 2665802ms, rms 84.4, Quiet</title></circle>
+<circle cx="289.92" cy="569.87" r="3" fill="#157e80"><title>CSV line 25: host 11.969s, device 2666302ms, rms 79.9, Normal</title></circle>
+<circle cx="298.07" cy="572.40" r="3" fill="#157e80"><title>CSV line 26: host 12.469s, device 2666802ms, rms 31.0, Quiet</title></circle>
+<circle cx="306.21" cy="572.31" r="3" fill="#157e80"><title>CSV line 27: host 12.969s, device 2667302ms, rms 32.7, Quiet</title></circle>
+<circle cx="314.35" cy="570.27" r="3" fill="#157e80"><title>CSV line 28: host 13.469s, device 2667802ms, rms 72.2, Quiet</title></circle>
+<circle cx="322.50" cy="573.37" r="3" fill="#157e80"><title>CSV line 29: host 13.969s, device 2668302ms, rms 12.1, Quiet</title></circle>
+<circle cx="330.64" cy="573.50" r="3" fill="#157e80"><title>CSV line 30: host 14.469s, device 2668802ms, rms 9.7, Quiet</title></circle>
+<circle cx="338.78" cy="572.22" r="3" fill="#157e80"><title>CSV line 31: host 14.969s, device 2669302ms, rms 34.4, Quiet</title></circle>
+<circle cx="346.92" cy="570.49" r="3" fill="#157e80"><title>CSV line 32: host 15.469s, device 2669802ms, rms 68.0, Quiet</title></circle>
+<circle cx="355.07" cy="572.00" r="3" fill="#157e80"><title>CSV line 33: host 15.969s, device 2670302ms, rms 38.7, Quiet</title></circle>
+<circle cx="363.21" cy="562.77" r="3" fill="#157e80"><title>CSV line 34: host 16.469s, device 2670802ms, rms 217.4, Normal</title></circle>
+<polyline points="102.39,573.33 110.78,570.21 118.92,568.71 127.07,572.45 135.21,570.18 143.35,568.72 151.50,569.70 159.64,569.84 167.54,568.67 175.68,569.98 184.07,571.95 191.97,572.69 200.11,568.80 208.50,567.81 216.64,571.10 224.78,569.19 232.92,563.19 241.07,572.28 249.21,573.55 257.35,573.61 265.50,573.51 273.64,566.41 281.78,569.64 289.92,569.87 298.07,572.40 306.21,572.31 314.35,570.27 322.50,573.37 330.64,573.50 338.78,572.22 346.92,570.49 355.07,572.00 363.21,562.77" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="379.50" cy="573.62" r="3" fill="#157e80"><title>CSV line 35: host 17.469s, device 2671802ms, rms 7.4, Quiet</title></circle>
+<circle cx="387.64" cy="573.54" r="3" fill="#157e80"><title>CSV line 36: host 17.969s, device 2672302ms, rms 8.9, Quiet</title></circle>
+<circle cx="395.78" cy="573.21" r="3" fill="#157e80"><title>CSV line 37: host 18.469s, device 2672802ms, rms 15.2, Quiet</title></circle>
+<circle cx="403.92" cy="572.90" r="3" fill="#157e80"><title>CSV line 38: host 18.969s, device 2673302ms, rms 21.2, Quiet</title></circle>
+<circle cx="412.07" cy="573.20" r="3" fill="#157e80"><title>CSV line 39: host 19.469s, device 2673802ms, rms 15.5, Quiet</title></circle>
+<circle cx="420.21" cy="569.71" r="3" fill="#157e80"><title>CSV line 40: host 19.969s, device 2674302ms, rms 83.0, Normal</title></circle>
+<circle cx="428.35" cy="567.37" r="3" fill="#157e80"><title>CSV line 41: host 20.469s, device 2674802ms, rms 128.4, Normal</title></circle>
+<circle cx="436.50" cy="568.78" r="3" fill="#157e80"><title>CSV line 42: host 20.969s, device 2675302ms, rms 101.1, Quiet</title></circle>
+<circle cx="444.64" cy="573.52" r="3" fill="#157e80"><title>CSV line 43: host 21.469s, device 2675802ms, rms 9.2, Quiet</title></circle>
+<circle cx="452.78" cy="573.04" r="3" fill="#157e80"><title>CSV line 44: host 21.969s, device 2676302ms, rms 18.6, Quiet</title></circle>
+<circle cx="460.92" cy="570.95" r="3" fill="#157e80"><title>CSV line 45: host 22.469s, device 2676802ms, rms 59.0, Quiet</title></circle>
+<circle cx="469.07" cy="569.71" r="3" fill="#157e80"><title>CSV line 46: host 22.969s, device 2677302ms, rms 83.0, Quiet</title></circle>
+<circle cx="477.21" cy="570.19" r="3" fill="#157e80"><title>CSV line 47: host 23.469s, device 2677802ms, rms 73.7, Quiet</title></circle>
+<circle cx="485.35" cy="571.65" r="3" fill="#157e80"><title>CSV line 48: host 23.969s, device 2678302ms, rms 45.5, Quiet</title></circle>
+<circle cx="493.50" cy="573.46" r="3" fill="#157e80"><title>CSV line 49: host 24.469s, device 2678802ms, rms 10.4, Quiet</title></circle>
+<circle cx="501.64" cy="573.41" r="3" fill="#157e80"><title>CSV line 50: host 24.969s, device 2679302ms, rms 11.4, Quiet</title></circle>
+<circle cx="509.78" cy="573.67" r="3" fill="#157e80"><title>CSV line 51: host 25.469s, device 2679802ms, rms 6.4, Quiet</title></circle>
+<circle cx="517.92" cy="573.39" r="3" fill="#157e80"><title>CSV line 52: host 25.969s, device 2680302ms, rms 11.8, Quiet</title></circle>
+<polyline points="379.50,573.62 387.64,573.54 395.78,573.21 403.92,572.90 412.07,573.20 420.21,569.71 428.35,567.37 436.50,568.78 444.64,573.52 452.78,573.04 460.92,570.95 469.07,569.71 477.21,570.19 485.35,571.65 493.50,573.46 501.64,573.41 509.78,573.67 517.92,573.39" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="534.21" cy="573.54" r="3" fill="#157e80"><title>CSV line 53: host 26.969s, device 2681302ms, rms 8.9, Quiet</title></circle>
+<circle cx="542.35" cy="570.92" r="3" fill="#157e80"><title>CSV line 54: host 27.469s, device 2681802ms, rms 59.7, Quiet</title></circle>
+<circle cx="550.50" cy="573.21" r="3" fill="#157e80"><title>CSV line 55: host 27.969s, device 2682302ms, rms 15.2, Quiet</title></circle>
+<circle cx="558.64" cy="573.53" r="3" fill="#157e80"><title>CSV line 56: host 28.469s, device 2682802ms, rms 9.1, Quiet</title></circle>
+<circle cx="566.78" cy="573.05" r="3" fill="#157e80"><title>CSV line 57: host 28.969s, device 2683302ms, rms 18.3, Quiet</title></circle>
+<circle cx="574.92" cy="572.31" r="3" fill="#157e80"><title>CSV line 58: host 29.469s, device 2683802ms, rms 32.7, Quiet</title></circle>
+<circle cx="583.07" cy="570.79" r="3" fill="#157e80"><title>CSV line 59: host 29.969s, device 2684302ms, rms 62.1, Quiet</title></circle>
+<polyline points="534.21,573.54 542.35,570.92 550.50,573.21 558.64,573.53 566.78,573.05 574.92,572.31 583.07,570.79" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<text x="765.00" y="409.00" class="small" text-anchor="start">PEAK   median 285   max 955</text>
+<rect x="765.00" y="419.00" width="570.00" height="155.00" fill="#ffffff"/>
+<rect x="1033.21" y="419.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="1187.92" y="419.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="765.00" y="419.00" width="7.39" height="155.00" fill="#edf0ee"/>
+<rect x="1253.07" y="419.00" width="2.54" height="155.00" fill="#edf0ee"/>
+<path d="M765.00,574.00 L1335.00,574.00" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="578.00" class="small" text-anchor="end">0</text>
+<path d="M765.00,535.25 L1335.00,535.25" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="539.25" class="small" text-anchor="end">12500</text>
+<path d="M765.00,496.50 L1335.00,496.50" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="500.50" class="small" text-anchor="end">25000</text>
+<path d="M765.00,457.75 L1335.00,457.75" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="461.75" class="small" text-anchor="end">37500</text>
+<path d="M765.00,419.00 L1335.00,419.00" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="423.00" class="small" text-anchor="end">50000</text>
+<path d="M765.00,419.00 L765.00,574.00" stroke="#dce3df" fill="none"/>
+<text x="765.00" y="594.00" class="small" text-anchor="middle">0</text>
+<path d="M846.43,419.00 L846.43,574.00" stroke="#dce3df" fill="none"/>
+<text x="846.43" y="594.00" class="small" text-anchor="middle">5</text>
+<path d="M927.86,419.00 L927.86,574.00" stroke="#dce3df" fill="none"/>
+<text x="927.86" y="594.00" class="small" text-anchor="middle">10</text>
+<path d="M1009.29,419.00 L1009.29,574.00" stroke="#dce3df" fill="none"/>
+<text x="1009.29" y="594.00" class="small" text-anchor="middle">15</text>
+<path d="M1090.71,419.00 L1090.71,574.00" stroke="#dce3df" fill="none"/>
+<text x="1090.71" y="594.00" class="small" text-anchor="middle">20</text>
+<path d="M1172.14,419.00 L1172.14,574.00" stroke="#dce3df" fill="none"/>
+<text x="1172.14" y="594.00" class="small" text-anchor="middle">25</text>
+<path d="M1253.57,419.00 L1253.57,574.00" stroke="#dce3df" fill="none"/>
+<text x="1253.57" y="594.00" class="small" text-anchor="middle">30</text>
+<path d="M1335.00,419.00 L1335.00,574.00" stroke="#dce3df" fill="none"/>
+<text x="1335.00" y="594.00" class="small" text-anchor="middle">35</text>
+<circle cx="772.39" cy="573.71" r="3" fill="#ba4539"><title>CSV line 2: host 0.454s, device 2654792ms, peak 93, Quiet</title></circle>
+<circle cx="780.78" cy="572.58" r="3" fill="#ba4539"><title>CSV line 3: host 0.969s, device 2655292ms, peak 457, Quiet</title></circle>
+<circle cx="788.92" cy="572.41" r="3" fill="#ba4539"><title>CSV line 4: host 1.469s, device 2655792ms, peak 513, Quiet</title></circle>
+<circle cx="797.07" cy="573.03" r="3" fill="#ba4539"><title>CSV line 5: host 1.969s, device 2656292ms, peak 313, Quiet</title></circle>
+<circle cx="805.21" cy="572.51" r="3" fill="#ba4539"><title>CSV line 6: host 2.469s, device 2656792ms, peak 482, Quiet</title></circle>
+<circle cx="813.35" cy="572.61" r="3" fill="#ba4539"><title>CSV line 7: host 2.969s, device 2657292ms, peak 449, Quiet</title></circle>
+<circle cx="821.50" cy="572.86" r="3" fill="#ba4539"><title>CSV line 8: host 3.469s, device 2657792ms, peak 368, Quiet</title></circle>
+<circle cx="829.64" cy="572.72" r="3" fill="#ba4539"><title>CSV line 9: host 3.969s, device 2658292ms, peak 414, Quiet</title></circle>
+<circle cx="837.54" cy="573.00" r="3" fill="#ba4539"><title>CSV line 10: host 4.454s, device 2658792ms, peak 323, Quiet</title></circle>
+<circle cx="845.68" cy="572.77" r="3" fill="#ba4539"><title>CSV line 11: host 4.954s, device 2659292ms, peak 397, Quiet</title></circle>
+<circle cx="854.07" cy="573.08" r="3" fill="#ba4539"><title>CSV line 12: host 5.469s, device 2659792ms, peak 297, Quiet</title></circle>
+<circle cx="861.97" cy="573.38" r="3" fill="#ba4539"><title>CSV line 13: host 5.954s, device 2660292ms, peak 200, Quiet</title></circle>
+<circle cx="870.11" cy="572.89" r="3" fill="#ba4539"><title>CSV line 14: host 6.454s, device 2660792ms, peak 358, Quiet</title></circle>
+<circle cx="878.50" cy="571.67" r="3" fill="#ba4539"><title>CSV line 15: host 6.969s, device 2661302ms, peak 753, Normal</title></circle>
+<circle cx="886.64" cy="573.16" r="3" fill="#ba4539"><title>CSV line 16: host 7.469s, device 2661802ms, peak 271, Quiet</title></circle>
+<circle cx="894.78" cy="572.20" r="3" fill="#ba4539"><title>CSV line 17: host 7.969s, device 2662302ms, peak 582, Quiet</title></circle>
+<circle cx="902.92" cy="571.77" r="3" fill="#ba4539"><title>CSV line 18: host 8.469s, device 2662802ms, peak 719, Normal</title></circle>
+<circle cx="911.07" cy="573.09" r="3" fill="#ba4539"><title>CSV line 19: host 8.969s, device 2663302ms, peak 292, Quiet</title></circle>
+<circle cx="919.21" cy="573.87" r="3" fill="#ba4539"><title>CSV line 20: host 9.469s, device 2663802ms, peak 41, Quiet</title></circle>
+<circle cx="927.35" cy="573.91" r="3" fill="#ba4539"><title>CSV line 21: host 9.969s, device 2664302ms, peak 30, Quiet</title></circle>
+<circle cx="935.50" cy="573.45" r="3" fill="#ba4539"><title>CSV line 22: host 10.469s, device 2664802ms, peak 177, Quiet</title></circle>
+<circle cx="943.64" cy="571.62" r="3" fill="#ba4539"><title>CSV line 23: host 10.969s, device 2665302ms, peak 767, Normal</title></circle>
+<circle cx="951.78" cy="573.01" r="3" fill="#ba4539"><title>CSV line 24: host 11.469s, device 2665802ms, peak 318, Quiet</title></circle>
+<circle cx="959.92" cy="573.19" r="3" fill="#ba4539"><title>CSV line 25: host 11.969s, device 2666302ms, peak 260, Normal</title></circle>
+<circle cx="968.07" cy="573.55" r="3" fill="#ba4539"><title>CSV line 26: host 12.469s, device 2666802ms, peak 145, Quiet</title></circle>
+<circle cx="976.21" cy="573.07" r="3" fill="#ba4539"><title>CSV line 27: host 12.969s, device 2667302ms, peak 301, Quiet</title></circle>
+<circle cx="984.35" cy="572.71" r="3" fill="#ba4539"><title>CSV line 28: host 13.469s, device 2667802ms, peak 415, Quiet</title></circle>
+<circle cx="992.50" cy="573.68" r="3" fill="#ba4539"><title>CSV line 29: host 13.969s, device 2668302ms, peak 102, Quiet</title></circle>
+<circle cx="1000.64" cy="573.86" r="3" fill="#ba4539"><title>CSV line 30: host 14.469s, device 2668802ms, peak 45, Quiet</title></circle>
+<circle cx="1008.78" cy="573.20" r="3" fill="#ba4539"><title>CSV line 31: host 14.969s, device 2669302ms, peak 259, Quiet</title></circle>
+<circle cx="1016.92" cy="573.00" r="3" fill="#ba4539"><title>CSV line 32: host 15.469s, device 2669802ms, peak 324, Quiet</title></circle>
+<circle cx="1025.07" cy="573.14" r="3" fill="#ba4539"><title>CSV line 33: host 15.969s, device 2670302ms, peak 278, Quiet</title></circle>
+<circle cx="1033.21" cy="571.04" r="3" fill="#ba4539"><title>CSV line 34: host 16.469s, device 2670802ms, peak 955, Normal</title></circle>
+<polyline points="772.39,573.71 780.78,572.58 788.92,572.41 797.07,573.03 805.21,572.51 813.35,572.61 821.50,572.86 829.64,572.72 837.54,573.00 845.68,572.77 854.07,573.08 861.97,573.38 870.11,572.89 878.50,571.67 886.64,573.16 894.78,572.20 902.92,571.77 911.07,573.09 919.21,573.87 927.35,573.91 935.50,573.45 943.64,571.62 951.78,573.01 959.92,573.19 968.07,573.55 976.21,573.07 984.35,572.71 992.50,573.68 1000.64,573.86 1008.78,573.20 1016.92,573.00 1025.07,573.14 1033.21,571.04" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1049.50" cy="573.92" r="3" fill="#ba4539"><title>CSV line 35: host 17.469s, device 2671802ms, peak 26, Quiet</title></circle>
+<circle cx="1057.64" cy="573.86" r="3" fill="#ba4539"><title>CSV line 36: host 17.969s, device 2672302ms, peak 45, Quiet</title></circle>
+<circle cx="1065.78" cy="573.40" r="3" fill="#ba4539"><title>CSV line 37: host 18.469s, device 2672802ms, peak 194, Quiet</title></circle>
+<circle cx="1073.92" cy="573.75" r="3" fill="#ba4539"><title>CSV line 38: host 18.969s, device 2673302ms, peak 81, Quiet</title></circle>
+<circle cx="1082.07" cy="573.82" r="3" fill="#ba4539"><title>CSV line 39: host 19.469s, device 2673802ms, peak 57, Quiet</title></circle>
+<circle cx="1090.21" cy="572.23" r="3" fill="#ba4539"><title>CSV line 40: host 19.969s, device 2674302ms, peak 572, Normal</title></circle>
+<circle cx="1098.35" cy="572.30" r="3" fill="#ba4539"><title>CSV line 41: host 20.469s, device 2674802ms, peak 549, Normal</title></circle>
+<circle cx="1106.50" cy="572.28" r="3" fill="#ba4539"><title>CSV line 42: host 20.969s, device 2675302ms, peak 555, Quiet</title></circle>
+<circle cx="1114.64" cy="573.84" r="3" fill="#ba4539"><title>CSV line 43: host 21.469s, device 2675802ms, peak 52, Quiet</title></circle>
+<circle cx="1122.78" cy="573.64" r="3" fill="#ba4539"><title>CSV line 44: host 21.969s, device 2676302ms, peak 115, Quiet</title></circle>
+<circle cx="1130.92" cy="572.91" r="3" fill="#ba4539"><title>CSV line 45: host 22.469s, device 2676802ms, peak 352, Quiet</title></circle>
+<circle cx="1139.07" cy="572.27" r="3" fill="#ba4539"><title>CSV line 46: host 22.969s, device 2677302ms, peak 559, Quiet</title></circle>
+<circle cx="1147.21" cy="572.49" r="3" fill="#ba4539"><title>CSV line 47: host 23.469s, device 2677802ms, peak 488, Quiet</title></circle>
+<circle cx="1155.35" cy="573.27" r="3" fill="#ba4539"><title>CSV line 48: host 23.969s, device 2678302ms, peak 235, Quiet</title></circle>
+<circle cx="1163.50" cy="573.84" r="3" fill="#ba4539"><title>CSV line 49: host 24.469s, device 2678802ms, peak 53, Quiet</title></circle>
+<circle cx="1171.64" cy="573.79" r="3" fill="#ba4539"><title>CSV line 50: host 24.969s, device 2679302ms, peak 68, Quiet</title></circle>
+<circle cx="1179.78" cy="573.87" r="3" fill="#ba4539"><title>CSV line 51: host 25.469s, device 2679802ms, peak 42, Quiet</title></circle>
+<circle cx="1187.92" cy="573.74" r="3" fill="#ba4539"><title>CSV line 52: host 25.969s, device 2680302ms, peak 85, Quiet</title></circle>
+<polyline points="1049.50,573.92 1057.64,573.86 1065.78,573.40 1073.92,573.75 1082.07,573.82 1090.21,572.23 1098.35,572.30 1106.50,572.28 1114.64,573.84 1122.78,573.64 1130.92,572.91 1139.07,572.27 1147.21,572.49 1155.35,573.27 1163.50,573.84 1171.64,573.79 1179.78,573.87 1187.92,573.74" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1204.21" cy="573.84" r="3" fill="#ba4539"><title>CSV line 53: host 26.969s, device 2681302ms, peak 51, Quiet</title></circle>
+<circle cx="1212.35" cy="572.42" r="3" fill="#ba4539"><title>CSV line 54: host 27.469s, device 2681802ms, peak 509, Quiet</title></circle>
+<circle cx="1220.50" cy="573.75" r="3" fill="#ba4539"><title>CSV line 55: host 27.969s, device 2682302ms, peak 82, Quiet</title></circle>
+<circle cx="1228.64" cy="573.85" r="3" fill="#ba4539"><title>CSV line 56: host 28.469s, device 2682802ms, peak 47, Quiet</title></circle>
+<circle cx="1236.78" cy="573.72" r="3" fill="#ba4539"><title>CSV line 57: host 28.969s, device 2683302ms, peak 91, Quiet</title></circle>
+<circle cx="1244.92" cy="573.31" r="3" fill="#ba4539"><title>CSV line 58: host 29.469s, device 2683802ms, peak 221, Quiet</title></circle>
+<circle cx="1253.07" cy="572.32" r="3" fill="#ba4539"><title>CSV line 59: host 29.969s, device 2684302ms, peak 541, Quiet</title></circle>
+<polyline points="1204.21,573.84 1212.35,572.42 1220.50,573.75 1228.64,573.85 1236.78,573.72 1244.92,573.31 1253.07,572.32" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<text x="95.00" y="632.00" class="heading" text-anchor="start">CLAP  /  44 rows  /  I2C errors 224  /  FAILED</text>
+<text x="95.00" y="654.00" class="small" text-anchor="start">RMS   median 12.6   max 2386.7</text>
+<rect x="95.00" y="664.00" width="570.00" height="155.00" fill="#ffffff"/>
+<rect x="144.88" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="177.45" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="210.03" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="226.31" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="291.45" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="364.74" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="381.03" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="397.31" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="438.03" y="664.00" width="24.43" height="155.00" fill="#f9e5d9"/>
+<rect x="486.88" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="519.45" y="664.00" width="32.57" height="155.00" fill="#f9e5d9"/>
+<rect x="95.00" y="664.00" width="1.03" height="155.00" fill="#edf0ee"/>
+<rect x="560.17" y="664.00" width="24.67" height="155.00" fill="#edf0ee"/>
+<path d="M95.00,819.00 L665.00,819.00" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="823.00" class="small" text-anchor="end">0</text>
+<path d="M95.00,780.25 L665.00,780.25" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="784.25" class="small" text-anchor="end">750</text>
+<path d="M95.00,741.50 L665.00,741.50" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="745.50" class="small" text-anchor="end">1500</text>
+<path d="M95.00,702.75 L665.00,702.75" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="706.75" class="small" text-anchor="end">2250</text>
+<path d="M95.00,664.00 L665.00,664.00" stroke="#dce3df" fill="none"/>
+<text x="86.00" y="668.00" class="small" text-anchor="end">3000</text>
+<path d="M95.00,664.00 L95.00,819.00" stroke="#dce3df" fill="none"/>
+<text x="95.00" y="839.00" class="small" text-anchor="middle">0</text>
+<path d="M176.43,664.00 L176.43,819.00" stroke="#dce3df" fill="none"/>
+<text x="176.43" y="839.00" class="small" text-anchor="middle">5</text>
+<path d="M257.86,664.00 L257.86,819.00" stroke="#dce3df" fill="none"/>
+<text x="257.86" y="839.00" class="small" text-anchor="middle">10</text>
+<path d="M339.29,664.00 L339.29,819.00" stroke="#dce3df" fill="none"/>
+<text x="339.29" y="839.00" class="small" text-anchor="middle">15</text>
+<path d="M420.71,664.00 L420.71,819.00" stroke="#dce3df" fill="none"/>
+<text x="420.71" y="839.00" class="small" text-anchor="middle">20</text>
+<path d="M502.14,664.00 L502.14,819.00" stroke="#dce3df" fill="none"/>
+<text x="502.14" y="839.00" class="small" text-anchor="middle">25</text>
+<path d="M583.57,664.00 L583.57,819.00" stroke="#dce3df" fill="none"/>
+<text x="583.57" y="839.00" class="small" text-anchor="middle">30</text>
+<path d="M665.00,664.00 L665.00,819.00" stroke="#dce3df" fill="none"/>
+<text x="665.00" y="839.00" class="small" text-anchor="middle">35</text>
+<circle cx="96.03" cy="816.17" r="3" fill="#157e80"><title>CSV line 2: host 0.063s, device 2823402ms, rms 54.8, Loud</title></circle>
+<circle cx="104.17" cy="810.46" r="3" fill="#157e80"><title>CSV line 3: host 0.563s, device 2823902ms, rms 165.2, Quiet</title></circle>
+<circle cx="112.31" cy="815.50" r="3" fill="#157e80"><title>CSV line 4: host 1.063s, device 2824402ms, rms 67.7, Quiet</title></circle>
+<circle cx="120.45" cy="818.15" r="3" fill="#157e80"><title>CSV line 5: host 1.563s, device 2824902ms, rms 16.4, Quiet</title></circle>
+<circle cx="128.60" cy="818.36" r="3" fill="#157e80"><title>CSV line 6: host 2.063s, device 2825412ms, rms 12.3, Quiet</title></circle>
+<circle cx="136.74" cy="818.39" r="3" fill="#157e80"><title>CSV line 7: host 2.563s, device 2825912ms, rms 11.9, Quiet</title></circle>
+<circle cx="144.88" cy="818.03" r="3" fill="#157e80"><title>CSV line 8: host 3.063s, device 2826412ms, rms 18.8, Quiet</title></circle>
+<polyline points="96.03,816.17 104.17,810.46 112.31,815.50 120.45,818.15 128.60,818.36 136.74,818.39 144.88,818.03" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="161.17" cy="817.89" r="3" fill="#157e80"><title>CSV line 9: host 4.063s, device 2827412ms, rms 21.4, Quiet</title></circle>
+<circle cx="169.31" cy="818.04" r="3" fill="#157e80"><title>CSV line 10: host 4.563s, device 2827912ms, rms 18.5, Quiet</title></circle>
+<circle cx="177.45" cy="695.69" r="3" fill="#157e80"><title>CSV line 11: host 5.063s, device 2828412ms, rms 2386.7, Loud</title></circle>
+<polyline points="161.17,817.89 169.31,818.04 177.45,695.69" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="193.74" cy="818.12" r="3" fill="#157e80"><title>CSV line 12: host 6.063s, device 2829412ms, rms 17.1, Quiet</title></circle>
+<circle cx="201.88" cy="818.33" r="3" fill="#157e80"><title>CSV line 13: host 6.563s, device 2829912ms, rms 12.9, Quiet</title></circle>
+<circle cx="210.03" cy="818.10" r="3" fill="#157e80"><title>CSV line 14: host 7.063s, device 2830412ms, rms 17.5, Quiet</title></circle>
+<polyline points="193.74,818.12 201.88,818.33 210.03,818.10" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="226.31" cy="818.14" r="3" fill="#157e80"><title>CSV line 15: host 8.063s, device 2831412ms, rms 16.6, Quiet</title></circle>
+<polyline points="226.31,818.14" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="242.60" cy="817.68" r="3" fill="#157e80"><title>CSV line 16: host 9.063s, device 2832412ms, rms 25.5, Quiet</title></circle>
+<circle cx="250.48" cy="818.05" r="3" fill="#157e80"><title>CSV line 17: host 9.547s, device 2832912ms, rms 18.4, Quiet</title></circle>
+<circle cx="258.88" cy="717.66" r="3" fill="#157e80"><title>CSV line 18: host 10.063s, device 2833412ms, rms 1961.5, Loud</title></circle>
+<circle cx="266.77" cy="815.63" r="3" fill="#157e80"><title>CSV line 19: host 10.547s, device 2833912ms, rms 65.2, Quiet</title></circle>
+<circle cx="275.17" cy="818.44" r="3" fill="#157e80"><title>CSV line 20: host 11.063s, device 2834412ms, rms 10.9, Quiet</title></circle>
+<circle cx="283.05" cy="818.00" r="3" fill="#157e80"><title>CSV line 21: host 11.547s, device 2834912ms, rms 19.3, Quiet</title></circle>
+<circle cx="291.45" cy="815.81" r="3" fill="#157e80"><title>CSV line 22: host 12.063s, device 2835412ms, rms 61.7, Quiet</title></circle>
+<polyline points="242.60,817.68 250.48,818.05 258.88,717.66 266.77,815.63 275.17,818.44 283.05,818.00 291.45,815.81" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="307.74" cy="818.46" r="3" fill="#157e80"><title>CSV line 23: host 13.063s, device 2836412ms, rms 10.4, Quiet</title></circle>
+<circle cx="315.88" cy="818.55" r="3" fill="#157e80"><title>CSV line 24: host 13.563s, device 2836912ms, rms 8.8, Quiet</title></circle>
+<circle cx="324.03" cy="818.57" r="3" fill="#157e80"><title>CSV line 25: host 14.063s, device 2837412ms, rms 8.3, Quiet</title></circle>
+<circle cx="332.17" cy="818.61" r="3" fill="#157e80"><title>CSV line 26: host 14.563s, device 2837912ms, rms 7.6, Quiet</title></circle>
+<circle cx="340.31" cy="818.60" r="3" fill="#157e80"><title>CSV line 27: host 15.063s, device 2838412ms, rms 7.7, Quiet</title></circle>
+<circle cx="348.45" cy="818.58" r="3" fill="#157e80"><title>CSV line 28: host 15.563s, device 2838912ms, rms 8.1, Quiet</title></circle>
+<circle cx="356.60" cy="818.62" r="3" fill="#157e80"><title>CSV line 29: host 16.063s, device 2839412ms, rms 7.3, Quiet</title></circle>
+<circle cx="364.74" cy="772.10" r="3" fill="#157e80"><title>CSV line 30: host 16.563s, device 2839912ms, rms 907.8, Loud</title></circle>
+<polyline points="307.74,818.46 315.88,818.55 324.03,818.57 332.17,818.61 340.31,818.60 348.45,818.58 356.60,818.62 364.74,772.10" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="381.03" cy="818.49" r="3" fill="#157e80"><title>CSV line 31: host 17.563s, device 2840912ms, rms 9.8, Quiet</title></circle>
+<polyline points="381.03,818.49" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="397.31" cy="818.55" r="3" fill="#157e80"><title>CSV line 32: host 18.563s, device 2841912ms, rms 8.8, Quiet</title></circle>
+<polyline points="397.31,818.55" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="413.60" cy="818.62" r="3" fill="#157e80"><title>CSV line 33: host 19.563s, device 2842912ms, rms 7.4, Quiet</title></circle>
+<circle cx="421.74" cy="818.55" r="3" fill="#157e80"><title>CSV line 34: host 20.063s, device 2843412ms, rms 8.7, Quiet</title></circle>
+<circle cx="429.88" cy="818.60" r="3" fill="#157e80"><title>CSV line 35: host 20.563s, device 2843912ms, rms 7.7, Quiet</title></circle>
+<circle cx="438.03" cy="818.62" r="3" fill="#157e80"><title>CSV line 36: host 21.063s, device 2844412ms, rms 7.4, Quiet</title></circle>
+<polyline points="413.60,818.62 421.74,818.55 429.88,818.60 438.03,818.62" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="462.45" cy="734.39" r="3" fill="#157e80"><title>CSV line 37: host 22.563s, device 2845912ms, rms 1637.7, Loud</title></circle>
+<circle cx="470.60" cy="817.33" r="3" fill="#157e80"><title>CSV line 38: host 23.063s, device 2846412ms, rms 32.3, Loud</title></circle>
+<circle cx="478.74" cy="817.64" r="3" fill="#157e80"><title>CSV line 39: host 23.563s, device 2846912ms, rms 26.3, Quiet</title></circle>
+<circle cx="486.88" cy="818.58" r="3" fill="#157e80"><title>CSV line 40: host 24.063s, device 2847412ms, rms 8.1, Quiet</title></circle>
+<polyline points="462.45,734.39 470.60,817.33 478.74,817.64 486.88,818.58" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="503.17" cy="818.59" r="3" fill="#157e80"><title>CSV line 41: host 25.063s, device 2848412ms, rms 8.0, Quiet</title></circle>
+<circle cx="511.31" cy="818.59" r="3" fill="#157e80"><title>CSV line 42: host 25.563s, device 2848912ms, rms 7.9, Quiet</title></circle>
+<circle cx="519.45" cy="818.59" r="3" fill="#157e80"><title>CSV line 43: host 26.063s, device 2849412ms, rms 7.9, Quiet</title></circle>
+<polyline points="503.17,818.59 511.31,818.59 519.45,818.59" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<circle cx="552.03" cy="818.63" r="3" fill="#157e80"><title>CSV line 44: host 28.063s, device 2851412ms, rms 7.2, Quiet</title></circle>
+<circle cx="560.17" cy="818.62" r="3" fill="#157e80"><title>CSV line 45: host 28.563s, device 2851912ms, rms 7.3, Quiet</title></circle>
+<polyline points="552.03,818.63 560.17,818.62" stroke="#157e80" stroke-width="1.6" fill="none"/>
+<text x="765.00" y="654.00" class="small" text-anchor="start">PEAK   median 63.5   max 42646</text>
+<rect x="765.00" y="664.00" width="570.00" height="155.00" fill="#ffffff"/>
+<rect x="814.88" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="847.45" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="880.03" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="896.31" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="961.45" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="1034.74" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="1051.03" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="1067.31" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="1108.03" y="664.00" width="24.43" height="155.00" fill="#f9e5d9"/>
+<rect x="1156.88" y="664.00" width="16.29" height="155.00" fill="#f9e5d9"/>
+<rect x="1189.45" y="664.00" width="32.57" height="155.00" fill="#f9e5d9"/>
+<rect x="765.00" y="664.00" width="1.03" height="155.00" fill="#edf0ee"/>
+<rect x="1230.17" y="664.00" width="24.67" height="155.00" fill="#edf0ee"/>
+<path d="M765.00,819.00 L1335.00,819.00" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="823.00" class="small" text-anchor="end">0</text>
+<path d="M765.00,780.25 L1335.00,780.25" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="784.25" class="small" text-anchor="end">12500</text>
+<path d="M765.00,741.50 L1335.00,741.50" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="745.50" class="small" text-anchor="end">25000</text>
+<path d="M765.00,702.75 L1335.00,702.75" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="706.75" class="small" text-anchor="end">37500</text>
+<path d="M765.00,664.00 L1335.00,664.00" stroke="#dce3df" fill="none"/>
+<text x="756.00" y="668.00" class="small" text-anchor="end">50000</text>
+<path d="M765.00,664.00 L765.00,819.00" stroke="#dce3df" fill="none"/>
+<text x="765.00" y="839.00" class="small" text-anchor="middle">0</text>
+<path d="M846.43,664.00 L846.43,819.00" stroke="#dce3df" fill="none"/>
+<text x="846.43" y="839.00" class="small" text-anchor="middle">5</text>
+<path d="M927.86,664.00 L927.86,819.00" stroke="#dce3df" fill="none"/>
+<text x="927.86" y="839.00" class="small" text-anchor="middle">10</text>
+<path d="M1009.29,664.00 L1009.29,819.00" stroke="#dce3df" fill="none"/>
+<text x="1009.29" y="839.00" class="small" text-anchor="middle">15</text>
+<path d="M1090.71,664.00 L1090.71,819.00" stroke="#dce3df" fill="none"/>
+<text x="1090.71" y="839.00" class="small" text-anchor="middle">20</text>
+<path d="M1172.14,664.00 L1172.14,819.00" stroke="#dce3df" fill="none"/>
+<text x="1172.14" y="839.00" class="small" text-anchor="middle">25</text>
+<path d="M1253.57,664.00 L1253.57,819.00" stroke="#dce3df" fill="none"/>
+<text x="1253.57" y="839.00" class="small" text-anchor="middle">30</text>
+<path d="M1335.00,664.00 L1335.00,819.00" stroke="#dce3df" fill="none"/>
+<text x="1335.00" y="839.00" class="small" text-anchor="middle">35</text>
+<circle cx="766.03" cy="816.86" r="3" fill="#ba4539"><title>CSV line 2: host 0.063s, device 2823402ms, peak 691, Loud</title></circle>
+<circle cx="774.17" cy="811.59" r="3" fill="#ba4539"><title>CSV line 3: host 0.563s, device 2823902ms, peak 2391, Quiet</title></circle>
+<circle cx="782.31" cy="816.30" r="3" fill="#ba4539"><title>CSV line 4: host 1.063s, device 2824402ms, peak 870, Quiet</title></circle>
+<circle cx="790.45" cy="818.59" r="3" fill="#ba4539"><title>CSV line 5: host 1.563s, device 2824902ms, peak 131, Quiet</title></circle>
+<circle cx="798.60" cy="818.84" r="3" fill="#ba4539"><title>CSV line 6: host 2.063s, device 2825412ms, peak 52, Quiet</title></circle>
+<circle cx="806.74" cy="818.87" r="3" fill="#ba4539"><title>CSV line 7: host 2.563s, device 2825912ms, peak 41, Quiet</title></circle>
+<circle cx="814.88" cy="818.78" r="3" fill="#ba4539"><title>CSV line 8: host 3.063s, device 2826412ms, peak 72, Quiet</title></circle>
+<polyline points="766.03,816.86 774.17,811.59 782.31,816.30 790.45,818.59 798.60,818.84 806.74,818.87 814.88,818.78" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="831.17" cy="818.74" r="3" fill="#ba4539"><title>CSV line 9: host 4.063s, device 2827412ms, peak 83, Quiet</title></circle>
+<circle cx="839.31" cy="818.74" r="3" fill="#ba4539"><title>CSV line 10: host 4.563s, device 2827912ms, peak 85, Quiet</title></circle>
+<circle cx="847.45" cy="747.26" r="3" fill="#ba4539"><title>CSV line 11: host 5.063s, device 2828412ms, peak 23143, Loud</title></circle>
+<polyline points="831.17,818.74 839.31,818.74 847.45,747.26" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="863.74" cy="818.69" r="3" fill="#ba4539"><title>CSV line 12: host 6.063s, device 2829412ms, peak 99, Quiet</title></circle>
+<circle cx="871.88" cy="818.83" r="3" fill="#ba4539"><title>CSV line 13: host 6.563s, device 2829912ms, peak 54, Quiet</title></circle>
+<circle cx="880.03" cy="818.71" r="3" fill="#ba4539"><title>CSV line 14: host 7.063s, device 2830412ms, peak 93, Quiet</title></circle>
+<polyline points="863.74,818.69 871.88,818.83 880.03,818.71" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="896.31" cy="818.80" r="3" fill="#ba4539"><title>CSV line 15: host 8.063s, device 2831412ms, peak 64, Quiet</title></circle>
+<polyline points="896.31,818.80" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="912.60" cy="818.59" r="3" fill="#ba4539"><title>CSV line 16: host 9.063s, device 2832412ms, peak 132, Quiet</title></circle>
+<circle cx="920.48" cy="818.77" r="3" fill="#ba4539"><title>CSV line 17: host 9.547s, device 2832912ms, peak 75, Quiet</title></circle>
+<circle cx="928.88" cy="699.45" r="3" fill="#ba4539"><title>CSV line 18: host 10.063s, device 2833412ms, peak 38566, Loud</title></circle>
+<circle cx="936.77" cy="817.22" r="3" fill="#ba4539"><title>CSV line 19: host 10.547s, device 2833912ms, peak 574, Quiet</title></circle>
+<circle cx="945.17" cy="818.86" r="3" fill="#ba4539"><title>CSV line 20: host 11.063s, device 2834412ms, peak 46, Quiet</title></circle>
+<circle cx="953.05" cy="818.38" r="3" fill="#ba4539"><title>CSV line 21: host 11.547s, device 2834912ms, peak 201, Quiet</title></circle>
+<circle cx="961.45" cy="817.94" r="3" fill="#ba4539"><title>CSV line 22: host 12.063s, device 2835412ms, peak 341, Quiet</title></circle>
+<polyline points="912.60,818.59 920.48,818.77 928.88,699.45 936.77,817.22 945.17,818.86 953.05,818.38 961.45,817.94" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="977.74" cy="818.86" r="3" fill="#ba4539"><title>CSV line 23: host 13.063s, device 2836412ms, peak 46, Quiet</title></circle>
+<circle cx="985.88" cy="818.88" r="3" fill="#ba4539"><title>CSV line 24: host 13.563s, device 2836912ms, peak 39, Quiet</title></circle>
+<circle cx="994.03" cy="818.90" r="3" fill="#ba4539"><title>CSV line 25: host 14.063s, device 2837412ms, peak 32, Quiet</title></circle>
+<circle cx="1002.17" cy="818.92" r="3" fill="#ba4539"><title>CSV line 26: host 14.563s, device 2837912ms, peak 27, Quiet</title></circle>
+<circle cx="1010.31" cy="818.92" r="3" fill="#ba4539"><title>CSV line 27: host 15.063s, device 2838412ms, peak 27, Quiet</title></circle>
+<circle cx="1018.45" cy="818.80" r="3" fill="#ba4539"><title>CSV line 28: host 15.563s, device 2838912ms, peak 65, Quiet</title></circle>
+<circle cx="1026.60" cy="818.91" r="3" fill="#ba4539"><title>CSV line 29: host 16.063s, device 2839412ms, peak 29, Quiet</title></circle>
+<circle cx="1034.74" cy="723.31" r="3" fill="#ba4539"><title>CSV line 30: host 16.563s, device 2839912ms, peak 30868, Loud</title></circle>
+<polyline points="977.74,818.86 985.88,818.88 994.03,818.90 1002.17,818.92 1010.31,818.92 1018.45,818.80 1026.60,818.91 1034.74,723.31" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1051.03" cy="818.80" r="3" fill="#ba4539"><title>CSV line 31: host 17.563s, device 2840912ms, peak 63, Quiet</title></circle>
+<polyline points="1051.03,818.80" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1067.31" cy="818.88" r="3" fill="#ba4539"><title>CSV line 32: host 18.563s, device 2841912ms, peak 39, Quiet</title></circle>
+<polyline points="1067.31,818.88" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1083.60" cy="818.92" r="3" fill="#ba4539"><title>CSV line 33: host 19.563s, device 2842912ms, peak 26, Quiet</title></circle>
+<circle cx="1091.74" cy="818.88" r="3" fill="#ba4539"><title>CSV line 34: host 20.063s, device 2843412ms, peak 40, Quiet</title></circle>
+<circle cx="1099.88" cy="818.89" r="3" fill="#ba4539"><title>CSV line 35: host 20.563s, device 2843912ms, peak 34, Quiet</title></circle>
+<circle cx="1108.03" cy="818.91" r="3" fill="#ba4539"><title>CSV line 36: host 21.063s, device 2844412ms, peak 29, Quiet</title></circle>
+<polyline points="1083.60,818.92 1091.74,818.88 1099.88,818.89 1108.03,818.91" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1132.45" cy="686.80" r="3" fill="#ba4539"><title>CSV line 37: host 22.563s, device 2845912ms, peak 42646, Loud</title></circle>
+<circle cx="1140.60" cy="818.08" r="3" fill="#ba4539"><title>CSV line 38: host 23.063s, device 2846412ms, peak 296, Loud</title></circle>
+<circle cx="1148.74" cy="818.12" r="3" fill="#ba4539"><title>CSV line 39: host 23.563s, device 2846912ms, peak 285, Quiet</title></circle>
+<circle cx="1156.88" cy="818.88" r="3" fill="#ba4539"><title>CSV line 40: host 24.063s, device 2847412ms, peak 38, Quiet</title></circle>
+<polyline points="1132.45,686.80 1140.60,818.08 1148.74,818.12 1156.88,818.88" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1173.17" cy="818.92" r="3" fill="#ba4539"><title>CSV line 41: host 25.063s, device 2848412ms, peak 27, Quiet</title></circle>
+<circle cx="1181.31" cy="818.91" r="3" fill="#ba4539"><title>CSV line 42: host 25.563s, device 2848912ms, peak 30, Quiet</title></circle>
+<circle cx="1189.45" cy="818.91" r="3" fill="#ba4539"><title>CSV line 43: host 26.063s, device 2849412ms, peak 29, Quiet</title></circle>
+<polyline points="1173.17,818.92 1181.31,818.91 1189.45,818.91" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<circle cx="1222.03" cy="818.92" r="3" fill="#ba4539"><title>CSV line 44: host 28.063s, device 2851412ms, peak 27, Quiet</title></circle>
+<circle cx="1230.17" cy="818.89" r="3" fill="#ba4539"><title>CSV line 45: host 28.563s, device 2851912ms, peak 34, Quiet</title></circle>
+<polyline points="1222.03,818.92 1230.17,818.89" stroke="#ba4539" stroke-width="1.6" fill="none"/>
+<text x="690.00" y="878.00" class="body" text-anchor="middle">Host receive elapsed time (seconds); each capture starts independently</text>
+<text x="40.00" y="917.00" class="small" text-anchor="start">Condition names describe operator instructions, not confirmed sound sources. Exact distance and clap count were not recorded.</text>
+<text x="40.00" y="939.00" class="small" text-anchor="start">RMS/peak summarize report windows. Firmware levels use short-frame classification, debounce and a Loud hold; these are not speech labels.</text>
+</svg>

@@ -1,0 +1,950 @@
+{
+  "schema_version": 1,
+  "analyzer_sha256": "c60bc2010d4ce9d0672e420f232e96d4c182a63ab6540cae4c1f59c02dda787f",
+  "scope": "offline saved evidence only; no serial or firmware changes",
+  "percentile_method": "linear interpolation at (n-1)*p; unweighted per-report distribution",
+  "gap_threshold_ms": 750,
+  "identical_local_source_hashes_at_capture": true,
+  "running_binary_verified": false,
+  "runs": [
+    {
+      "label": "quiet",
+      "source_directory": "test-runs/20261013T132241Z-4f4c50f9",
+      "started_utc": "2026-10-13T13:22:41.733285+00:00",
+      "source_sha256": {
+        "mic.csv": "89a93f5a3adbf9b8d9ec1b76392bfe9140c26dabb57910fbb57beb43dc1799d8",
+        "serial.log": "f6f1b5259d8c33a1e1d5693f2fa3f92f4b56184bc40fe932691fb5852d2ab38f",
+        "report.json": "fd6a958e4583cf936328298acb297ca3ae2e8ab3d9296a7c85faad9734706ba8"
+      },
+      "local_source_at_capture": "a26959ec0a7ea7dfb7e424f6a0e4e7a43e52ce56",
+      "device_firmware_identity": "not_reported_by_legacy_or_csv_v1",
+      "evidence_checks": {
+        "row_count_matches_report": true,
+        "csv_matches_standalone_raw_in_order": true,
+        "i2c_count_matches_report": true,
+        "diagnostics_match_report": true,
+        "rms_range_matches_report": true,
+        "peak_max_matches_report": true
+      },
+      "capture_verdict": "FAILED",
+      "rows": 54,
+      "rms": {
+        "min": 7.8,
+        "median": 13.05,
+        "p95": 44.0199999999998,
+        "max": 327.0
+      },
+      "peak": {
+        "min": 28,
+        "median": 51.5,
+        "p95": 586.6999999999957,
+        "max": 6260
+      },
+      "level_report_counts": {
+        "Quiet": 52,
+        "Normal": 1,
+        "Loud": 1
+      },
+      "host_delta_s": {
+        "min": 0.46799999999999997,
+        "median": 0.5,
+        "p95": 1.0,
+        "max": 1.5
+      },
+      "device_delta_ms": {
+        "min": 500,
+        "median": 500,
+        "p95": 1000.0,
+        "max": 1500
+      },
+      "first_host_report_s": 0.109,
+      "tail_without_valid_report_s": 0.438,
+      "capture_elapsed_s": 30.047,
+      "gap_threshold_ms": 750,
+      "gaps": [
+        {
+          "from_csv_line": 13,
+          "to_csv_line": 14,
+          "host_start_s": 5.609,
+          "host_end_s": 7.109,
+          "host_delta_s": 1.5,
+          "device_delta_ms": 1500,
+          "embedded_log_lines": [
+            65,
+            69
+          ]
+        },
+        {
+          "from_csv_line": 19,
+          "to_csv_line": 20,
+          "host_start_s": 9.609,
+          "host_end_s": 10.609,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            107
+          ]
+        },
+        {
+          "from_csv_line": 26,
+          "to_csv_line": 27,
+          "host_start_s": 13.609,
+          "host_end_s": 14.609,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            150
+          ]
+        },
+        {
+          "from_csv_line": 27,
+          "to_csv_line": 28,
+          "host_start_s": 14.609,
+          "host_end_s": 15.641,
+          "host_delta_s": 1.032,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            160
+          ]
+        },
+        {
+          "from_csv_line": 51,
+          "to_csv_line": 52,
+          "host_start_s": 27.109,
+          "host_end_s": 28.109,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            291
+          ]
+        }
+      ],
+      "clock_events": [],
+      "top_peak_rows": [
+        {
+          "device_timestamp_ms": 2421762,
+          "rms": 327.0,
+          "peak": 6260,
+          "level": "Loud",
+          "host_elapsed_s": 5.609,
+          "csv_line": 13,
+          "break_before": false,
+          "host_delta_s": 0.5,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 5.5
+        },
+        {
+          "device_timestamp_ms": 2428762,
+          "rms": 181.9,
+          "peak": 2048,
+          "level": "Normal",
+          "host_elapsed_s": 12.609,
+          "csv_line": 24,
+          "break_before": false,
+          "host_delta_s": 0.5,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 12.5
+        },
+        {
+          "device_timestamp_ms": 2428262,
+          "rms": 66.9,
+          "peak": 1082,
+          "level": "Quiet",
+          "host_elapsed_s": 12.109,
+          "csv_line": 23,
+          "break_before": false,
+          "host_delta_s": 0.46799999999999997,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 12.0
+        },
+        {
+          "device_timestamp_ms": 2427762,
+          "rms": 24.4,
+          "peak": 320,
+          "level": "Quiet",
+          "host_elapsed_s": 11.641,
+          "csv_line": 22,
+          "break_before": false,
+          "host_delta_s": 0.532,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 11.5
+        },
+        {
+          "device_timestamp_ms": 2424262,
+          "rms": 20.7,
+          "peak": 283,
+          "level": "Quiet",
+          "host_elapsed_s": 8.109,
+          "csv_line": 16,
+          "break_before": false,
+          "host_delta_s": 0.5,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 8.0
+        }
+      ],
+      "i2c_error_count": 221,
+      "embedded_payload_candidates": [
+        {
+          "device_timestamp_ms": 2422262,
+          "rms": 16.0,
+          "peak": 72,
+          "level": "Loud",
+          "log_line": 65,
+          "text": "[2422368][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2422262,16.0,72,Loud"
+        },
+        {
+          "device_timestamp_ms": 2422762,
+          "rms": 31.2,
+          "peak": 384,
+          "level": "Quiet",
+          "log_line": 69,
+          "text": "[2422780][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2422762,31.2,384,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2426262,
+          "rms": 14.9,
+          "peak": 57,
+          "level": "Quiet",
+          "log_line": 107,
+          "text": "[2426300][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2426262,14.9,57,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2430262,
+          "rms": 12.1,
+          "peak": 52,
+          "level": "Quiet",
+          "log_line": 150,
+          "text": "[2430361][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2430262,12.1,52,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2431262,
+          "rms": 10.3,
+          "peak": 46,
+          "level": "Quiet",
+          "log_line": 160,
+          "text": "[2431309][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2431262,10.3,46,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2443762,
+          "rms": 8.6,
+          "peak": 32,
+          "level": "Quiet",
+          "log_line": 291,
+          "text": "[2443766][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2443762,8.6,32,Quiet"
+        }
+      ],
+      "raw_candidate_count": 60,
+      "raw_candidate_delta_ms": {
+        "min": 500,
+        "median": 500,
+        "p95": 500.0,
+        "max": 500
+      },
+      "touch_messages": [],
+      "diagnostics": [
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        }
+      ],
+      "diagnostic_samples_per_second": {
+        "min": 16000.0,
+        "median": 16000.0,
+        "p95": 16000.0,
+        "max": 16000.0
+      }
+    },
+    {
+      "label": "speech",
+      "source_directory": "test-runs/20261013T132639Z-03888e7a",
+      "started_utc": "2026-10-13T13:26:39.941244+00:00",
+      "source_sha256": {
+        "mic.csv": "c9b8087f8fb99e63408d9c16e941cdbe9195e0c75308633948d066a16ee1a654",
+        "serial.log": "2f6fa5bea5884933d4299e46dc4804bd57a9631cf48e70aed50f82d7f721d049",
+        "report.json": "c1a881540a39132697d8a8dd7e9e89d5afd623fd7c3dd5e43a8921ed67f5b36f"
+      },
+      "local_source_at_capture": "a26959ec0a7ea7dfb7e424f6a0e4e7a43e52ce56",
+      "device_firmware_identity": "not_reported_by_legacy_or_csv_v1",
+      "evidence_checks": {
+        "row_count_matches_report": true,
+        "csv_matches_standalone_raw_in_order": true,
+        "i2c_count_matches_report": true,
+        "diagnostics_match_report": true,
+        "rms_range_matches_report": true,
+        "peak_max_matches_report": true
+      },
+      "capture_verdict": "FAILED",
+      "rows": 58,
+      "rms": {
+        "min": 6.4,
+        "median": 39.2,
+        "p95": 131.17499999999998,
+        "max": 217.4
+      },
+      "peak": {
+        "min": 26,
+        "median": 285.0,
+        "p95": 724.0999999999999,
+        "max": 955
+      },
+      "level_report_counts": {
+        "Quiet": 51,
+        "Normal": 7,
+        "Loud": 0
+      },
+      "host_delta_s": {
+        "min": 0.48499999999999943,
+        "median": 0.5,
+        "p95": 0.5150000000000006,
+        "max": 1.0
+      },
+      "device_delta_ms": {
+        "min": 500,
+        "median": 500,
+        "p95": 501.99999999999994,
+        "max": 1000
+      },
+      "first_host_report_s": 0.454,
+      "tail_without_valid_report_s": 0.156,
+      "capture_elapsed_s": 30.125,
+      "gap_threshold_ms": 750,
+      "gaps": [
+        {
+          "from_csv_line": 34,
+          "to_csv_line": 35,
+          "host_start_s": 16.469,
+          "host_end_s": 17.469,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            179
+          ]
+        },
+        {
+          "from_csv_line": 52,
+          "to_csv_line": 53,
+          "host_start_s": 25.969,
+          "host_end_s": 26.969,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            281
+          ]
+        }
+      ],
+      "clock_events": [],
+      "top_peak_rows": [
+        {
+          "device_timestamp_ms": 2670802,
+          "rms": 217.4,
+          "peak": 955,
+          "level": "Normal",
+          "host_elapsed_s": 16.469,
+          "csv_line": 34,
+          "break_before": false,
+          "host_delta_s": 0.5000000000000018,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 16.01
+        },
+        {
+          "device_timestamp_ms": 2665302,
+          "rms": 146.9,
+          "peak": 767,
+          "level": "Normal",
+          "host_elapsed_s": 10.969,
+          "csv_line": 23,
+          "break_before": false,
+          "host_delta_s": 0.5,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 10.51
+        },
+        {
+          "device_timestamp_ms": 2661302,
+          "rms": 119.9,
+          "peak": 753,
+          "level": "Normal",
+          "host_elapsed_s": 6.969,
+          "csv_line": 15,
+          "break_before": false,
+          "host_delta_s": 0.5150000000000006,
+          "device_delta_ms": 510,
+          "device_segment": 0,
+          "device_elapsed_s": 6.51
+        },
+        {
+          "device_timestamp_ms": 2662802,
+          "rms": 209.3,
+          "peak": 719,
+          "level": "Normal",
+          "host_elapsed_s": 8.469,
+          "csv_line": 18,
+          "break_before": false,
+          "host_delta_s": 0.4999999999999991,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 8.01
+        },
+        {
+          "device_timestamp_ms": 2662302,
+          "rms": 93.1,
+          "peak": 582,
+          "level": "Quiet",
+          "host_elapsed_s": 7.969,
+          "csv_line": 17,
+          "break_before": false,
+          "host_delta_s": 0.5,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 7.51
+        }
+      ],
+      "i2c_error_count": 222,
+      "embedded_payload_candidates": [
+        {
+          "device_timestamp_ms": 2671302,
+          "rms": 15.6,
+          "peak": 135,
+          "level": "Quiet",
+          "log_line": 179,
+          "text": "[2671321][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2671302,15.6,135,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2680802,
+          "rms": 9.0,
+          "peak": 72,
+          "level": "Quiet",
+          "log_line": 281,
+          "text": "[2680931][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2680802,9.0,72,Quiet"
+        }
+      ],
+      "raw_candidate_count": 60,
+      "raw_candidate_delta_ms": {
+        "min": 500,
+        "median": 500,
+        "p95": 500.0,
+        "max": 510
+      },
+      "touch_messages": [],
+      "diagnostics": [
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5005,
+          "read_errors": 0
+        },
+        {
+          "frames": 501,
+          "samples": 80160,
+          "elapsed_ms": 5005,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5001,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        }
+      ],
+      "diagnostic_samples_per_second": {
+        "min": 15984.015984015983,
+        "median": 16000.0,
+        "p95": 16011.988011988013,
+        "max": 16015.984015984017
+      }
+    },
+    {
+      "label": "clap",
+      "source_directory": "test-runs/20261013T132928Z-6698a2dd",
+      "started_utc": "2026-10-13T13:29:28.974039+00:00",
+      "source_sha256": {
+        "mic.csv": "6d4ae8ad0b1bc974e5cd868f5d037b06a97303aaa1b9f98261cf58fbe7bc8fe1",
+        "serial.log": "d5f70932a19f600bb93b97b86fb091011fb2f0e50486f5e8b435aa23b94b1f79",
+        "report.json": "94c39ff1686a3cbaf696a7def627fcad9764103d5e7a19e72865450a35f60ffe"
+      },
+      "local_source_at_capture": "a26959ec0a7ea7dfb7e424f6a0e4e7a43e52ce56",
+      "device_firmware_identity": "not_reported_by_legacy_or_csv_v1",
+      "evidence_checks": {
+        "row_count_matches_report": true,
+        "csv_matches_standalone_raw_in_order": true,
+        "i2c_count_matches_report": true,
+        "diagnostics_match_report": true,
+        "rms_range_matches_report": true,
+        "peak_max_matches_report": true
+      },
+      "capture_verdict": "FAILED",
+      "rows": 44,
+      "rms": {
+        "min": 7.2,
+        "median": 12.600000000000001,
+        "p95": 1528.215000000001,
+        "max": 2386.7
+      },
+      "peak": {
+        "min": 26,
+        "median": 63.5,
+        "p95": 29709.25000000001,
+        "max": 42646
+      },
+      "level_report_counts": {
+        "Quiet": 38,
+        "Normal": 0,
+        "Loud": 6
+      },
+      "host_delta_s": {
+        "min": 0.484,
+        "median": 0.5,
+        "p95": 1.0000000000000009,
+        "max": 2.0
+      },
+      "device_delta_ms": {
+        "min": 500,
+        "median": 500,
+        "p95": 1000.0,
+        "max": 2000
+      },
+      "first_host_report_s": 0.063,
+      "tail_without_valid_report_s": 1.515,
+      "capture_elapsed_s": 30.078,
+      "gap_threshold_ms": 750,
+      "gaps": [
+        {
+          "from_csv_line": 8,
+          "to_csv_line": 9,
+          "host_start_s": 3.063,
+          "host_end_s": 4.063,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            43
+          ]
+        },
+        {
+          "from_csv_line": 11,
+          "to_csv_line": 12,
+          "host_start_s": 5.063,
+          "host_end_s": 6.063,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            63
+          ]
+        },
+        {
+          "from_csv_line": 14,
+          "to_csv_line": 15,
+          "host_start_s": 7.063,
+          "host_end_s": 8.063,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            85
+          ]
+        },
+        {
+          "from_csv_line": 15,
+          "to_csv_line": 16,
+          "host_start_s": 8.063,
+          "host_end_s": 9.063,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            96
+          ]
+        },
+        {
+          "from_csv_line": 22,
+          "to_csv_line": 23,
+          "host_start_s": 12.063,
+          "host_end_s": 13.063,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            138
+          ]
+        },
+        {
+          "from_csv_line": 30,
+          "to_csv_line": 31,
+          "host_start_s": 16.563,
+          "host_end_s": 17.563,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            185
+          ]
+        },
+        {
+          "from_csv_line": 31,
+          "to_csv_line": 32,
+          "host_start_s": 17.563,
+          "host_end_s": 18.563,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            196
+          ]
+        },
+        {
+          "from_csv_line": 32,
+          "to_csv_line": 33,
+          "host_start_s": 18.563,
+          "host_end_s": 19.563,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            206
+          ]
+        },
+        {
+          "from_csv_line": 36,
+          "to_csv_line": 37,
+          "host_start_s": 21.063,
+          "host_end_s": 22.563,
+          "host_delta_s": 1.5,
+          "device_delta_ms": 1500,
+          "embedded_log_lines": [
+            234,
+            238
+          ]
+        },
+        {
+          "from_csv_line": 40,
+          "to_csv_line": 41,
+          "host_start_s": 24.063,
+          "host_end_s": 25.063,
+          "host_delta_s": 1.0,
+          "device_delta_ms": 1000,
+          "embedded_log_lines": [
+            265
+          ]
+        },
+        {
+          "from_csv_line": 43,
+          "to_csv_line": 44,
+          "host_start_s": 26.063,
+          "host_end_s": 28.063,
+          "host_delta_s": 2.0,
+          "device_delta_ms": 2000,
+          "embedded_log_lines": [
+            287,
+            291,
+            297
+          ]
+        }
+      ],
+      "clock_events": [],
+      "top_peak_rows": [
+        {
+          "device_timestamp_ms": 2845912,
+          "rms": 1637.7,
+          "peak": 42646,
+          "level": "Loud",
+          "host_elapsed_s": 22.563,
+          "csv_line": 37,
+          "break_before": true,
+          "host_delta_s": 1.5,
+          "device_delta_ms": 1500,
+          "device_segment": 0,
+          "device_elapsed_s": 22.51
+        },
+        {
+          "device_timestamp_ms": 2833412,
+          "rms": 1961.5,
+          "peak": 38566,
+          "level": "Loud",
+          "host_elapsed_s": 10.063,
+          "csv_line": 18,
+          "break_before": false,
+          "host_delta_s": 0.516,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 10.01
+        },
+        {
+          "device_timestamp_ms": 2839912,
+          "rms": 907.8,
+          "peak": 30868,
+          "level": "Loud",
+          "host_elapsed_s": 16.563,
+          "csv_line": 30,
+          "break_before": false,
+          "host_delta_s": 0.5,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 16.51
+        },
+        {
+          "device_timestamp_ms": 2828412,
+          "rms": 2386.7,
+          "peak": 23143,
+          "level": "Loud",
+          "host_elapsed_s": 5.063,
+          "csv_line": 11,
+          "break_before": false,
+          "host_delta_s": 0.5,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 5.01
+        },
+        {
+          "device_timestamp_ms": 2823902,
+          "rms": 165.2,
+          "peak": 2391,
+          "level": "Quiet",
+          "host_elapsed_s": 0.563,
+          "csv_line": 3,
+          "break_before": false,
+          "host_delta_s": 0.49999999999999994,
+          "device_delta_ms": 500,
+          "device_segment": 0,
+          "device_elapsed_s": 0.5
+        }
+      ],
+      "i2c_error_count": 224,
+      "embedded_payload_candidates": [
+        {
+          "device_timestamp_ms": 2826912,
+          "rms": 16.8,
+          "peak": 60,
+          "level": "Quiet",
+          "log_line": 43,
+          "text": "[2827032][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2826912,16.8,60,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2828912,
+          "rms": 19.9,
+          "peak": 90,
+          "level": "Quiet",
+          "log_line": 63,
+          "text": "[2828926][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2828912,19.9,90,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2830912,
+          "rms": 17.0,
+          "peak": 83,
+          "level": "Quiet",
+          "log_line": 85,
+          "text": "[2830955][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2830912,17.0,83,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2831912,
+          "rms": 12.7,
+          "peak": 53,
+          "level": "Quiet",
+          "log_line": 96,
+          "text": "[2832037][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2831912,12.7,53,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2835912,
+          "rms": 17.9,
+          "peak": 70,
+          "level": "Quiet",
+          "log_line": 138,
+          "text": "[2835960][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2835912,17.9,70,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2840412,
+          "rms": 16.4,
+          "peak": 81,
+          "level": "Quiet",
+          "log_line": 185,
+          "text": "[2840426][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2840412,16.4,81,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2841412,
+          "rms": 14.2,
+          "peak": 59,
+          "level": "Quiet",
+          "log_line": 196,
+          "text": "[2841509][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2841412,14.2,59,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2842412,
+          "rms": 7.4,
+          "peak": 25,
+          "level": "Quiet",
+          "log_line": 206,
+          "text": "[2842457][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2842412,7.4,25,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2844912,
+          "rms": 7.3,
+          "peak": 27,
+          "level": "Quiet",
+          "log_line": 234,
+          "text": "[2845029][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2844912,7.3,27,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2845412,
+          "rms": 9.2,
+          "peak": 48,
+          "level": "Quiet",
+          "log_line": 238,
+          "text": "[2845435][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2845412,9.2,48,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2847912,
+          "rms": 7.8,
+          "peak": 30,
+          "level": "Quiet",
+          "log_line": 265,
+          "text": "[2848011][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2847912,7.8,30,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2849912,
+          "rms": 6.9,
+          "peak": 28,
+          "level": "Quiet",
+          "log_line": 287,
+          "text": "[2850041][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2849912,6.9,28,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2850412,
+          "rms": 6.6,
+          "peak": 24,
+          "level": "Quiet",
+          "log_line": 291,
+          "text": "[2850447][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2850412,6.6,24,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2850912,
+          "rms": 7.7,
+          "peak": 30,
+          "level": "Quiet",
+          "log_line": 297,
+          "text": "[2850989][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2850912,7.7,30,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2852412,
+          "rms": 7.5,
+          "peak": 24,
+          "level": "Quiet",
+          "log_line": 312,
+          "text": "[2852478][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2852412,7.5,24,Quiet"
+        },
+        {
+          "device_timestamp_ms": 2852912,
+          "rms": 8.1,
+          "peak": 27,
+          "level": "Quiet",
+          "log_line": 318,
+          "text": "[2853019][E][Wire.cpp:513] requestFrom(): i2cRead returned Error2852912,8.1,27,Quiet"
+        }
+      ],
+      "raw_candidate_count": 60,
+      "raw_candidate_delta_ms": {
+        "min": 500,
+        "median": 500,
+        "p95": 500.0,
+        "max": 510
+      },
+      "touch_messages": [
+        {
+          "log_line": 18,
+          "text": "[2824730][E][Wire.cpp:513] requestFrom(): i2cRead returned ErrorTouch: x=152 y=1, running=false"
+        }
+      ],
+      "diagnostics": [
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        },
+        {
+          "frames": 501,
+          "samples": 80160,
+          "elapsed_ms": 5001,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5001,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        },
+        {
+          "frames": 500,
+          "samples": 80000,
+          "elapsed_ms": 5000,
+          "read_errors": 0
+        }
+      ],
+      "diagnostic_samples_per_second": {
+        "min": 15996.800639872026,
+        "median": 16000.0,
+        "p95": 16021.595680863826,
+        "max": 16028.794241151769
+      }
+    }
+  ]
+}
