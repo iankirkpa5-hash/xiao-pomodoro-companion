@@ -4,7 +4,7 @@
 
 ## 来源与本地兼容修改
 
-工具来自草稿 [PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1) 的固定提交 `e7c73dd2618e09a0d84d8595dafb545e76144f63`，未合并 PR。2026-10-13 在当前实验工作区加入新旧格式兼容、设备时间检查、采集诊断、I²C 错误记录和 `--notes`，没有修改 MCU 固件。依赖已在现有 PlatformIO Python 环境中可用，无需为本轮重新安装。
+工具来自 [PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1) 的固定提交 `e7c73dd2618e09a0d84d8595dafb545e76144f63`；该 PR 于 2026-10-17 以合并提交 `ec5cfe8` 进入 main，当前仓库中的工具即为适配后的版本。2026-10-13 在当前实验工作区加入新旧格式兼容、设备时间检查、采集诊断、I²C 错误记录和 `--notes`，没有修改 MCU 固件。依赖已在现有 PlatformIO Python 环境中可用，无需为本轮重新安装。
 
 ## 当前边界
 

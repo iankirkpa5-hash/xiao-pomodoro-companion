@@ -160,8 +160,8 @@ detection rate.
 - The quiet group is closed by the separate clean
   [quiet retest](2026-10-16-t05-quiet-retest.md).
 - Reset, Stats, and power-cycle NVS manual checks passed on October 17
-  ([manual check record](2026-10-17-t07-manual-reset-stats-nvs.md)); PR #1
-  acceptance remains open.
+  ([manual check record](2026-10-17-t07-manual-reset-stats-nvs.md)); PR #1 was
+  merged on October 17 (`ec5cfe8`).
 
 No firmware thresholds were adjusted and no release acceptance, commit, tag,
 or push was performed for these retests.

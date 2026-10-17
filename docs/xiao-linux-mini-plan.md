@@ -24,20 +24,20 @@
 
 ## 2．当前真实位置
 
-以下仓库状态于 2026-10-13 核对，10-14 补充 [T02 离线分析](experiments/2026-10-14-t02-sound-comparison.md)，10-16 补充 [触摸 IRQ 修正与实机复测](experiments/2026-10-16-t04-touch-irq-serial.md) 与 [安静复测](experiments/2026-10-16-t05-quiet-retest.md)，10-17 补充 [拍手复测](experiments/2026-10-17-t02-clap-retest.md) 与 [Quiet 去抖修正](experiments/2026-10-17-t06-quiet-debounce.md)。原始 [T01 声音基线](experiments/2026-10-13-t01-sound-baseline.md) 仍为 FAILED；安静／说话／拍手三组复测均无 I²C 错误或混行，拍手 13/13，屏幕等级同步已实机确认（修正后说话时 Normal 稳定），仅剩 Reset／Stats／NVS 与 PR 验收。
+以下仓库状态于 2026-10-13 核对，10-14 补充 [T02 离线分析](experiments/2026-10-14-t02-sound-comparison.md)，10-16 补充 [触摸 IRQ 修正与实机复测](experiments/2026-10-16-t04-touch-irq-serial.md) 与 [安静复测](experiments/2026-10-16-t05-quiet-retest.md)，10-17 补充 [拍手复测](experiments/2026-10-17-t02-clap-retest.md)、[Quiet 去抖修正](experiments/2026-10-17-t06-quiet-debounce.md) 与 [Reset／Stats／NVS 手工检查](experiments/2026-10-17-t07-manual-reset-stats-nvs.md)。原始 [T01 声音基线](experiments/2026-10-13-t01-sound-baseline.md) 仍为 FAILED；安静／说话／拍手三组复测均无 I²C 错误或混行，拍手 13/13，屏幕等级同步已实机确认，PR #1 已于 10-17 合并（`ec5cfe8`），本阶段验收闭环。
 
 | 项目 | 状态与证据 | 仍需注意 |
 | --- | --- | --- |
 | XIAO ESP32S3 Sense＋Round Display | 已确认持有，是当前实验基础 | SX1262、FPGA、Jetson 等是否已到手，需分别确认，不能由学习兴趣推定已拥有 |
 | 番茄机 v1.6 日用功能 | 按此前实机反馈，计时、设置、亮度、休息提示、触摸等已完成一轮稳定性验证 | 后续改动仍需回归检查 |
-| 远端 main | PR #1 的基线为 `fc32445d40b48cd2dd7a81e64f9d1183a83048d3`，日用显示版本 v1.6 | 不是本地所有实验改动的总和 |
-| 本地工作区 | `codex/microphone-serial-data`，HEAD 为 `a26959e`；本地 main 也在此文档提交，另有未提交的采集、工具和文档改动 | 不切分支、不覆盖未提交工作；未将其视为新稳定版 |
+| 远端 main | 日用显示版本 v1.6；10-17 合并 PR #1（`ec5cfe8`），包含本地实验工作 | 合并不改变发布标签；新版本仍需按发布清单打标 |
+| 本地工作区 | `codex/microphone-serial-data`，HEAD 为 `eb759a5`；实验工作已随 PR #1 进入 main，本地 main 已同步 | 分支保留作为实验线，不覆盖未提交工作；未将其视为新稳定版 |
 | 麦克风采集 | 远端旧版输出 mean／RMS／peak／samples；本地实验已实现连续 10 ms 帧采集、区间 RMS／最大 peak 和 `timestamp_ms,rms,peak,level` | 本轮三组数据已保存，但有 I²C 错误与安静组高峰；缺运行固件唯一标识，尚非整体验收通过 |
 | 摄像头 v1.7 实验 | 先前已做实验并形成结论 | 本计划不把“做过实验”解释为“发热已修复”；重启分支前先读原记录 |
-| 实机反馈脚本 | [PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1) 仍为草稿；以 `e7c73dd` 中的工具为起点在当前分支适配新旧格式，没有合并 PR | 本地兼容修改尚未提交或推回 PR；见 [工具说明](hardware-feedback-loop.md) |
+| 实机反馈脚本 | [PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1) 已于 2026-10-17 合并（`ec5cfe8`），包含适配后的采集工具与实验记录 | 原始 `e7c73dd` 保留在 `backup/pr1-e7c73dd`；见 [工具说明](hardware-feedback-loop.md) |
 | 脚本测试 | 本地 15 项通过，2 项 POSIX 伪终端测试在 Windows 跳过 | 模拟输入不等于开发板验收；SKIP 不等于通过 |
 | T02 离线分析测试 | 新增 11 项通过；合计 Python 26 项通过、2 项跳过；现有网页解析 6 项通过 | 图表已目视检查，原始文件与固件未改；仍不替代实机验收 |
-| 编译、烧录、真实串口采集 | 10-16 实际 build、cycle 均通过，烧录后 30 秒和另一次 60 秒观察均为 PASS_SERIAL_SMOKE | COM11；实机操作反馈与串口记录分别保存，仍非完整声学或 PR 验收 |
+| 编译、烧录、真实串口采集 | 10-16 实际 build、cycle 均通过；10-17 完成三组声音复测、屏幕同步与手工检查，PR #1 已合并 | COM11；实机操作反馈与串口记录分别保存，验收闭环 |
 | 实时声音曲线与离线对比 | 本地 [网页工具](../tools/microphone-monitor/README.md) 已有曲线与 CSV；T02 已读取 CLI 保存的数据，生成三组对比与时间／等级图 | 未重写网页；T02 未打开串口，屏幕与数据同步核对仍待实机 |
 | 双向串口亮度控制 | 原计划已有方案／对话示例，落地和实机效果未确认 | 不作为启动声音基线实验的前置条件 |
 | 圆屏清晰度问题 | 待当前照片、显示设置和复现条件 | 字体放大只是旧线索，不能直接认定原因 |
@@ -91,7 +91,7 @@
 
 ### T03｜P1｜验证完整编译—烧录—采集流程，完成 PR #1 验收
 
-**分类：实际编译—烧录—串口采集已通过（2026-10-16），完整人工／声学／PR 验收仍待完成。** 见 [本轮记录](experiments/2026-10-16-t04-touch-irq-serial.md)。
+**分类：已完成（2026-10-17）。实际编译—烧录—串口采集、人工／声学复测与 PR #1 合并（`ec5cfe8`）均已完成。** 见 [本轮记录](experiments/2026-10-16-t04-touch-irq-serial.md) 与 [手工检查记录](experiments/2026-10-17-t07-manual-reset-stats-nvs.md)。
 
 前置：T01 基线已保存，确认本地固件内容、目标板、端口和回退版本。
 
@@ -99,7 +99,7 @@
 - [x] 运行 `build`，检查实际构建日志和结果。
 - [x] 运行 `cycle`，编译、上传和采集成功；后续 60 秒观察另有 120 笔完整数据，I²C 错误与混行均为 0。
 - [x] 完整复测计时、触摸、设置、亮度以及麦克风响应；用户已确认短按、长按进 Settings、项目切换、Bright、Save；安静／说话／拍手三组已复测（拍手 13/13），屏幕等级同步已确认；Reset／Stats／NVS 按 [手工检查记录](experiments/2026-10-17-t07-manual-reset-stats-nvs.md) 通过（Done 递增路径留待日常使用验证）。
-- [ ] 如实记录问题并修复；证据足够后完成 PR 审阅与合并。
+- [x] 如实记录问题并修复；PR #1 已审阅并合并（`ec5cfe8`）。
 
 产出：一次真实构建／上传／采集记录及人工功能检查记录。
 
@@ -214,7 +214,7 @@ AEIC-SE 的资料更正已纳入：当前 Seeed 文档确实链接了模型，�
 
 ## 9．下一次动手入口
 
-**T02 离线对照、10-16 的最小 IRQ 修正、10-16／10-17 的安静／说话／拍手三组复测、Quiet 去抖修正与 Reset／Stats／NVS 手工检查均已完成；拍手 13/13 与屏幕等级同步均已实机确认。** 剩余：PR 验收。不要求先完成双向串口、FFT、T9 或设备树，也暂不接入 PCM／AI。以下保留 T01 复测入口，旧 FAILED 报告不改写。
+**T02 离线对照、10-16 的最小 IRQ 修正、10-16／10-17 的安静／说话／拍手三组复测、Quiet 去抖修正与 Reset／Stats／NVS 手工检查均已完成；拍手 13/13 与屏幕等级同步均已实机确认；PR #1 已合并（`ec5cfe8`）。** 下一候选：PCM→WAV 短实验。不要求先完成双向串口、FFT、T9 或设备树，也暂不接入 PCM／AI。以下保留 T01 复测入口，旧 FAILED 报告不改写。
 
 工具已引入当前实验分支，先检查工作区和版本，不直接切换或合并 PR。以下命令在项目根目录执行；也可用已有 PlatformIO Python 环境，无需重复安装依赖：
 
@@ -233,8 +233,8 @@ py tools/hardware_loop.py capture --port COM11 --seconds 30 --label quiet
 本次实时核对了项目 main 和 PR #1；以下其他链接作为学习入口保留，实际动手时再核对版本、环境和支持范围。近期 RetroMeshDevice 与 AEIC-SE 已在讨论中查阅源码或一手资料，但没有据此声称在我们的设备上运行过。
 
 - [当前项目仓库](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion)
-- [实机反馈草稿 PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1)
-- [PR 中的实机反馈使用说明](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/blob/e7c73dd2618e09a0d84d8595dafb545e76144f63/docs/hardware-feedback-loop.md)
+- [已合并的 PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1)
+- [仓库内的实机反馈使用说明](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/blob/main/docs/hardware-feedback-loop.md)
 - [PySDR 中文：频率域](https://pysdr.org/zh/content-zh/frequency_domain)
 - [Seeing Circles, Sines, and Signals](https://jackschaedler.github.io/circles-sines-signals/)
 - [Digital](https://github.com/hneemann/Digital)

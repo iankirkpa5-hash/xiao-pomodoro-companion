@@ -49,5 +49,5 @@ f67e53aa ACD7E70FB58E62DE1F32132039BE8668A51E4514B542F7C102C0A095E22A495D
 
 ## Remaining
 
-PR #1 review and merge. All sound-group, screen-sync, and manual items on the
-local branch are now recorded.
+PR #1 was merged on 2026-10-17 as `ec5cfe8`. All sound-group, screen-sync, and
+manual items on the local branch are now recorded and in main.

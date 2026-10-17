@@ -63,4 +63,6 @@ serial.log  376898D265D0B280CA9326FF9E72E36DE8294A3FC630E238D2B77A0A4830CAA4
 The change affects only the Normal-to-Quiet fallback timing. The 13/13 clap
 and clean quiet records were captured on the previous firmware; their
 detection thresholds are unchanged, so a quick post-change clap sanity check
-is optional. Reset/Stats/NVS manual checks and PR #1 acceptance remain open.
+is optional. Reset/Stats/NVS manual checks and PR #1 acceptance were completed
+later the same day ([manual checks](2026-10-17-t07-manual-reset-stats-nvs.md);
+PR merged as `ec5cfe8`).

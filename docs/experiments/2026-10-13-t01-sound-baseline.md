@@ -6,7 +6,7 @@ Date: 2026-10-13 (Asia/Shanghai). Task: T01, real-board evidence collection.
 
 - Local branch: `codex/microphone-serial-data`; HEAD: `a26959ec0a7ea7dfb7e424f6a0e4e7a43e52ce56`.
 - Local source includes uncommitted September continuous-microphone and web-monitor work. It is not identical to remote main (`fc32445`) or the published v1.6 tag.
-- Capture tooling was imported from draft PR #1 at `e7c73dd2618e09a0d84d8595dafb545e76144f63`, then adapted locally for legacy Mic records and timestamped CSV. The PR was not merged or changed remotely.
+- Capture tooling was imported from draft PR #1 at `e7c73dd2618e09a0d84d8595dafb545e76144f63`, then adapted locally for legacy Mic records and timestamped CSV. The PR was not merged at that time; it was merged later on 2026-10-17 as `ec5cfe8`, with the adapted tooling included.
 - All `src/` files and `platformio.ini` still matched the preflight source hashes after the captures. No firmware build, upload, threshold change, touch fix, or NVS write was performed this round.
 - Python 3.11.7 in the existing PlatformIO environment; PlatformIO Core 6.2.0; pySerial available. Port: COM11, USB VID:PID `303A:1001`, device serial `E0:72:A1:FA:17:9C`.
 - The board emitted `timestamp_ms,rms,peak,level` and `Mic capture:` throughput diagnostics. This matches the experimental format but does not prove the exact running binary; no unique firmware identifier is reported.

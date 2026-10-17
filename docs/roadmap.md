@@ -27,7 +27,7 @@ Main branch: main
 Current daily-use line: v1.6
 Displayed version: v1.6 (corrected in fc32445)
 Camera experiment: v1.7-camera-test, separate from main
-Current task: sound-group retests recorded; final clap run 13/13 operator-confirmed
+Current task: sound-group validation merged to main (PR #1, ec5cfe8)
 Later candidate: v1.8-hardware-feedback, not implemented
 ```
 
@@ -77,7 +77,7 @@ Tag `v1.6-microphone-test` points to `b033798`. It contains the microphone featu
 Keep the daily-use baseline separate from the local experiment:
 
 1. Local HEAD is `a26959e` on `codex/microphone-serial-data`, with uncommitted continuous sampling, interval aggregation, timestamped CSV, and [web monitor](../tools/microphone-monitor/README.md) work. Do not overwrite it with remote main or assume it identifies the board firmware.
-2. [PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1) remains a draft at `e7c73dd`. Its [capture tool](hardware-feedback-loop.md) was brought into this workspace without merging, then adapted for both serial formats. Local changes are not yet in that PR.
+2. [PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1) merged into main on October 17 as `ec5cfe8`. Its [capture tool](hardware-feedback-loop.md) was brought into this workspace at `e7c73dd`, adapted for both serial formats, and merged back together with the local work. The original `e7c73dd` stays on `backup/pr1-e7c73dd`.
 3. T01 reads the currently running firmware only: preserve raw logs, CSV and reports for quiet, speech and clap, plus user observations. Do not flash just to capture a baseline. Only one program may own the serial port.
 4. T02 compares recorded data and reuses the existing visualization. T03 validates the full build/upload/capture workflow after baseline collection. T04 makes only evidence-supported firmware changes; timestamps and aggregation already implemented locally must be tested, not recreated.
 
@@ -87,7 +87,7 @@ The [serial-data record](microphone-serial-data.md) includes earlier format chec
 
 Three subsequent 30-second quiet / speech / clap captures are preserved in the [T01 record](experiments/2026-10-13-t01-sound-baseline.md). All retained I2C errors; the quiet run also contains a high outlier. The user confirmed following the prompts at very close range, without an exact distance or clap count. The [T02 offline comparison](experiments/2026-10-14-t02-sound-comparison.md) plots all three runs with host time, device intervals, gap markers and firmware labels. It found 6 / 2 / 16 microphone payloads embedded in I2C error lines. Every internal valid-CSV gap has corresponding mixed-line evidence; the plots do not silently recover these candidates. No firmware was changed in T02.
 
-On October 16, a single [touch-IRQ guard](experiments/2026-10-16-t04-touch-irq-serial.md) in `input.cpp` prevented coordinate reads when touch INT was inactive. Before: 222 I2C errors / 19 mixed payloads in 30 seconds. After build/upload: zero errors / zero mixed payloads in 30 seconds and a separate 60-second follow-up, with 500 ms device report spacing. The user confirmed basic touch, Settings, Bright and Save; the confirmation was not synchronized with the follow-up capture. This provides a T03 real cycle and a bounded T04 fix, not full PR or acoustic acceptance. The [October 16 quiet retest](experiments/2026-10-16-t05-quiet-retest.md) then produced a clean Quiet-only baseline, and the [October 17 clap retest](experiments/2026-10-17-t02-clap-retest.md) closed with an operator-confirmed 13/13 final run; speech completion is operator-confirmed. A second evidence-led T04 change on October 17 raised the quiet debounce from 5 to 15 frames after screen-sync captures showed Quiet/Normal flicker during word gaps; the [debounce record](experiments/2026-10-17-t06-quiet-debounce.md) documents the rebuilt firmware and its 30-second verification capture. The [manual Reset / Stats / NVS checks](experiments/2026-10-17-t07-manual-reset-stats-nvs.md) then passed with serial and operator confirmation. Keep original FAILED records and investigate any returning errors instead of suppressing logs.
+On October 16, a single [touch-IRQ guard](experiments/2026-10-16-t04-touch-irq-serial.md) in `input.cpp` prevented coordinate reads when touch INT was inactive. Before: 222 I2C errors / 19 mixed payloads in 30 seconds. After build/upload: zero errors / zero mixed payloads in 30 seconds and a separate 60-second follow-up, with 500 ms device report spacing. The user confirmed basic touch, Settings, Bright and Save; the confirmation was not synchronized with the follow-up capture. This provides a T03 real cycle and a bounded T04 fix, not full PR or acoustic acceptance. The [October 16 quiet retest](experiments/2026-10-16-t05-quiet-retest.md) then produced a clean Quiet-only baseline, and the [October 17 clap retest](experiments/2026-10-17-t02-clap-retest.md) closed with an operator-confirmed 13/13 final run; speech completion is operator-confirmed. A second evidence-led T04 change on October 17 raised the quiet debounce from 5 to 15 frames after screen-sync captures showed Quiet/Normal flicker during word gaps; the [debounce record](experiments/2026-10-17-t06-quiet-debounce.md) documents the rebuilt firmware and its 30-second verification capture. The [manual Reset / Stats / NVS checks](experiments/2026-10-17-t07-manual-reset-stats-nvs.md) then passed with serial and operator confirmation, and PR #1 was merged into main as `ec5cfe8` on October 17. Keep original FAILED records and investigate any returning errors instead of suppressing logs.
 
 ## v1.x: Offline Desktop Terminal
 
@@ -700,8 +700,8 @@ Choose work using the flexible learning map; this is the current sequence for th
 ```text
 Current baseline: v1.6 daily-use mainline
 Preserved experiment: v1.7 camera test and thermal findings
-Current step: touch-IRQ guard passed; quiet/speech/clap retests recorded; clap 13/13, screen-label sync, and Reset/Stats/NVS manual checks operator-confirmed; quiet debounce raised with evidence
-Remaining: T03 PR review/merge; further T04 changes only from evidence
+Current step: touch-IRQ guard passed; quiet/speech/clap retests recorded; clap 13/13, screen-label sync, and Reset/Stats/NVS manual checks operator-confirmed; quiet debounce raised with evidence; PR #1 merged (ec5cfe8)
+Remaining: further T04 changes only from evidence
 Available locally: web curves and CSV, dual-format CLI capture, I2C error reporting
 Deferred: bidirectional serial, keyboard, FFT/PCM and other product changes
 Later candidates: v1.8 hardware feedback, battery, enclosure, Wi-Fi
