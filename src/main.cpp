@@ -3,6 +3,7 @@
 #include "config.h"
 #include "input.h"
 #include "microphone.h"
+#include "pcm_capture.h"
 #include "pomodoro_timer.h"
 #include "prompts.h"
 #include "stats.h"
@@ -364,4 +365,5 @@ void loop() {
     printStatusEverySecond(now);
   }
   microphone_print_level(now);
+  pcm_capture_service(microphone_read_level().ok);
 }

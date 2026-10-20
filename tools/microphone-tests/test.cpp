@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include "../../src/pcm_capture.cpp"
 #include "../../src/microphone.cpp"
 
 void reset(uint32_t now = 0) {
