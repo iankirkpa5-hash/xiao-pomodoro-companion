@@ -11,6 +11,15 @@ inline unsigned long millis() { return fake_ms; }
 
 struct FakeSerial {
   std::string output;
+  std::string input;
+  int tx_space = 256;
+  int available() { return static_cast<int>(input.size()); }
+  int read() { const unsigned char c = input.front(); input.erase(0, 1); return c; }
+  int availableForWrite() { return tx_space; }
+  size_t write(const uint8_t *data, size_t size) {
+    output.append(reinterpret_cast<const char *>(data), size);
+    return size;
+  }
   void println(const char *text) { output += std::string(text) + "\n"; }
   void printf(const char *format, ...) {
     char text[512];

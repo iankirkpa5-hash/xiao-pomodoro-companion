@@ -1,4 +1,5 @@
 #include "microphone.h"
+#include "pcm_capture.h"
 
 #include <driver/i2s.h>
 #include <math.h>
@@ -119,6 +120,7 @@ void publishFrame() {
       peak, mean, MIC_SAMPLE_COUNT};
   const bool loud = isLoudFrame(level);
   const uint32_t timestamp = millis();
+  pcm_capture_feed(sample_buffer, MIC_SAMPLE_COUNT, timestamp);
 
   portENTER_CRITICAL(&capture_mux);
   captured_level = level;
@@ -144,6 +146,7 @@ bool receiveAudio() {
       MIC_I2S_PORT, reinterpret_cast<uint8_t *>(sample_buffer) + buffered_bytes,
       requested, &bytes_read, pdMS_TO_TICKS(20));
   if (result != ESP_OK || bytes_read == 0 || bytes_read > requested) {
+    pcm_capture_read_error();
     portENTER_CRITICAL(&capture_mux);
     read_errors++;
     portEXIT_CRITICAL(&capture_mux);

@@ -72,14 +72,21 @@ USB-C power
 
 Tag `v1.6-microphone-test` points to `b033798`. It contains the microphone feature, but its Settings screen still displays `v1.5`. Commit `fc32445` subsequently corrected `src/version.h` to `v1.6` and updated the hardware notes. Keep the published tag unchanged to preserve history; the display mismatch does not apply to current `main`.
 
-### Current Task: Validate Sound After the Touch-IRQ Fix
+### Current Task: Short PCM Recording And Listening
 
-Keep the daily-use baseline separate from the local experiment:
+The sound-data baseline closed on October 17 through PR #1. On October 20,
+`codex/pcm-wav` branched from `2dbf5ef` for a bounded recording experiment:
 
-1. Local HEAD is `a26959e` on `codex/microphone-serial-data`, with uncommitted continuous sampling, interval aggregation, timestamped CSV, and [web monitor](../tools/microphone-monitor/README.md) work. Do not overwrite it with remote main or assume it identifies the board firmware.
-2. [PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1) merged into main on October 17 as `ec5cfe8`. Its [capture tool](hardware-feedback-loop.md) was brought into this workspace at `e7c73dd`, adapted for both serial formats, and merged back together with the local work. The original `e7c73dd` stays on `backup/pr1-e7c73dd`.
-3. T01 reads the currently running firmware only: preserve raw logs, CSV and reports for quiet, speech and clap, plus user observations. Do not flash just to capture a baseline. Only one program may own the serial port.
-4. T02 compares recorded data and reuses the existing visualization. T03 validates the full build/upload/capture workflow after baseline collection. T04 makes only evidence-supported firmware changes; timestamps and aggregation already implemented locally must be tested, not recreated.
+1. Preserve up to five seconds of raw samples from the existing microphone task in PSRAM.
+2. Download with bounded serial commands and CRC checks, then save the unchanged PCM in a local WAV.
+3. Keep original audio separate from optional DC-removal / fixed-gain listening previews.
+4. Record manual sound and Pomodoro checks independently of transport checks. The operator found the side-position speech retest clear but quiet, and confirmed screen, touch, Settings and Bright operation. Comfortable playback loudness remains open.
+
+See [recorder usage and boundaries](pcm-recording.md) and the [October 20 record](experiments/2026-10-20-pcm-wav.md). This is not a new daily-use release, an AI mode, or a claim of lossless physical sampling. No new tag or main merge was performed for this experiment.
+
+### Previous Sound-Data Evidence
+
+[PR #1](https://github.com/iankirkpa5-hash/xiao-pomodoro-companion/pull/1) merged into main on October 17 as `ec5cfe8`. Its [capture tool](hardware-feedback-loop.md) was brought into the workspace at `e7c73dd`, adapted for both serial formats, and merged back together with the local work. The original `e7c73dd` stays on `backup/pr1-e7c73dd`. The following paragraphs preserve the dated investigation, including failures later resolved.
 
 This task does not require another microphone classifier, a new UI, or AI. The sound levels describe intensity, not a reliable identification of the sound source. Debounce and the Loud hold interval mean the label can briefly outlast the high-energy sample that triggered it.
 
@@ -535,8 +542,9 @@ Positioning:
 
 ```text
 Passive sound indicator completed
-Continuous capture and timestamped interval reports implemented locally; formal acceptance pending
+Continuous capture, timestamped interval reports and controlled retests completed
 Local web curves and CSV download are available for device validation
+Short PCM -> WAV experiment: verified transfer, clear but quiet listening preview
 ```
 
 Completed milestone:
@@ -564,10 +572,10 @@ Do not cut J1 / J2
 Do not repurpose D11 / D12 during this test
 ```
 
-Optional later directions, not implemented:
+Optional later directions, beyond the bounded PCM experiment:
 
 ```text
-Raw audio recording and repeatable data replay
+Longer recordings, playback gain tuning and repeatable data replay
 Sound-data / TinyML experiments
 Ambient noise reminder
 Clap detection
@@ -700,10 +708,11 @@ Choose work using the flexible learning map; this is the current sequence for th
 ```text
 Current baseline: v1.6 daily-use mainline
 Preserved experiment: v1.7 camera test and thermal findings
-Current step: touch-IRQ guard passed; quiet/speech/clap retests recorded; clap 13/13, screen-label sync, and Reset/Stats/NVS manual checks operator-confirmed; quiet debounce raised with evidence; PR #1 merged (ec5cfe8)
-Remaining: further T04 changes only from evidence
+Completed baseline: controlled sound retests, screen-label sync, Reset/Stats/NVS; PR #1 merged (ec5cfe8)
+Current step: codex/pcm-wav, bounded five-second raw PCM -> WAV with transfer and listening evidence
+Remaining: playback loudness improvement; further changes only from evidence
 Available locally: web curves and CSV, dual-format CLI capture, I2C error reporting
-Deferred: bidirectional serial, keyboard, FFT/PCM and other product changes
+Deferred: serial brightness control, keyboard, FFT, STT/AI and other product changes
 Later candidates: v1.8 hardware feedback, battery, enclosure, Wi-Fi
 ```
 

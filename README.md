@@ -14,7 +14,7 @@ The separate `v1.7-camera-test` experiment initialized the camera and captured o
 
 The [Flexible Learning Map](docs/esp32-flexible-learning-roadmap.md) connects this project with circuits, mathematics, sound data, embedded systems, FPGA, and AI. It is an evolving map, not a mandatory sequence. The [Engineering Roadmap](docs/roadmap.md) tracks current work and candidate product extensions.
 
-The updated [Project and Learning Plan](docs/xiao-linux-mini-plan.md) separates current tasks, learning exercises, pending validation, and optional branches. The near-term sequence is capture evidence, compare curves, validate the full workflow, then make evidence-led changes. The local `codex/microphone-serial-data` experiment already contains continuous microphone capture and a web monitor; these are not a new daily-use release. The [hardware feedback CLI](docs/hardware-feedback-loop.md) now accepts both legacy Mic records and experimental timestamped CSV. Its checks do not replace human screen, touch, and sound-response checks.
+The updated [Project and Learning Plan](docs/xiao-linux-mini-plan.md) separates current tasks, learning exercises, pending validation, and optional branches. Continuous microphone capture, curves, and controlled sound retests were merged through PR #1; they do not create a new release tag. The current `codex/pcm-wav` experiment adds [short PCM recording to a local WAV](docs/pcm-recording.md). On October 20, five-second transfer checks passed and the operator confirmed clear content from the DC-removed listening preview, though playback volume remains low. See the [recording and listening evidence](docs/experiments/2026-10-20-pcm-wav.md). The [hardware feedback CLI](docs/hardware-feedback-loop.md) accepts both legacy Mic records and timestamped CSV; its checks do not replace human screen, touch, and sound-response checks.
 
 The [October 13 T01 record](docs/experiments/2026-10-13-t01-sound-baseline.md) contains quiet / speech / clap captures. The [October 14 T02 comparison](docs/experiments/2026-10-14-t02-sound-comparison.md) found microphone payloads mixed into I2C error lines. The [October 16 touch-IRQ fix and retest](docs/experiments/2026-10-16-t04-touch-irq-serial.md) now gates coordinate reads on the touch interrupt: two post-upload observations had zero I2C errors and zero mixed records, and the user confirmed basic touch / Settings / Bright / Save operation. The [October 16 quiet retest](docs/experiments/2026-10-16-t05-quiet-retest.md) produced a clean Quiet-only baseline, and the [October 17 clap retest](docs/experiments/2026-10-17-t02-clap-retest.md) closed with an operator-confirmed 13/13 final run. Screen-label sync was confirmed on device on October 17, and the [quiet debounce change](docs/experiments/2026-10-17-t06-quiet-debounce.md) stabilized the Normal label during speech. The [manual Reset / Stats / NVS checks](docs/experiments/2026-10-17-t07-manual-reset-stats-nvs.md) passed the same day. PR #1 was then merged into main on October 17 (`ec5cfe8`). The original FAILED reports are preserved. Full acceptance and PCM / AI remain separate work.
 
@@ -154,7 +154,7 @@ Experiment status and future candidates:
 
 * `v1.6-microphone-test`: completed and merged; centered RMS / peak and Quiet / Normal / Loud are available.
 * `feature/camera-test` / `v1.7-camera-test`: recorded initialization, single-frame capture, and a thermal limitation; kept separate from `main`.
-* Current sound-data task: produce timestamped RMS / peak / level rows over serial, verify them, then add computer plotting and CSV capture.
+* Sound-data baseline: timestamped RMS / peak / level, curves, CSV, and controlled retests completed; current experiment retains raw PCM and saves a verified WAV for listening.
 * `feature/hardware-feedback`: a later candidate for buzzer or vibration feedback; hardware and implementation are still to be selected.
 * `feature/battery-power`: a later candidate for battery support and power management.
 
@@ -274,6 +274,7 @@ src/
 +-- ui.h/.cpp             # display rendering
 +-- config.h/.cpp         # NVS-backed settings
 +-- microphone.h/.cpp     # PDM microphone sound level indicator
++-- pcm_capture.h/.cpp    # experimental bounded raw PCM recording / USB transfer
 +-- prompts.h/.cpp        # break wellness prompts
 +-- stats.h/.cpp          # completed Focus counter
 +-- version.h             # app version string
@@ -313,7 +314,8 @@ Historical version note: tag `v1.6-microphone-test` points to `b033798`, whose S
 * Use [Release Checklist](docs/release-checklist.md) before tagging new versions
 * Use the [Flexible Learning Map](docs/esp32-flexible-learning-roadmap.md) to choose experiments by interest and available hardware
 * Review the completed [T02 offline comparison](docs/experiments/2026-10-14-t02-sound-comparison.md): quiet outlier, clap peaks, and serial records interleaved with I2C diagnostics
-* Review the [touch-IRQ retest](docs/experiments/2026-10-16-t04-touch-irq-serial.md): a real build/upload/capture cycle passed, but controlled sound retesting and complete PR acceptance remain open
-* Use the experimental [Microphone Web Monitor](tools/microphone-monitor/README.md) for local USB serial curves, diagnostics, and CSV download; real microphone validation is still pending
+* Review the completed [touch-IRQ retest](docs/experiments/2026-10-16-t04-touch-irq-serial.md) and subsequent [controlled clap retest](docs/experiments/2026-10-17-t02-clap-retest.md); PR #1 is merged
+* Use the [Microphone Web Monitor](tools/microphone-monitor/README.md) for USB serial curves, diagnostics, and CSV; disconnect it before another tool opens the same port
+* Continue from the [five-second PCM/WAV experiment](docs/experiments/2026-10-20-pcm-wav.md): raw transfer and basic listening verified, playback volume still low; no FFT, STT, or AI added
 * Keep the camera experiment separate and the camera module removed from the daily setup
 * Consider `v1.8-hardware-feedback`, battery power, and enclosure work as later candidates
