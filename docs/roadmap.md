@@ -27,7 +27,8 @@ Main branch: main
 Current daily-use line: v1.6
 Displayed version: v1.6 (corrected in fc32445)
 Camera experiment: v1.7-camera-test, separate from main
-Current task: sound-group validation merged to main (PR #1, ec5cfe8)
+Sound baseline: merged to main (PR #1, ec5cfe8)
+Current task: PCM/WAV experiment merged to main (PR #2, 6379372)
 Later candidate: v1.8-hardware-feedback, not implemented
 ```
 
@@ -72,7 +73,7 @@ USB-C power
 
 Tag `v1.6-microphone-test` points to `b033798`. It contains the microphone feature, but its Settings screen still displays `v1.5`. Commit `fc32445` subsequently corrected `src/version.h` to `v1.6` and updated the hardware notes. Keep the published tag unchanged to preserve history; the display mismatch does not apply to current `main`.
 
-### Current Task: Short PCM Recording And Listening
+### Completed: Short PCM Recording And Listening
 
 The sound-data baseline closed on October 17 through PR #1. On October 20,
 `codex/pcm-wav` branched from `2dbf5ef` for a bounded recording experiment:
@@ -82,7 +83,7 @@ The sound-data baseline closed on October 17 through PR #1. On October 20,
 3. Keep original audio separate from optional DC-removal / fixed-gain listening previews.
 4. Record manual sound and Pomodoro checks independently of transport checks. The operator found the side-position speech retest clear but quiet, and confirmed screen, touch, Settings and Bright operation. Comfortable playback loudness remains open.
 
-See [recorder usage and boundaries](pcm-recording.md) and the [October 20 record](experiments/2026-10-20-pcm-wav.md). This is not a new daily-use release, an AI mode, or a claim of lossless physical sampling. No new tag or main merge was performed for this experiment.
+See [recorder usage and boundaries](pcm-recording.md) and the [October 20 record](experiments/2026-10-20-pcm-wav.md). This is not a new daily-use release, an AI mode, or a claim of lossless physical sampling. Merged into `main` through PR #2 (`6379372`); no new tag was created. Playback loudness remains the next open item.
 
 ### Previous Sound-Data Evidence
 
@@ -544,7 +545,7 @@ Positioning:
 Passive sound indicator completed
 Continuous capture, timestamped interval reports and controlled retests completed
 Local web curves and CSV download are available for device validation
-Short PCM -> WAV experiment: verified transfer, clear but quiet listening preview
+Short PCM -> WAV experiment: merged (PR #2, 6379372); verified transfer, clear but quiet listening preview
 ```
 
 Completed milestone:
@@ -709,7 +710,7 @@ Choose work using the flexible learning map; this is the current sequence for th
 Current baseline: v1.6 daily-use mainline
 Preserved experiment: v1.7 camera test and thermal findings
 Completed baseline: controlled sound retests, screen-label sync, Reset/Stats/NVS; PR #1 merged (ec5cfe8)
-Current step: codex/pcm-wav, bounded five-second raw PCM -> WAV with transfer and listening evidence
+Current step: PCM/WAV merged to main (PR #2, 6379372); bounded five-second raw PCM -> WAV with transfer and listening evidence
 Remaining: playback loudness improvement; further changes only from evidence
 Available locally: web curves and CSV, dual-format CLI capture, I2C error reporting
 Deferred: serial brightness control, keyboard, FFT, STT/AI and other product changes

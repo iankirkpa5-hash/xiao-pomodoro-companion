@@ -3,7 +3,8 @@
 This experiment records up to five seconds from the existing PDM receive task,
 downloads the original samples over USB serial, and creates a local WAV. It does
 not add AI, speech recognition, network upload, an SD card, or microphone controls
-to Settings. It remains on `codex/pcm-wav`; the displayed version stays `v1.6`.
+to Settings. It was merged into `main` through PR #2 (`6379372`); the
+displayed version stays `v1.6`.
 
 ## Record And Listen
 
