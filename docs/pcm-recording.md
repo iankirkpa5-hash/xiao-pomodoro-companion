@@ -48,12 +48,24 @@ the original file and never change the device's sound-level thresholds:
 Replace `pcm-EXAMPLE` with the directory printed by the recorder. The new
 `audio-listening-comparison/` directory contains `centered.wav` (whole-record DC
 removal) and `highpass-80hz.wav` (additional one-pole high-pass filtering). Both
-use the same fixed gain, capped at 8x and reduced when necessary for -6 dBFS
-peak headroom, plus 10 ms endpoint fades. There is no automatic gain control,
-silence gate, time stretching, or deletion of interior samples. Processing
-parameters and source/output hashes are saved in `comparison.json`. Existing
-outputs are never overwritten. These are listening aids, not raw measurements
-or a claim that a recording defect was repaired.
+use the same fixed gain, 16x by default, reduced when necessary for -6 dBFS peak
+headroom, plus 10 ms endpoint fades. For quiet recordings, a bounded override is
+available:
+
+```powershell
+& "$env:USERPROFILE\.platformio\penv\Scripts\python.exe" tools/prepare_pcm_preview.py test-runs/pcm-EXAMPLE/audio.wav --gain 20
+```
+
+`--gain` accepts 1-32 and is shared by both outputs. The request is still capped
+by the same -6 dBFS headroom rule, so the actual gain in `comparison.json` can be
+lower than requested (`requested_gain`, `headroom_cap`, `shared_gain`, and
+`estimated_peak_dbfs` record the result). A non-default gain writes to
+`audio-listening-comparison-gain20/`, and existing outputs are never overwritten.
+There is no automatic gain control, silence gate, time stretching, or deletion
+of interior samples. Processing parameters and source/output hashes are saved in
+`comparison.json`. Louder previews also raise background noise; these are
+listening aids, not raw measurements or a claim that a recording defect was
+repaired.
 
 Recordings remain local and are ignored by Git. They may contain private speech;
 do not publish them with source changes unless deliberately selected.

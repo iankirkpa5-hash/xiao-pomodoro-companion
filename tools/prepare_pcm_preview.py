@@ -10,6 +10,17 @@ import sys
 import wave
 
 
+DEFAULT_GAIN = 16.0
+MAX_GAIN = 32.0
+HEADROOM_PEAK = 16383  # -6 dBFS for signed 16-bit samples
+
+
+def validate_gain(gain):
+    if not math.isfinite(gain) or not 1.0 <= gain <= MAX_GAIN:
+        raise ValueError(f"gain must be between 1 and {MAX_GAIN:g}")
+    return gain
+
+
 def highpass(samples, rate, cutoff):
     alpha = math.exp(-2 * math.pi * cutoff / rate)
     previous_input, previous_output = samples[0], 0.0
@@ -33,7 +44,8 @@ def render(samples, rate, gain):
     return output.tobytes()
 
 
-def prepare(source):
+def prepare(source, gain=DEFAULT_GAIN):
+    gain = validate_gain(gain)
     before = hashlib.sha256(source.read_bytes()).hexdigest()
     with wave.open(str(source), "rb") as wav:
         if (wav.getnchannels(), wav.getsampwidth(), wav.getframerate()) != (1, 2, 16000):
@@ -49,12 +61,17 @@ def prepare(source):
     filtered = highpass(centered, rate, 80)
     # The same fixed gain in both comparisons avoids automatic gain pumping.
     maximum = max(max(map(abs, centered)), max(map(abs, filtered)))
-    gain = min(8.0, 16383 / maximum) if maximum else 1.0
-    output = source.parent / (source.stem + "-listening-comparison")
+    headroom_cap = HEADROOM_PEAK / maximum if maximum else 1.0
+    shared_gain = min(gain, headroom_cap)
+    suffix = "-listening-comparison" if gain == DEFAULT_GAIN else f"-listening-comparison-gain{gain:g}"
+    output = source.parent / (source.stem + suffix)
     output.mkdir(exist_ok=False)
+    peak_dbfs = round(20 * math.log10(maximum * shared_gain / 32767), 2) if maximum else None
     report = dict(source=str(source.resolve()), source_sha256=before,
                   sample_rate=rate, samples=len(data), raw_mean=mean,
-                  shared_gain=gain, fade_ms=10, highpass_hz=80,
+                  requested_gain=gain, headroom_cap=headroom_cap,
+                  shared_gain=shared_gain, estimated_peak_dbfs=peak_dbfs,
+                  fade_ms=10, highpass_hz=80,
                   purpose="Listening comparison only; not a firmware or audio-quality fix",
                   outputs=[])
     for name, samples in (("centered.wav", centered), ("highpass-80hz.wav", filtered)):
@@ -64,7 +81,7 @@ def prepare(source):
                 wav.setnchannels(1)
                 wav.setsampwidth(2)
                 wav.setframerate(rate)
-                wav.writeframes(render(samples, rate, gain))
+                wav.writeframes(render(samples, rate, shared_gain))
         report["outputs"].append(dict(file=name, sha256=hashlib.sha256(path.read_bytes()).hexdigest()))
     if hashlib.sha256(source.read_bytes()).hexdigest() != before:
         raise RuntimeError("source changed during preview generation")
@@ -75,8 +92,14 @@ def prepare(source):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("wav", type=Path)
+    parser.add_argument("--gain", type=float, default=DEFAULT_GAIN,
+                        help="fixed preview gain from 1 to 32 (default 8); still capped for -6 dBFS peak headroom")
     args = parser.parse_args()
-    print(prepare(args.wav))
+    try:
+        output = prepare(args.wav, args.gain)
+    except ValueError as error:
+        parser.error(str(error))
+    print(output)
 
 
 if __name__ == "__main__":
