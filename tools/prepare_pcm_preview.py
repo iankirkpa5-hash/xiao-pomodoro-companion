@@ -10,7 +10,7 @@ import sys
 import wave
 
 
-DEFAULT_GAIN = 8.0
+DEFAULT_GAIN = 16.0
 MAX_GAIN = 32.0
 HEADROOM_PEAK = 16383  # -6 dBFS for signed 16-bit samples
 

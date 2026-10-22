@@ -163,12 +163,12 @@ class PcmTests(unittest.TestCase):
             path = Path(tmp)/"quiet.wav"
             pcm.write_wav(path, data, self.status(data))
             original = path.read_bytes()
-            output = preview.prepare(path, 16)
-            self.assertEqual(output.name, "quiet-listening-comparison-gain16")
+            output = preview.prepare(path, 24)
+            self.assertEqual(output.name, "quiet-listening-comparison-gain24")
             self.assertEqual(path.read_bytes(), original)
             report = json.loads((output/"comparison.json").read_text(encoding="utf-8"))
-            self.assertEqual(report["requested_gain"], 16)
-            self.assertAlmostEqual(report["shared_gain"], 16)
+            self.assertEqual(report["requested_gain"], 24)
+            self.assertAlmostEqual(report["shared_gain"], 24)
             peaks = []
             for name in ("centered.wav", "highpass-80hz.wav"):
                 with wave.open(str(output/name), "rb") as wav:
@@ -178,6 +178,8 @@ class PcmTests(unittest.TestCase):
             self.assertGreater(min(peaks), 1500)
             default_output = preview.prepare(path)
             self.assertEqual(default_output.name, "quiet-listening-comparison")
+            default_report = json.loads((default_output/"comparison.json").read_text(encoding="utf-8"))
+            self.assertEqual(default_report["requested_gain"], 16)
             for invalid in (0, 33, float("nan"), float("inf")):
                 with self.assertRaises(ValueError):
                     preview.prepare(path, invalid)
