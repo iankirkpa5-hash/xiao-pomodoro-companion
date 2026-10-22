@@ -17,6 +17,8 @@ bool session_feedback_active = false;
 unsigned long session_feedback_until_ms = 0;
 bool settings_active = false;
 bool idle_screen_active = false;
+// Keep the Break screen visible after Focus completion until the operator acts.
+bool break_awaiting_ack = false;
 unsigned long paused_since_ms = 0;
 unsigned long idle_block_until_ms = 0;
 uint8_t focus_option_index = 0;
@@ -205,10 +207,14 @@ void finishSessionFeedbackIfReady(unsigned long now) {
 void switchSession(unsigned long now) {
   toggleSessionMode();
   setRunning(false);
+  break_awaiting_ack = mode == SessionMode::Break;
   resetTimerForCurrentSession(now);
   paused_since_ms = now;
   beginSessionFeedback(now);
   Serial.printf("Switched to %s\n", modeLabel());
+  if (break_awaiting_ack) {
+    Serial.println("Break awaiting ack");
+  }
 }
 
 void updateIdleScreen(unsigned long now) {
@@ -218,6 +224,12 @@ void updateIdleScreen(unsigned long now) {
   }
 
   if (static_cast<long>(now - idle_block_until_ms) < 0) {
+    paused_since_ms = now;
+    return;
+  }
+
+  if (break_awaiting_ack) {
+    // Keep the completed Focus's Break screen visible until the operator acts.
     paused_since_ms = now;
     return;
   }
@@ -269,6 +281,10 @@ void handleInput(unsigned long now) {
 
   const InputEvent event = input_update(now);
   const TouchPoint touch = input_last_touch();
+  if (event != InputEvent::None && break_awaiting_ack) {
+    break_awaiting_ack = false;
+    Serial.println("Break acknowledged");
+  }
   if (settings_active) {
     if (event == InputEvent::LongPress) {
       Serial.printf("Settings long press ignored: x=%u y=%u\n", touch.x, touch.y);
