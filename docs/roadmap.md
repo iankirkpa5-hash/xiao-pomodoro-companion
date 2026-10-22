@@ -30,7 +30,7 @@ Camera experiment: v1.7-camera-test, separate from main
 Sound baseline: merged to main (PR #1, ec5cfe8)
 Current task: PCM/WAV experiment merged to main (PR #2, 6379372)
 Host preview gain: 16x default, bounded --gain to 32x (2026-10-22)
-Manual C checks: Reset/Stats/NVS/full Focus passed (2026-10-22); Break screen idle observation
+Manual C checks: Reset/Stats/NVS/full Focus passed (2026-10-22); Break screen fix verified
 Later candidate: v1.8-hardware-feedback, not implemented
 ```
 
@@ -91,10 +91,10 @@ See [recorder usage and boundaries](pcm-recording.md), the [October 20 record](e
 
 On 2026-10-22, Reset, Stats clear/increment, NVS persistence, and a full 25-minute
 Focus session were repeated on `main` (`53b5055`). Serial checks passed, Done
-reached 1, and the settings were restored to Focus 50 / Bright 60. The Break
-5:00 screen was replaced by the idle screen after 60 seconds, and tapping idle
-started a new Focus instead of returning to Break; this is a UX candidate. See
-the [C record](experiments/2026-10-22-t08-manual-reset-stats-nvs-focus.md).
+reached 1, and the settings were restored to Focus 50 / Bright 60. The Break 5:00 screen originally gave way to the idle screen after 60 seconds;
+a follow-up now keeps it visible until the operator acts, and a short tap then
+starts Break. See the [C record](experiments/2026-10-22-t08-manual-reset-stats-nvs-focus.md)
+and the [break-idle record](experiments/2026-10-22-t09-break-idle-ack.md).
 
 ### Previous Sound-Data Evidence
 
@@ -722,8 +722,8 @@ Current baseline: v1.6 daily-use mainline
 Preserved experiment: v1.7 camera test and thermal findings
 Completed baseline: controlled sound retests, screen-label sync, Reset/Stats/NVS, full Focus (2026-10-22); PR #1 merged (ec5cfe8)
 Current step: PCM/WAV merged (PR #2, 6379372); 16x host preview default (PR #4)
-Manual C: Reset/Stats/NVS/full Focus passed (2026-10-22); Break screen idle observation
-Remaining: device audio output assessment and Break-screen UX; further changes only from evidence
+Manual C: Reset/Stats/NVS/full Focus passed (2026-10-22); Break screen fix verified
+Remaining: device audio output assessment; further changes only from evidence
 Available locally: web curves and CSV, dual-format CLI capture, I2C error reporting
 Deferred: serial brightness control, keyboard, FFT, STT/AI and other product changes
 Later candidates: v1.8 hardware feedback, battery, enclosure, Wi-Fi

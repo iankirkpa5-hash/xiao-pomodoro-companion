@@ -96,6 +96,9 @@ appear exactly once.
   idle starts a new Focus rather than returning to the paused Break. This is a
   candidate follow-up: either keep the Break screen until acknowledged or make
   idle tap restore Break.
+
+Follow-up: the [break-idle record](2026-10-22-t09-break-idle-ack.md) implements
+the first option; the Break screen now remains until the operator acts.
 - Settings are restored to Focus 50 / Bright 60, 50:00 paused. Done is 1 because
   the completion incremented it; the original Done 2 was cleared and cannot be
   restored.

@@ -6,7 +6,7 @@
 
 **近期唯一开发主线：声音基线与曲线验收已完成 → 保留原始 PCM → 保存 WAV → 实际回放检查。**
 
-2026-10-20 补充：当前实验分支 `codex/pcm-wav` 从 `2dbf5ef` 建立，第一步已完成 5 秒 PCM/WAV 传输校验和人工试听。侧向说话复测反馈为“音量小，但内容清楚”，画面、触摸、Settings、Bright 均正常；播放音量仍可改善。原始音频与去直流试听副本分开保存，不新增 AI，也不改声音等级阈值。见 [使用说明](pcm-recording.md) 与 [实测记录](experiments/2026-10-20-pcm-wav.md)。2026-10-21 补充：该实验已由 PR #2 合并（`6379372`），未建立新版本标签；播放音量仍是待改善项。2026-10-22 补充：试听预览新增有界 `--gain`（1–32x），默认由 8x 提高到 16x（+6 dB）；操作者确认 8x／16x／19.38x 三个版本内容都清晰，差别只在音量。原始采集、WAV 与声音等级阈值未改，最大请求仍受 -6 dBFS headroom 限制。见 [播放增益记录](experiments/2026-10-22-pcm-playback-gain.md)。2026-10-22 同日完成 C 实机回归：Reset、Stats 清除/递增、NVS 断电保持、完整 25 分钟 Focus；serial PASS，Done 1，设置还原为 Focus 50／Bright 60。Break 5:00 只显示约 60 秒后被 idle screen 覆盖，点 idle 会开新 Focus，列为 UX 候选。见 [C 实测记录](experiments/2026-10-22-t08-manual-reset-stats-nvs-focus.md)。以下旧日期的快照保留历史语境，不代表当前分支或最新验收状态。
+2026-10-20 补充：当前实验分支 `codex/pcm-wav` 从 `2dbf5ef` 建立，第一步已完成 5 秒 PCM/WAV 传输校验和人工试听。侧向说话复测反馈为“音量小，但内容清楚”，画面、触摸、Settings、Bright 均正常；播放音量仍可改善。原始音频与去直流试听副本分开保存，不新增 AI，也不改声音等级阈值。见 [使用说明](pcm-recording.md) 与 [实测记录](experiments/2026-10-20-pcm-wav.md)。2026-10-21 补充：该实验已由 PR #2 合并（`6379372`），未建立新版本标签；播放音量仍是待改善项。2026-10-22 补充：试听预览新增有界 `--gain`（1–32x），默认由 8x 提高到 16x（+6 dB）；操作者确认 8x／16x／19.38x 三个版本内容都清晰，差别只在音量。原始采集、WAV 与声音等级阈值未改，最大请求仍受 -6 dBFS headroom 限制。见 [播放增益记录](experiments/2026-10-22-pcm-playback-gain.md)。2026-10-22 同日完成 C 实机回归：Reset、Stats 清除/递增、NVS 断电保持、完整 25 分钟 Focus；serial PASS，Done 1，设置还原为 Focus 50／Bright 60。Break 5:00 只显示约 60 秒后被 idle screen 覆盖，点 idle 会开新 Focus，列为 UX 候选（同日已由 A 修正）。见 [C 实测记录](experiments/2026-10-22-t08-manual-reset-stats-nvs-focus.md)。同日完成 A：Focus 完成后 Break 5:00 保留到使用者操作，不再 60 秒后进 idle；已用 25 分钟 Focus 实机验证，完成後约 5.5 分钟无 idle，触控後 `Break acknowledged` 并开始 Break。见 [break-idle 记录](experiments/2026-10-22-t09-break-idle-ack.md)。以下旧日期的快照保留历史语境，不代表当前分支或最新验收状态。
 
 长期方向：以 XIAO 边缘设备为起点，逐步连接信号分析、协议分析、TinyML、LoRa、FPGA，以及 Linux／ROS 2。它们是可以按需要选择的分支，不是每一项都必须依次完成的清单。
 
@@ -154,7 +154,7 @@ L03 注意：SCL／SDA 的分析仪通道由当前接线决定，D0／D1 或旧�
 | B04 | 原始 PCM 采集和麦克风 FFT | PCM/WAV 已合并；预览默认 16x，FFT 待开发 | 10-20：16 kHz／16-bit／单声道、PSRAM 保存 5 秒、CRC 校验、WAV 与试听副本完成；内容清楚。10-22：预览默认 16x（+6 dB），可选至 32x，仍受 -6 dBFS headroom 限制。DMA 溢出事件未计数，不宣称绝对无丢样；FFT 留待后续 |
 | B05 | 仓库 README／路线图／历史版本记录同步 | 待办／随里程碑更新 | 把真实验收结果写回仓库，区分 main、草稿分支和板上版本；本次已更新本计划，仓库旧路线文档仍单列待同步 |
 | B06 | 更完整的硬件自检 | 候选开发／P2 | 参考 RetroMeshDevice 的逐项检查；分别输出 PASS／FAIL／SKIP，不能将“没有失败”当作“全部已验证” |
-| B07 | 完成后 Break 画面被 idle screen 覆盖 | 观察记录／P2，未开工 | 2026-10-22 C 发现：Focus 完成后 Break 5:00 只显示约 60 秒；点 idle 会开新 Focus。先确认期望行为，再决定延长 idle、暂停 idle，或让 idle 点击回到 Break |
+| B07 | 完成后 Break 画面被 idle screen 覆盖 | 已修并实机验证（2026-10-22） | 采 A：完成后 Break 5:00 保留到使用者操作；已用 25 分钟 Focus 验证，完成後约 5.5 分钟无 idle，触控後 `Break acknowledged` 并开始 Break。 |
 
 B03 的重点是输入体验和状态机。1.28 英寸圆屏空间有限，需要实际测试触摸目标、手指遮挡和误触；实体 T9 项目的布局不能直接照搬。实现 multi-tap 不依赖 MCP23017 驱动，也不代表完成带词典的 T9。
 
