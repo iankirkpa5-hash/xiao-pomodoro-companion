@@ -14,9 +14,9 @@ The separate `v1.7-camera-test` experiment initialized the camera and captured o
 
 The [Flexible Learning Map](docs/esp32-flexible-learning-roadmap.md) connects this project with circuits, mathematics, sound data, embedded systems, FPGA, and AI. It is an evolving map, not a mandatory sequence. The [Engineering Roadmap](docs/roadmap.md) tracks current work and candidate product extensions.
 
-The updated [Project and Learning Plan](docs/xiao-linux-mini-plan.md) separates current tasks, learning exercises, pending validation, and optional branches. Continuous microphone capture, curves, and controlled sound retests were merged through PR #1; they do not create a new release tag. The `codex/pcm-wav` experiment, merged through PR #2 (`6379372`), adds [short PCM recording to a local WAV](docs/pcm-recording.md). On October 20, five-second transfer checks passed and the operator confirmed clear content from the DC-removed listening preview. A later host-side gain pass raised the preview default to 16x without changing raw capture or device thresholds; see the [recording evidence](docs/experiments/2026-10-20-pcm-wav.md) and the [playback gain record](docs/experiments/2026-10-22-pcm-playback-gain.md). The [hardware feedback CLI](docs/hardware-feedback-loop.md) accepts both legacy Mic records and timestamped CSV; its checks do not replace human screen, touch, and sound-response checks.
+The updated [Project and Learning Plan](docs/xiao-linux-mini-plan.md) separates current tasks, learning exercises, pending validation, and optional branches. Continuous microphone capture, curves, and controlled sound retests were merged through PR #1; they do not create a new release tag. The PCM/WAV work, merged through PR #2 (`6379372`), adds [short PCM recording to a local WAV](docs/pcm-recording.md). On October 20, five-second transfer checks passed and the operator confirmed clear content from the DC-removed listening preview. A later host-side gain pass raised the preview default to 16x without changing raw capture or device thresholds; see the [recording evidence](docs/experiments/2026-10-20-pcm-wav.md) and the [playback gain record](docs/experiments/2026-10-22-pcm-playback-gain.md). The [hardware feedback CLI](docs/hardware-feedback-loop.md) accepts both legacy Mic records and timestamped CSV; its checks do not replace human screen, touch, and sound-response checks.
 
-The [October 13 T01 record](docs/experiments/2026-10-13-t01-sound-baseline.md) contains quiet / speech / clap captures. The [October 14 T02 comparison](docs/experiments/2026-10-14-t02-sound-comparison.md) found microphone payloads mixed into I2C error lines. The [October 16 touch-IRQ fix and retest](docs/experiments/2026-10-16-t04-touch-irq-serial.md) now gates coordinate reads on the touch interrupt: two post-upload observations had zero I2C errors and zero mixed records, and the user confirmed basic touch / Settings / Bright / Save operation. The [October 16 quiet retest](docs/experiments/2026-10-16-t05-quiet-retest.md) produced a clean Quiet-only baseline, and the [October 17 clap retest](docs/experiments/2026-10-17-t02-clap-retest.md) closed with an operator-confirmed 13/13 final run. Screen-label sync was confirmed on device on October 17, and the [quiet debounce change](docs/experiments/2026-10-17-t06-quiet-debounce.md) stabilized the Normal label during speech. The [manual Reset / Stats / NVS checks](docs/experiments/2026-10-17-t07-manual-reset-stats-nvs.md) passed the same day. A 2026-10-22 manual pass repeated Reset, Stats, NVS, and a complete Focus session; Reset/Stats/NVS and the Done increment passed. The Break 5:00 screen originally gave way to the idle screen after 60 seconds; a follow-up now keeps it visible until the operator acts. See the [C manual record](docs/experiments/2026-10-22-t08-manual-reset-stats-nvs-focus.md) and the [break-idle follow-up](docs/experiments/2026-10-22-t09-break-idle-ack.md). PR #1 was then merged into main on October 17 (`ec5cfe8`). The original FAILED reports are preserved. Full acceptance, PCM follow-ups, and AI remain separate work.
+The [October 13 T01 record](docs/experiments/2026-10-13-t01-sound-baseline.md) contains quiet / speech / clap captures. The [October 14 T02 comparison](docs/experiments/2026-10-14-t02-sound-comparison.md) found microphone payloads mixed into I2C error lines. The [October 16 touch-IRQ fix and retest](docs/experiments/2026-10-16-t04-touch-irq-serial.md) now gates coordinate reads on the touch interrupt: two post-upload observations had zero I2C errors and zero mixed records, and the user confirmed basic touch / Settings / Bright / Save operation. The [October 16 quiet retest](docs/experiments/2026-10-16-t05-quiet-retest.md) produced a clean Quiet-only baseline, and the [October 17 clap retest](docs/experiments/2026-10-17-t02-clap-retest.md) closed with an operator-confirmed 13/13 final run. Screen-label sync was confirmed on device on October 17, and the [quiet debounce change](docs/experiments/2026-10-17-t06-quiet-debounce.md) stabilized the Normal label during speech. The [manual Reset / Stats / NVS checks](docs/experiments/2026-10-17-t07-manual-reset-stats-nvs.md) passed the same day. A 2026-10-22 manual pass repeated Reset, Stats, NVS, and a complete Focus session; Reset/Stats/NVS and the Done increment passed. The Break 5:00 screen originally gave way to the idle screen after 60 seconds; a follow-up now keeps it visible until the operator acts. See the [C manual record](docs/experiments/2026-10-22-t08-manual-reset-stats-nvs-focus.md) and the [break-idle follow-up](docs/experiments/2026-10-22-t09-break-idle-ack.md). PR #1 was then merged into main on October 17 (`ec5cfe8`). The original FAILED reports are preserved. Full acceptance and AI remain separate work; waveform / FFT is the next sound step.
 
 ## Hardware
 
@@ -154,7 +154,7 @@ Experiment status and future candidates:
 
 * `v1.6-microphone-test`: completed and merged; centered RMS / peak and Quiet / Normal / Loud are available.
 * `feature/camera-test` / `v1.7-camera-test`: recorded initialization, single-frame capture, and a thermal limitation; kept separate from `main`.
-* Sound-data baseline: timestamped RMS / peak / level, curves, CSV, and controlled retests completed; current experiment retains raw PCM and saves a verified WAV for listening.
+* Sound-data baseline: timestamped RMS / peak / level, curves, CSV, and controlled retests completed; bounded PCM/WAV capture is merged and the host preview defaults to 16x.
 * `feature/hardware-feedback`: a later candidate for buzzer or vibration feedback; hardware and implementation are still to be selected.
 * `feature/battery-power`: a later candidate for battery support and power management.
 
@@ -162,6 +162,7 @@ Experiment status and future candidates:
 
 * Pomodoro timer with Focus and Break sessions
 * Automatic Focus / Break switching
+* Break screen stays visible after Focus completion until acknowledged
 * Round progress ring
 * Touch controls
 * Settings menu
@@ -274,7 +275,7 @@ src/
 +-- ui.h/.cpp             # display rendering
 +-- config.h/.cpp         # NVS-backed settings
 +-- microphone.h/.cpp     # PDM microphone sound level indicator
-+-- pcm_capture.h/.cpp    # experimental bounded raw PCM recording / USB transfer
++-- pcm_capture.h/.cpp    # bounded raw PCM recording / USB transfer
 +-- prompts.h/.cpp        # break wellness prompts
 +-- stats.h/.cpp          # completed Focus counter
 +-- version.h             # app version string
@@ -316,6 +317,6 @@ Historical version note: tag `v1.6-microphone-test` points to `b033798`, whose S
 * Review the completed [T02 offline comparison](docs/experiments/2026-10-14-t02-sound-comparison.md): quiet outlier, clap peaks, and serial records interleaved with I2C diagnostics
 * Review the completed [touch-IRQ retest](docs/experiments/2026-10-16-t04-touch-irq-serial.md) and subsequent [controlled clap retest](docs/experiments/2026-10-17-t02-clap-retest.md); PR #1 is merged
 * Use the [Microphone Web Monitor](tools/microphone-monitor/README.md) for USB serial curves, diagnostics, and CSV; disconnect it before another tool opens the same port
-* Continue from the [five-second PCM/WAV experiment](docs/experiments/2026-10-20-pcm-wav.md): raw transfer and basic listening verified, playback volume still low; no FFT, STT, or AI added
+* Continue from the merged [five-second PCM/WAV work](docs/experiments/2026-10-20-pcm-wav.md) and [16x preview gain](docs/experiments/2026-10-22-pcm-playback-gain.md): transfer, CRC, and listening are verified; the next sound step is waveform / FFT analysis using the existing WAV files, not another capture round. STT and AI remain later work.
 * Keep the camera experiment separate and the camera module removed from the daily setup
 * Consider `v1.8-hardware-feedback`, battery power, and enclosure work as later candidates

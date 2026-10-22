@@ -4,7 +4,7 @@
 
 本仓库版来自用户在其他对话整理的同名文件，已补充本地核对结果。远端 main、本地实验工作区与板上固件分别记录；下列资料链接是参考入口，不代表本轮逐篇复核或实机验证。
 
-**近期唯一开发主线：声音基线与曲线验收已完成 → 保留原始 PCM → 保存 WAV → 实际回放检查。**
+**近期主线已完成：声音基线、PCM/WAV、16x 试听、C 实机回归与 Break 修正 → 下一步用现有 WAV 做波形／FFT。**
 
 2026-10-20 补充：当前实验分支 `codex/pcm-wav` 从 `2dbf5ef` 建立，第一步已完成 5 秒 PCM/WAV 传输校验和人工试听。侧向说话复测反馈为“音量小，但内容清楚”，画面、触摸、Settings、Bright 均正常；播放音量仍可改善。原始音频与去直流试听副本分开保存，不新增 AI，也不改声音等级阈值。见 [使用说明](pcm-recording.md) 与 [实测记录](experiments/2026-10-20-pcm-wav.md)。2026-10-21 补充：该实验已由 PR #2 合并（`6379372`），未建立新版本标签；播放音量仍是待改善项。2026-10-22 补充：试听预览新增有界 `--gain`（1–32x），默认由 8x 提高到 16x（+6 dB）；操作者确认 8x／16x／19.38x 三个版本内容都清晰，差别只在音量。原始采集、WAV 与声音等级阈值未改，最大请求仍受 -6 dBFS headroom 限制。见 [播放增益记录](experiments/2026-10-22-pcm-playback-gain.md)。2026-10-22 同日完成 C 实机回归：Reset、Stats 清除/递增、NVS 断电保持、完整 25 分钟 Focus；serial PASS，Done 1，设置还原为 Focus 50／Bright 60。Break 5:00 只显示约 60 秒后被 idle screen 覆盖，点 idle 会开新 Focus，列为 UX 候选（同日已由 A 修正）。见 [C 实测记录](experiments/2026-10-22-t08-manual-reset-stats-nvs-focus.md)。同日完成 A：Focus 完成后 Break 5:00 保留到使用者操作，不再 60 秒后进 idle；已用 25 分钟 Focus 实机验证，完成後约 5.5 分钟无 idle，触控後 `Break acknowledged` 并开始 Break。见 [break-idle 记录](experiments/2026-10-22-t09-break-idle-ack.md)。以下旧日期的快照保留历史语境，不代表当前分支或最新验收状态。
 
@@ -217,9 +217,9 @@ AEIC-SE 的资料更正已纳入：当前 Seeed 文档确实链接了模型，�
 
 ## 9．下一次动手入口
 
-**T02 离线对照、10-16 的最小 IRQ 修正、10-16／10-17 的安静／说话／拍手三组复测、Quiet 去抖修正与 Reset／Stats／NVS 手工检查均已完成；拍手 13/13 与屏幕等级同步均已实机确认；PR #1 已合并（`ec5cfe8`）。** 下一候选：PCM→WAV 短实验。不要求先完成双向串口、FFT、T9 或设备树，也暂不接入 PCM／AI。以下保留 T01 复测入口，旧 FAILED 报告不改写。
+**T02 离线对照、10-16 的最小 IRQ 修正、10-16／10-17 的安静／说话／拍手三组复测、Quiet 去抖修正、Reset／Stats／NVS 手工检查、PCM/WAV（PR #2）、16x 试听（PR #4）、C 实机回归（`fee4a27`）与 Break 修正（PR #5）均已完成；拍手 13/13 与屏幕等级同步均已实机确认；PR #1 已合并（`ec5cfe8`）。** 下一候选：用现有 WAV 做波形／FFT；不要求先完成双向串口、T9 或设备树，也暂不接入 STT／AI。以下保留 T01 复测入口，旧 FAILED 报告不改写。
 
-工具已引入当前实验分支，先检查工作区和版本，不直接切换或合并 PR。以下命令在项目根目录执行；也可用已有 PlatformIO Python 环境，无需重复安装依赖：
+工具已在 main，先检查工作区和版本，不直接切换或合并 PR。以下命令在项目根目录执行；也可用已有 PlatformIO Python 环境，无需重复安装依赖：
 
 ```powershell
 py -m pip install -r tools/requirements-hardware.txt
@@ -227,9 +227,11 @@ py tools/hardware_loop.py doctor
 py tools/hardware_loop.py capture --port COM11 --seconds 30 --label quiet
 ```
 
-用 doctor 识别出的实际端口替换 COM11；随后用 speech、clap 标签各采一轮。先留下数据，再决定下一项修改。
+用 doctor 识别出的实际端口替换 COM11。若要重做证据链，可再用 speech、clap 标签各采一轮；当前下一步优先用 test-runs/ 里已保存的 WAV 做波形／FFT，不需要重新录音。
 
 第一轮验收点：三组日志与实验条件可对应、报告可读、已记录屏幕／触摸／计时状态；异常也可以成为本轮有效成果，不要求所有检查一次变绿。
+
+下一步入口：选一段已保存的 audio.wav，先用 Python 画波形与频谱（16 kHz、80,000 samples、去直流），比较窗长与频率分辨率；这一步不接 STT／AI。确认需要后再考虑固件侧 FFT。
 
 ## 10．参考入口与核对范围
 

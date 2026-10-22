@@ -28,9 +28,9 @@ Current daily-use line: v1.6
 Displayed version: v1.6 (corrected in fc32445)
 Camera experiment: v1.7-camera-test, separate from main
 Sound baseline: merged to main (PR #1, ec5cfe8)
-Current task: PCM/WAV experiment merged to main (PR #2, 6379372)
-Host preview gain: 16x default, bounded --gain to 32x (2026-10-22)
-Manual C checks: Reset/Stats/NVS/full Focus passed (2026-10-22); Break screen fix verified
+PCM/WAV: merged (PR #2, 6379372); 16x host preview default (PR #4)
+Manual C + Break idle fix: verified (2026-10-22; PR #5, 3e343eb)
+Next sound step: waveform / FFT from saved WAV
 Later candidate: v1.8-hardware-feedback, not implemented
 ```
 
@@ -721,11 +721,11 @@ Choose work using the flexible learning map; this is the current sequence for th
 Current baseline: v1.6 daily-use mainline
 Preserved experiment: v1.7 camera test and thermal findings
 Completed baseline: controlled sound retests, screen-label sync, Reset/Stats/NVS, full Focus (2026-10-22); PR #1 merged (ec5cfe8)
-Current step: PCM/WAV merged (PR #2, 6379372); 16x host preview default (PR #4)
+Current step: C checks and Break idle fix verified; next sound step is waveform / FFT from saved WAV
 Manual C: Reset/Stats/NVS/full Focus passed (2026-10-22); Break screen fix verified
 Remaining: device audio output assessment; further changes only from evidence
 Available locally: web curves and CSV, dual-format CLI capture, I2C error reporting
-Deferred: serial brightness control, keyboard, FFT, STT/AI and other product changes
+Deferred: serial brightness control, keyboard, STT/AI and other product changes
 Later candidates: v1.8 hardware feedback, battery, enclosure, Wi-Fi
 ```
 
