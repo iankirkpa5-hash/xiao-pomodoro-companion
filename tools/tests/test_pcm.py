@@ -1,5 +1,7 @@
 """Offline protocol/integrity tests; no serial device is opened."""
 import io
+import json
+import math
 from pathlib import Path
 import struct
 import sys
@@ -153,6 +155,46 @@ class PcmTests(unittest.TestCase):
                 self.assertEqual((values[0], values[-1]), (0, 0))
                 self.assertLessEqual(max(map(abs, values)), 16383)
             self.assertEqual(preview.highpass([100.0]*10, 16000, 80), [0.0]*10)
+
+    def test_preview_gain_option_is_bounded_and_shared(self):
+        data = b"".join(struct.pack("<h", round(100 * math.sin(2 * math.pi * 440 * i / 16000)))
+                        for i in range(16000))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)/"quiet.wav"
+            pcm.write_wav(path, data, self.status(data))
+            original = path.read_bytes()
+            output = preview.prepare(path, 16)
+            self.assertEqual(output.name, "quiet-listening-comparison-gain16")
+            self.assertEqual(path.read_bytes(), original)
+            report = json.loads((output/"comparison.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["requested_gain"], 16)
+            self.assertAlmostEqual(report["shared_gain"], 16)
+            peaks = []
+            for name in ("centered.wav", "highpass-80hz.wav"):
+                with wave.open(str(output/name), "rb") as wav:
+                    values = struct.unpack("<16000h", wav.readframes(16000))
+                peaks.append(max(map(abs, values)))
+                self.assertLessEqual(peaks[-1], 16383)
+            self.assertGreater(min(peaks), 1500)
+            default_output = preview.prepare(path)
+            self.assertEqual(default_output.name, "quiet-listening-comparison")
+            for invalid in (0, 33, float("nan"), float("inf")):
+                with self.assertRaises(ValueError):
+                    preview.prepare(path, invalid)
+
+    def test_preview_gain_is_capped_by_headroom(self):
+        data = struct.pack("<hh", -32768, 32767) * 8000
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)/"loud.wav"
+            pcm.write_wav(path, data, self.status(data))
+            output = preview.prepare(path, 32)
+            report = json.loads((output/"comparison.json").read_text(encoding="utf-8"))
+            self.assertEqual(report["requested_gain"], 32)
+            self.assertLess(report["shared_gain"], 1.0)
+            for name in ("centered.wav", "highpass-80hz.wav"):
+                with wave.open(str(output/name), "rb") as wav:
+                    values = struct.unpack("<16000h", wav.readframes(16000))
+                self.assertLessEqual(max(map(abs, values)), 16383)
 
     def test_preview_rejects_empty_and_wrong_format(self):
         with tempfile.TemporaryDirectory() as tmp:
