@@ -30,7 +30,7 @@ Camera experiment: v1.7-camera-test, separate from main
 Sound baseline: merged to main (PR #1, ec5cfe8)
 PCM/WAV: merged (PR #2, 6379372); 16x host preview default (PR #4)
 Manual C + Break idle fix: verified (2026-10-22; PR #5, 3e343eb)
-Next sound step: waveform / FFT from saved WAV
+Waveform / FFT: first offline analysis verified locally (codex/wav-fft; not yet merged)
 Later candidate: v1.8-hardware-feedback, not implemented
 ```
 
@@ -86,6 +86,15 @@ The sound-data baseline closed on October 17 through PR #1. On October 20,
 4. Record manual sound and Pomodoro checks independently of transport checks. The operator found the side-position speech retest clear but quiet, and confirmed screen, touch, Settings and Bright operation. Comfortable playback loudness remains open.
 
 See [recorder usage and boundaries](pcm-recording.md), the [October 20 record](experiments/2026-10-20-pcm-wav.md), and the [playback gain record](experiments/2026-10-22-pcm-playback-gain.md). This is not a new daily-use release, an AI mode, or a claim of lossless physical sampling. Merged into `main` through PR #2 (`6379372`); no new tag was created. Host preview loudness is addressed with a 16x default and a bounded `--gain`; device audio output was not assessed.
+
+### Completed Locally: Saved-WAV Analysis
+
+The subsequent [saved-WAV waveform / FFT record](experiments/2026-10-22-wav-fft.md)
+documents a host-only analysis of the existing five-second recording. Waveform,
+Hann spectrum, window-length comparison and numerical tests are complete locally
+on `codex/wav-fft`, not yet merged. Firmware, original audio and v1.6 remain
+unchanged. Low-frequency content is observed, not assigned a hardware cause;
+comparison of the existing listening previews is an optional next step.
 
 ### Manual C Checks
 
@@ -721,7 +730,7 @@ Choose work using the flexible learning map; this is the current sequence for th
 Current baseline: v1.6 daily-use mainline
 Preserved experiment: v1.7 camera test and thermal findings
 Completed baseline: controlled sound retests, screen-label sync, Reset/Stats/NVS, full Focus (2026-10-22); PR #1 merged (ec5cfe8)
-Current step: C checks and Break idle fix verified; next sound step is waveform / FFT from saved WAV
+Current step: saved-WAV waveform / FFT verified locally; review before selecting another experiment
 Manual C: Reset/Stats/NVS/full Focus passed (2026-10-22); Break screen fix verified
 Remaining: device audio output assessment; further changes only from evidence
 Available locally: web curves and CSV, dual-format CLI capture, I2C error reporting
