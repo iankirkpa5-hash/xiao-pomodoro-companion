@@ -8,6 +8,8 @@
 
 2026-10-20 补充：当前实验分支 `codex/pcm-wav` 从 `2dbf5ef` 建立，第一步已完成 5 秒 PCM/WAV 传输校验和人工试听。侧向说话复测反馈为“音量小，但内容清楚”，画面、触摸、Settings、Bright 均正常；播放音量仍可改善。原始音频与去直流试听副本分开保存，不新增 AI，也不改声音等级阈值。见 [使用说明](pcm-recording.md) 与 [实测记录](experiments/2026-10-20-pcm-wav.md)。2026-10-21 补充：该实验已由 PR #2 合并（`6379372`），未建立新版本标签；播放音量仍是待改善项。2026-10-22 补充：试听预览新增有界 `--gain`（1–32x），默认由 8x 提高到 16x（+6 dB）；操作者确认 8x／16x／19.38x 三个版本内容都清晰，差别只在音量。原始采集、WAV 与声音等级阈值未改，最大请求仍受 -6 dBFS headroom 限制。见 [播放增益记录](experiments/2026-10-22-pcm-playback-gain.md)。2026-10-22 同日完成 C 实机回归：Reset、Stats 清除/递增、NVS 断电保持、完整 25 分钟 Focus；serial PASS，Done 1，设置还原为 Focus 50／Bright 60。Break 5:00 只显示约 60 秒后被 idle screen 覆盖，点 idle 会开新 Focus，列为 UX 候选（同日已由 A 修正）。见 [C 实测记录](experiments/2026-10-22-t08-manual-reset-stats-nvs-focus.md)。同日完成 A：Focus 完成后 Break 5:00 保留到使用者操作，不再 60 秒后进 idle；已用 25 分钟 Focus 实机验证，完成后约 5.5 分钟无 idle，触控后 `Break acknowledged` 并开始 Break。见 [break-idle 记录](experiments/2026-10-22-t09-break-idle-ack.md)。以下旧日期的快照保留历史语境，不代表当前分支或最新验收状态。
 
+2026-10-23 补充：现有 16x preview 的 matched-gain A/B 完成；0-<80 Hz source-referred power 8,810.2 -> 37.3 counts²（-23.73 dB），占比 84.15% -> 2.88%；80-300 Hz -1.73 dB。操作者确认人声清楚、无变薄／鼻音／artifact，日常偏好 high-pass。未改固件／阈值／未重录。见 [low-cut 记录](experiments/2026-10-23-lowcut-comparison.md)。
+
 长期方向：以 XIAO 边缘设备为起点，逐步连接信号分析、协议分析、TinyML、LoRa、FPGA，以及 Linux／ROS 2。它们是可以按需要选择的分支，不是每一项都必须依次完成的清单。
 
 ## 1．先分清五种事项
@@ -151,7 +153,7 @@ L03 注意：SCL／SDA 的分析仪通道由当前接线决定，D0／D1 或旧�
 | B01 | 双向串口：亮度控制、状态查询、ACK | 待实现核对／P2 | 基线采集稳定后做；确认板端执行与 ACK 对应，计时和触摸正常；“电脑已发送”不算执行成功 |
 | B02 | 圆屏清晰度定位与改善 | 待资料、待验证／P2；若影响使用可提前 | 先给出当前正面照片、字号、亮度、显示代码和复现条件，再比较改动前后 |
 | B03 | 短语按钮与触摸键盘 | 候选开发／P2，未开工 | 先做三个短语按钮→串口输出；再做 3×4 多次点按输入、超时确认、删除、空格；暂不承诺词典预测或中文输入法 |
-| B04 | 原始 PCM 采集和麦克风 FFT | PCM/WAV 已合并；预览默认 16x；电脑端首轮 FFT 已合并（PR #6） | 10-22：现有 WAV 波形、Hann FFT、40／250 ms 窗长对照和数值测试完成，见 [记录](experiments/2026-10-22-wav-fft.md)。未改固件、未重录；固件侧 FFT 未做。DMA 溢出事件未计数，不宣称绝对无丢样 |
+| B04 | 原始 PCM 采集和麦克风 FFT | PCM/WAV 已合并；预览默认 16x；电脑端 FFT 已合并（PR #6）；low-cut A/B 完成，偏好 high-pass | 10-22：现有 WAV 波形、Hann FFT、40／250 ms 窗长对照和数值测试完成，见 [记录](experiments/2026-10-22-wav-fft.md)。10-23：matched-gain A/B，0-<80 Hz -23.73 dB、80-300 Hz -1.73 dB，无变薄感。未改固件、未重录；固件侧 FFT 未做。DMA 溢出事件未计数，不宣称绝对无丢样 |
 | B05 | 仓库 README／路线图／历史版本记录同步 | 待办／随里程碑更新 | 把真实验收结果写回仓库，区分 main、草稿分支和板上版本；本次已更新本计划，仓库旧路线文档仍单列待同步 |
 | B06 | 更完整的硬件自检 | 候选开发／P2 | 参考 RetroMeshDevice 的逐项检查；分别输出 PASS／FAIL／SKIP，不能将“没有失败”当作“全部已验证” |
 | B07 | 完成后 Break 画面被 idle screen 覆盖 | 已修并实机验证（2026-10-22） | 采 A：完成后 Break 5:00 保留到使用者操作；已用 25 分钟 Focus 验证，完成后约 5.5 分钟无 idle，触控后 `Break acknowledged` 并开始 Break。 |
@@ -231,7 +233,7 @@ py tools/hardware_loop.py capture --port COM11 --seconds 30 --label quiet
 
 第一轮验收点：三组日志与实验条件可对应、报告可读、已记录屏幕／触摸／计时状态；异常也可以成为本轮有效成果，不要求所有检查一次变绿。
 
-10-22 后续：上述 WAV 波形／FFT 入口已完成首轮验证并合并（PR #6, `21c0684`），见 [分析记录与复现命令](experiments/2026-10-22-wav-fft.md)。保留上方流程作为此前的计划快照。下一步先理解波形、低频成分和窗长权衡；可选对比已有 centered／80 Hz high-pass 试听副本。无需重录，不接 STT／AI，也未开始固件侧 FFT。
+10-22 后续：上述 WAV 波形／FFT 入口已完成首轮验证并合并（PR #6, `21c0684`），见 [分析记录与复现命令](experiments/2026-10-22-wav-fft.md)。保留上方流程作为此前的计划快照。下一步先理解波形、低频成分和窗长权衡；10-23 已完成 matched-gain A/B，操作者偏好 high-pass（见 [low-cut 记录](experiments/2026-10-23-lowcut-comparison.md)）。无需重录，不接 STT／AI，也未开始固件侧 FFT。
 
 ## 10．参考入口与核对范围
 
