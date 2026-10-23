@@ -2,6 +2,7 @@
 
 Date: 2026-10-23 (Asia/Shanghai).
 Branch: `codex/pcm-highpass-comparison`, based on `0d15c26`.
+Merged into `main` through PR #7 (`0b8f0fe`).
 Offline analysis only: no new recording, firmware build/upload, sound-level
 threshold change, or STT/AI. The previews are existing 16x listening aids.
 

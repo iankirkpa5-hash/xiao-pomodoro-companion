@@ -71,8 +71,9 @@ A 2026-10-23 matched-gain A/B check on the existing 16x pair measured a
 23.73 dB reduction in 0-<80 Hz weighted power (84.15% to 2.88%) and a 1.73 dB
 reduction in 80-300 Hz. The operator reported clear speech, no thinning or
 artifacts, and preferred the high-pass preview for daily listening. See the
-[low-cut comparison](experiments/2026-10-23-lowcut-comparison.md). This is
-listening evidence only; it does not change capture, thresholds, or firmware.
+[low-cut comparison](experiments/2026-10-23-lowcut-comparison.md). Merged
+through PR #7 (`0b8f0fe`); this is listening evidence only; it does not change
+capture, thresholds, or firmware.
 
 Recordings remain local and are ignored by Git. They may contain private speech;
 do not publish them with source changes unless deliberately selected.
