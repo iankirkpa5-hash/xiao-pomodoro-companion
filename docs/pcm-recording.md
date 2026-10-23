@@ -67,10 +67,15 @@ of interior samples. Processing parameters and source/output hashes are saved in
 listening aids, not raw measurements or a claim that a recording defect was
 repaired.
 
+`audio.wav` remains the raw evidence. `centered.wav` is a derived comparison
+baseline (DC removal, shared gain, and 10 ms fades), not a raw capture;
+`highpass-80hz.wav` adds the filter on that baseline.
+
 A 2026-10-23 matched-gain A/B check on the existing 16x pair measured a
 23.73 dB reduction in 0-<80 Hz weighted power (84.15% to 2.88%) and a 1.73 dB
 reduction in 80-300 Hz. The operator reported clear speech, no thinning or
-artifacts, and preferred the high-pass preview for daily listening. See the
+artifacts, and preferred the high-pass preview for this recording (not a default
+for all recordings). See the
 [low-cut comparison](experiments/2026-10-23-lowcut-comparison.md). Merged
 through PR #7 (`0b8f0fe`); this is listening evidence only; it does not change
 capture, thresholds, or firmware.

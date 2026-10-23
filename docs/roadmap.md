@@ -31,7 +31,7 @@ Sound baseline: merged to main (PR #1, ec5cfe8)
 PCM/WAV: merged (PR #2, 6379372); 16x host preview default (PR #4)
 Manual C + Break idle fix: verified (2026-10-22; PR #5, 3e343eb)
 Waveform / FFT: first offline analysis merged (PR #6, 21c0684)
-Low-cut A/B: 80 Hz high-pass preferred (PR #7, 0b8f0fe; -23.73 dB <80 Hz)
+Low-cut A/B: 80 Hz high-pass preferred for this recording (PR #7, 0b8f0fe; -23.73 dB <80 Hz)
 Later candidate: v1.8-hardware-feedback, not implemented
 ```
 
@@ -102,7 +102,8 @@ the following low-cut section records the comparison of those previews.
 On 2026-10-23, the existing 16x centered and 80 Hz high-pass previews were
 compared at matched gain. Sub-80 Hz weighted power fell 23.73 dB (84.15% to
 2.88%); 80-300 Hz fell 1.73 dB; 300-3000 Hz fell 0.27 dB. The operator reported
-clear speech, no thinning or artifacts, and preferred the high-pass preview.
+clear speech, no thinning or artifacts, and preferred the high-pass preview for
+this recording (not a default for all recordings).
 See the [low-cut record](experiments/2026-10-23-lowcut-comparison.md). Merged
 through PR #7 (`0b8f0fe`); this is host-side listening evidence, not a threshold
 or firmware change.

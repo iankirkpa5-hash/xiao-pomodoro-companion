@@ -15,6 +15,10 @@ threshold change, or STT/AI. The previews are existing 16x listening aids.
   shared gain `16.0`, 80,000 samples, 10 ms fades, one-pole 80 Hz high-pass.
 - `centered.wav` SHA-256 `0e5206801d1aa81691371755bf82d73d90a4f979b5aa765a87573c505071f806`;
   `highpass-80hz.wav` SHA-256 `b3a35afe41016ee78cc1130f86fdaf375a60acc795a6483b045bf70a5ddd3a18`.
+- Evidence relationship: `audio.wav` is the raw capture and the original evidence.
+  `centered.wav` is derived (whole-record DC removal, shared 16x gain, 10 ms
+  endpoint fades); `highpass-80hz.wav` adds the one-pole filter on that derived
+  baseline. Both previews are comparison/listening aids, not raw evidence.
 - The tool reconstructs both previews from the raw source and manifest and
   compares every sample. `matched_gain_verified`, `all_preview_samples_reconstructed`,
   and `inputs_unchanged` are true. The automated JSON keeps
@@ -62,7 +66,8 @@ endpoint fades. The operator reported:
 - B did not sound thin, hollow, or more nasal;
 - low-frequency rumble / slow drift was clearly reduced;
 - no clicks, pumping, or other artifacts;
-- preferred B for daily listening.
+- preferred B as the listening version for this recording; this is not a default
+  for all recordings.
 
 This is one listener, one five-second recording, and one preview pair. It is not
 a general acoustic certification or a preference for every recording.
@@ -74,7 +79,8 @@ a general acoustic certification or a preference for every recording.
   speech band 300-3000 Hz drops 0.27 dB.
 - The operator did not perceive thinning, so the measured 80-300 Hz reduction was
   not audible as a loss of body on this clip. This supports using B as a listening
-  aid for this recording; it does not prove the same for all speech.
+  aid for this recording; it does not prove the same for all speech and does not
+  make B the default for other recordings.
 - Share changes are partly a consequence of the total-power reduction; the
   absolute band powers are the relevant attenuation measure.
 - No capture, firmware, Quiet/Normal/Loud threshold, or STT/AI change is made.
