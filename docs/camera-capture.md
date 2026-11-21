@@ -100,7 +100,7 @@ CAM FEND <id> 0
 CAM RELEASE <id>
 CAM RELEASED <id>
 
-CAM STREAM START <id> [interval_ms]
+CAM STREAM START <id> [interval_ms] [FAST]
 CAM STREAMING <id> <interval_ms> <max_ms> <temp_c_x10>
 CAM FRAME <id> <seq> <length_bytes> <width> <height> <crc32> <temp_c_x10>
 CAM FDATA <id> <seq> <base64_chunk>

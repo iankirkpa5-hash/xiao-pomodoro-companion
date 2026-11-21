@@ -217,7 +217,11 @@ bool camParseSize(const char *text, framesize_t &size_out, int &quality_out) {
   return false;
 }
 
-camera_config_t camConfig(framesize_t frame_size = FRAMESIZE_QVGA, int jpeg_quality = 12) {
+camera_config_t camConfig(framesize_t frame_size = FRAMESIZE_QVGA,
+                          int jpeg_quality = 12,
+                          int xclk_freq_hz = 10000000,
+                          size_t fb_count = 1,
+                          camera_grab_mode_t grab_mode = CAMERA_GRAB_WHEN_EMPTY) {
   camera_config_t config{};
   // Use LEDC channel/timer 1 so LCD backlight PWM on channel 0 is untouched.
   config.ledc_channel = LEDC_CHANNEL_1;
@@ -238,12 +242,12 @@ camera_config_t camConfig(framesize_t frame_size = FRAMESIZE_QVGA, int jpeg_qual
   config.pin_sccb_scl = CAMERA_PIN_SIOC;
   config.pin_pwdn = CAMERA_PIN_PWDN;
   config.pin_reset = CAMERA_PIN_RESET;
-  config.xclk_freq_hz = 10000000;
+  config.xclk_freq_hz = xclk_freq_hz;
   config.pixel_format = PIXFORMAT_JPEG;
   config.frame_size = frame_size;
   config.jpeg_quality = jpeg_quality;
-  config.fb_count = 1;
-  config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
+  config.fb_count = fb_count;
+  config.grab_mode = grab_mode;
   config.fb_location = CAMERA_FB_IN_PSRAM;
   return config;
 }
@@ -348,7 +352,7 @@ const char *camCaptureSingleFrame(uint32_t id, framesize_t frame_size, int jpeg_
 }
 
 void camHandleStreamCommand(const char *action, const char *id_text,
-                            const char *param_text, bool pcm_busy) {
+                            const char *param_text, const char *mode_text, bool pcm_busy) {
   uint32_t id = 0;
   if (!action || !camNumber(id_text, id) || !id) {
     camRespond("CAM ERROR 0 BAD_COMMAND\n");
@@ -357,10 +361,19 @@ void camHandleStreamCommand(const char *action, const char *id_text,
 
   if (strcmp(action, "START") == 0) {
     uint32_t interval_ms = 150;
+    bool fast_mode = false;
     if (param_text) {
       if (!camNumber(param_text, interval_ms) ||
           interval_ms > CAM_STREAM_MAX_INTERVAL_MS) {
         camRespond("CAM ERROR %lu BAD_INTERVAL\n", static_cast<unsigned long>(id));
+        return;
+      }
+    }
+    if (mode_text) {
+      if (strcmp(mode_text, "FAST") == 0) {
+        fast_mode = true;
+      } else {
+        camRespond("CAM ERROR %lu BAD_COMMAND\n", static_cast<unsigned long>(id));
         return;
       }
     }
@@ -381,7 +394,9 @@ void camHandleStreamCommand(const char *action, const char *id_text,
       camRespond("CAM ERROR %lu NO_PSRAM\n", static_cast<unsigned long>(id));
       return;
     }
-    camera_config_t config = camConfig(FRAMESIZE_QVGA, 18);
+    camera_config_t config = fast_mode
+                                 ? camConfig(FRAMESIZE_QVGA, 18, 20000000, 2, CAMERA_GRAB_LATEST)
+                                 : camConfig(FRAMESIZE_QVGA, 18, 10000000, 1, CAMERA_GRAB_WHEN_EMPTY);
     if (esp_camera_init(&config) != ESP_OK) {
       camRespond("CAM ERROR %lu INIT_FAILED\n", static_cast<unsigned long>(id));
       return;
@@ -406,7 +421,7 @@ void camHandleStreamCommand(const char *action, const char *id_text,
     return;
   }
 
-  if (param_text) {
+  if (param_text || mode_text) {
     camRespond("CAM ERROR %lu BAD_COMMAND\n", static_cast<unsigned long>(id));
     return;
   }
@@ -616,6 +631,7 @@ void camHandleCommand(bool pcm_busy) {
   const char *first = strtok_r(nullptr, " ", &save);
   const char *second = strtok_r(nullptr, " ", &save);
   const char *third = strtok_r(nullptr, " ", &save);
+  const char *fourth = strtok_r(nullptr, " ", &save);
   const char *extra = strtok_r(nullptr, " ", &save);
 
   if (verb && strcmp(verb, "INFO") == 0 && !first) {
@@ -634,12 +650,12 @@ void camHandleCommand(bool pcm_busy) {
       camRespond("CAM ERROR 0 BAD_COMMAND\n");
       return;
     }
-    camHandleStreamCommand(first, second, third, pcm_busy);
+    camHandleStreamCommand(first, second, third, fourth, pcm_busy);
     return;
   }
 
   if (verb && strcmp(verb, "TUNE") == 0) {
-    if (extra) {
+    if (fourth || extra) {
       camRespond("CAM ERROR 0 BAD_COMMAND\n");
       return;
     }
@@ -649,7 +665,7 @@ void camHandleCommand(bool pcm_busy) {
 
   uint32_t id = 0;
   uint32_t value = 0;
-  if (!verb || !camNumber(first, id) || !id || third || extra) {
+  if (!verb || !camNumber(first, id) || !id || third || fourth || extra) {
     camRespond("CAM ERROR 0 BAD_COMMAND\n");
     return;
   }

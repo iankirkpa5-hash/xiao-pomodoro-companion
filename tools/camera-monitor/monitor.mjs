@@ -572,13 +572,19 @@ async function startLivePreview() {
   streamBusy = true;
   setMessage();
   const session = nextSessionId();
-  const intervalMs = Number($("preview-interval").value);
+  const rawMode = $("preview-interval").value;
+  const [intervalStr, modeFlag] = rawMode.split(":");
+  const intervalMs = Number(intervalStr);
   const safeInterval = Number.isFinite(intervalMs) && intervalMs >= 0 ? intervalMs : 0;
+  const isFast = modeFlag === "FAST";
+  const startCmd = isFast
+    ? `CAM STREAM START ${session} ${safeInterval} FAST`
+    : `CAM STREAM START ${session} ${safeInterval}`;
   renderControls();
   try {
     const started = await sendRequest(
       session,
-      `CAM STREAM START ${session} ${safeInterval}`,
+      startCmd,
       line => parseStreamStarted(line, session),
       { timeoutMs: 4000, attempts: 2 },
     );

@@ -209,11 +209,18 @@ int main() {
   fake_temp_c = 41.2f;
   fake_camera.frame_bytes = makeJpeg(250);
   assert(sendRouted("CAM STREAM START 200 2001") == "CAM ERROR 200 BAD_INTERVAL\n");
+  assert(sendRouted("CAM STREAM START 200 0 TURBO") == "CAM ERROR 200 BAD_COMMAND\n");
   assert(!fake_camera.initialized);
-  assert(sendRouted("CAM STREAM START 199 0") == "CAM STREAMING 199 0 180000 412\n");
+  assert(sendRouted("CAM STREAM START 199 0 FAST") == "CAM STREAMING 199 0 180000 412\n");
+  assert(fake_camera.last_config.xclk_freq_hz == 20000000 &&
+         fake_camera.last_config.fb_count == 2 &&
+         fake_camera.last_config.grab_mode == CAMERA_GRAB_LATEST);
   assert(sendRouted("CAM STREAM STOP 199") == "CAM STOPPED 199 HOST\n");
   fake_camera.init_calls = fake_camera.deinit_calls = 0;
   const std::string started = sendRouted("CAM STREAM START 200 150");
+  assert(fake_camera.last_config.xclk_freq_hz == 10000000 &&
+         fake_camera.last_config.fb_count == 1 &&
+         fake_camera.last_config.grab_mode == CAMERA_GRAB_WHEN_EMPTY);
   assert(started == "CAM STREAMING 200 150 180000 412\n");
   assert(fake_camera.initialized && fake_camera.init_calls == 1 && fake_camera.deinit_calls == 0);
   // Single capture rejected while streaming.
