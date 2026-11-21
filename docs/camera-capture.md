@@ -1,6 +1,6 @@
 # On-Demand Single-Frame Camera Capture (`feature/camera-capture`)
 
-Status: **Implemented and host-verified; pending real-device verification.**
+Status: **Host-verified and headless real-device verified (Round Display detached for repair); Round Display / touch / Pomodoro regression pending display return.** See the [2026-11-21 camera experiment record](experiments/2026-11-21-camera-capture.md).
 
 This experimental branch adds on-demand single-frame JPEG capture over USB serial
 on top of the current `v1.6` Pomodoro + microphone + PCM mainline. It does **not**
