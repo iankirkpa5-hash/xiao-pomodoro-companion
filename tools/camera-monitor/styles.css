@@ -327,12 +327,42 @@ main {
   left: 12px;
   padding: 3px 10px;
   border-radius: 999px;
-  background: rgba(173, 61, 50, 0.92);
+  background: rgba(19, 124, 112, 0.92);
   color: #fff;
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .08em;
+}
+
+.rec-pill {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(173, 61, 50, 0.94);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.stage-frame {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s ease;
+}
+
+.motion-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .empty-state {
@@ -353,13 +383,53 @@ main {
 }
 
 #preview-image {
+  display: block;
   max-width: 100%;
   max-height: 460px;
   width: auto;
   height: auto;
   border-radius: 4px;
   image-rendering: auto;
-  transition: transform .15s ease;
+}
+
+.motion-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.motion-track {
+  position: relative;
+  height: 10px;
+  background: #e6ece6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.motion-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--teal);
+  transition: width .08s linear, background .12s;
+}
+
+.motion-bar.triggered {
+  background: var(--danger);
+}
+
+.motion-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  left: 16%;
+  background: var(--amber);
+}
+
+.motion-readout {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .readout {

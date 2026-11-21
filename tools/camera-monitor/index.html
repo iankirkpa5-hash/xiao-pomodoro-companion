@@ -87,10 +87,14 @@
             <p class="empty-title">尚未開始預覽或拍攝</p>
             <p class="empty-sub">連接 XIAO 後點擊「開始即時預覽」同步取景，或直接點「拍一張」單張擷取。</p>
           </div>
-          <img id="preview-image" alt="XIAO 攝像機畫面" hidden>
+          <div id="stage-frame" class="stage-frame" hidden>
+            <img id="preview-image" alt="XIAO 攝像機畫面">
+            <canvas id="motion-overlay" class="motion-overlay" width="320" height="240" hidden></canvas>
+          </div>
           <span id="live-pill" class="live-pill" hidden>LIVE</span>
+          <span id="rec-pill" class="rec-pill" hidden>REC 00:00</span>
         </div>
-        <p id="transform-note" class="small">旋轉與鏡像僅影響網頁顯示，下載的 JPEG 維持板端原始位元組。</p>
+        <p id="transform-note" class="small">旋轉與鏡像僅影響網頁顯示與 WebM 錄影，下載的單張 JPEG 維持板端原始位元組。</p>
       </section>
 
       <section class="readout" aria-label="即時狀態與拍攝資訊">
@@ -98,6 +102,56 @@
         <div><span>幀大小</span><strong id="meta-bytes">—</strong></div>
         <div><span>ESP32 晶片內部溫度</span><strong id="meta-temp">—</strong></div>
         <div><span>安全倒數 / CRC32</span><strong id="meta-verify">—</strong></div>
+      </section>
+
+      <section class="tools-grid" aria-label="移動偵測與即時錄影">
+        <div class="tool-card">
+          <div class="panel-title">
+            <h2>移動偵測自動拍照（純網頁端）</h2>
+            <span id="motion-status">未啟用</span>
+          </div>
+          <div class="motion-meter">
+            <div class="motion-track">
+              <div id="motion-bar" class="motion-bar"></div>
+              <div id="motion-threshold-mark" class="motion-mark"></div>
+            </div>
+            <span id="motion-readout" class="motion-readout">變化 0.0% / 門檻 4.0%</span>
+          </div>
+          <div class="tune-row">
+            <label class="inline-field" for="motion-threshold">
+              <span>門檻 <strong id="val-motion-threshold">4%</strong></span>
+              <input id="motion-threshold" type="range" min="1" max="20" step="1" value="4" disabled>
+            </label>
+            <label class="inline-field" for="motion-cooldown">
+              <span>冷卻</span>
+              <select id="motion-cooldown" disabled>
+                <option value="3000">3 秒</option>
+                <option value="5000" selected>5 秒</option>
+                <option value="10000">10 秒</option>
+              </select>
+            </label>
+          </div>
+          <label class="check-field">
+            <input id="motion-autodownload" type="checkbox" disabled>
+            <span>偵測到移動時自動下載 JPEG（未勾選仍會存入下方縮圖列）</span>
+          </label>
+          <div class="timelapse-actions">
+            <button id="motion-toggle" class="secondary" type="button" disabled>開啟移動偵測</button>
+          </div>
+          <p class="small">在即時預覽開啟時運作（免重燒韌體），畫面出現明顯移動即自動抓拍並標示移動區域。</p>
+        </div>
+
+        <div class="tool-card">
+          <div class="panel-title">
+            <h2>即時錄影（WebM）</h2>
+            <span id="record-status">未錄影</span>
+          </div>
+          <p class="small">直接錄下即時預覽串流（最高可達 27.8 FPS），套用目前的旋轉與鏡像方向，停止錄影或預覽結束時自動下載 <code>.webm</code> 檔案。</p>
+          <div class="timelapse-actions">
+            <button id="record-toggle" class="secondary" type="button" disabled>開始錄影</button>
+          </div>
+          <p class="small">純瀏覽器端 <code>MediaRecorder</code> 錄製，檔案留在本機，不上傳雲端。</p>
+        </div>
       </section>
 
       <section class="tools-grid" aria-label="影像微調與定時連拍">

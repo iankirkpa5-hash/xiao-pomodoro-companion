@@ -9,10 +9,16 @@ import {
   parseStreamStopped,
   runCapture,
 } from "./protocol.mjs";
+import { MotionDetector, rgbaToLuma } from "./vision.mjs";
 
 const $ = id => document.getElementById(id);
 const supported = window.isSecureContext && "serial" in navigator;
+const recorderSupported = typeof MediaRecorder !== "undefined" && typeof HTMLCanvasElement !== "undefined";
 const encoder = new TextEncoder();
+
+const MOTION_W = 64;
+const MOTION_H = 48;
+const MOTION_SCALE_MAX = 25; // Visual meter full scale = 25% changed pixels.
 
 let port = null;
 let reader = null;
@@ -41,6 +47,33 @@ let timelapseTotal = 0;
 let timelapseNextAt = 0;
 let timelapseTimer = null;
 let timelapseTickTimer = null;
+
+// Browser-side motion detection state
+let motionEnabled = false;
+let motionBusy = false;
+const motionDetector = new MotionDetector({
+  width: MOTION_W,
+  height: MOTION_H,
+  triggerPercent: 4,
+  cooldownMs: 5000,
+  warmupFrames: 3,
+});
+const motionCanvas = document.createElement("canvas");
+motionCanvas.width = MOTION_W;
+motionCanvas.height = MOTION_H;
+const motionCtx = motionCanvas.getContext("2d", { willReadFrequently: true });
+
+// Browser-side WebM recording state
+let recordingActive = false;
+let mediaRecorder = null;
+let recordChunks = [];
+let recordFrames = 0;
+let recordStartedAt = 0;
+let recordTickTimer = null;
+const recordCanvas = document.createElement("canvas");
+recordCanvas.width = 320;
+recordCanvas.height = 240;
+const recordCtx = recordCanvas.getContext("2d");
 
 let activeWaiter = null;
 let sessionSeed = Math.floor(Math.random() * 0x7fffffff) + 1;
@@ -76,6 +109,22 @@ function formatCountdown(ms) {
   return `${m}:${s}`;
 }
 
+function formatElapsed(ms) {
+  const sec = Math.max(0, Math.floor(ms / 1000));
+  const m = String(Math.floor(sec / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function timestampSlug() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  return (
+    `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-` +
+    `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
+  );
+}
+
 function setMessage(text = "") {
   $("message").textContent = text;
   $("message").hidden = !text;
@@ -91,12 +140,50 @@ function appendLog(line) {
 }
 
 function updateTransform() {
-  const img = $("preview-image");
+  const frame = $("stage-frame");
   const scaleX = mirrored ? -1 : 1;
-  img.style.transform = `rotate(${rotationDeg}deg) scaleX(${scaleX})`;
+  frame.style.transform = `rotate(${rotationDeg}deg) scaleX(${scaleX})`;
   $("rotate").textContent = `旋轉 ${rotationDeg}°`;
   $("mirror").textContent = mirrored ? "鏡像：開" : "鏡像：關";
   $("mirror").setAttribute("aria-pressed", String(mirrored));
+}
+
+function updateMotionThresholdUi() {
+  const pct = Number($("motion-threshold").value) || 4;
+  motionDetector.triggerPercent = pct;
+  $("val-motion-threshold").textContent = `${pct}%`;
+  const markLeft = Math.min(100, Math.round((pct / MOTION_SCALE_MAX) * 100));
+  $("motion-threshold-mark").style.left = `${markLeft}%`;
+  if (!motionEnabled) {
+    $("motion-readout").textContent = `變化 0.0% / 門檻 ${pct.toFixed(1)}%`;
+  }
+}
+
+function clearMotionOverlay() {
+  const overlay = $("motion-overlay");
+  const ctx = overlay.getContext("2d");
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+  overlay.hidden = true;
+}
+
+function drawMotionOverlay(box, triggered) {
+  const overlay = $("motion-overlay");
+  const ctx = overlay.getContext("2d");
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+  if (!box) {
+    overlay.hidden = true;
+    return;
+  }
+  overlay.hidden = false;
+  ctx.lineWidth = triggered ? 3 : 2;
+  ctx.strokeStyle = triggered ? "#ef5350" : "#26c6da";
+  ctx.fillStyle = triggered ? "rgba(239, 83, 80, 0.14)" : "rgba(38, 198, 218, 0.08)";
+  const x = box.x * overlay.width;
+  const y = box.y * overlay.height;
+  const w = box.w * overlay.width;
+  const h = box.h * overlay.height;
+  ctx.fillRect(x, y, w, h);
+  ctx.strokeRect(x, y, w, h);
 }
 
 function applyTuningToUi(t) {
@@ -162,9 +249,7 @@ function pushSavedShot({ jpeg, width, height, length, crc32, captureMs, tempC, s
   const now = new Date();
   const pad = n => String(n).padStart(2, "0");
   const timeLabel = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  const filename =
-    `${filenamePrefix}-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-` +
-    `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.jpg`;
+  const filename = `${filenamePrefix}-${timestampSlug()}.jpg`;
 
   history.unshift({
     url,
@@ -196,8 +281,9 @@ function pushSavedShot({ jpeg, width, height, length, crc32, captureMs, tempC, s
 
 function showShotInStage(item) {
   $("empty-state").hidden = true;
+  $("stage-frame").hidden = false;
   $("preview-image").src = item.url;
-  $("preview-image").hidden = false;
+  clearMotionOverlay();
   $("meta-size").textContent = `${item.width} × ${item.height} JPEG`;
   $("meta-bytes").textContent = `${item.length.toLocaleString()} bytes`;
   $("meta-temp").textContent = formatTemp(item.tempC ?? latestTempC);
@@ -205,9 +291,11 @@ function showShotInStage(item) {
   $("viewer-subtitle").textContent =
     item.source === "live-snap"
       ? `預覽快門存檔 ${item.timeLabel}`
-      : item.source === "timelapse"
-        ? `定時連拍 ${item.timeLabel} · 耗時 ${item.captureMs} ms`
-        : `單張拍攝 ${item.timeLabel} · 耗時 ${item.captureMs} ms`;
+      : item.source === "motion"
+        ? `移動偵測自動抓拍 ${item.timeLabel}`
+        : item.source === "timelapse"
+          ? `定時連拍 ${item.timeLabel} · 耗時 ${item.captureMs} ms`
+          : `單張拍攝 ${item.timeLabel} · 耗時 ${item.captureMs} ms`;
   updateTransform();
 }
 
@@ -250,7 +338,115 @@ function stopTimelapse(statusText = "已停止") {
   renderControls();
 }
 
+function pickRecorderMime() {
+  if (!recorderSupported) return "";
+  for (const mime of ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"]) {
+    if (MediaRecorder.isTypeSupported(mime)) return mime;
+  }
+  return "";
+}
+
+function drawBitmapToRecordCanvas(bitmap) {
+  const swap = rotationDeg % 180 !== 0;
+  const targetW = swap ? bitmap.height : bitmap.width;
+  const targetH = swap ? bitmap.width : bitmap.height;
+  if (recordCanvas.width !== targetW || recordCanvas.height !== targetH) {
+    recordCanvas.width = targetW;
+    recordCanvas.height = targetH;
+  }
+  recordCtx.save();
+  recordCtx.clearRect(0, 0, recordCanvas.width, recordCanvas.height);
+  recordCtx.translate(recordCanvas.width / 2, recordCanvas.height / 2);
+  recordCtx.rotate((rotationDeg * Math.PI) / 180);
+  if (mirrored) recordCtx.scale(-1, 1);
+  recordCtx.drawImage(bitmap, -bitmap.width / 2, -bitmap.height / 2, bitmap.width, bitmap.height);
+  recordCtx.restore();
+}
+
+function startRecording() {
+  if (!streaming || recordingActive || !recorderSupported) return;
+  try {
+    const swap = rotationDeg % 180 !== 0;
+    recordCanvas.width = swap ? 240 : 320;
+    recordCanvas.height = swap ? 320 : 240;
+    const stream = recordCanvas.captureStream(30);
+    const mimeType = pickRecorderMime();
+    mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+    recordChunks = [];
+    recordFrames = 0;
+    recordStartedAt = performance.now();
+
+    mediaRecorder.ondataavailable = event => {
+      if (event.data && event.data.size > 0) recordChunks.push(event.data);
+    };
+    mediaRecorder.onstop = () => {
+      const chunks = recordChunks;
+      const frames = recordFrames;
+      const mime = (mediaRecorder && mediaRecorder.mimeType) || "video/webm";
+      recordChunks = [];
+      mediaRecorder = null;
+      if (chunks.length > 0) {
+        const blob = new Blob(chunks, { type: mime });
+        const url = URL.createObjectURL(blob);
+        const filename = `xiao-video-${timestampSlug()}.webm`;
+        triggerBlobDownload(url, filename);
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+        appendLog(
+          `[網頁] 錄影完成並下載 ${filename}（${frames} 幀，${Math.round(blob.size / 1024)} KiB）。`,
+        );
+        $("record-status").textContent = `已下載（${frames} 幀）`;
+      } else {
+        $("record-status").textContent = "未錄到畫面";
+      }
+      renderControls();
+    };
+
+    mediaRecorder.start(500);
+    recordingActive = true;
+    $("rec-pill").hidden = false;
+    $("rec-pill").textContent = "REC 00:00";
+    $("record-status").textContent = "錄影中 00:00";
+    recordTickTimer = setInterval(() => {
+      if (!recordingActive) return;
+      const elapsed = formatElapsed(performance.now() - recordStartedAt);
+      $("rec-pill").textContent = `REC ${elapsed}`;
+      $("record-status").textContent = `錄影中 ${elapsed} · ${recordFrames} 幀`;
+    }, 500);
+    appendLog("[網頁] 開始瀏覽器端 WebM 錄影。");
+    renderControls();
+  } catch (error) {
+    setMessage(`無法開始錄影：${error.message}`);
+    appendLog(`[網頁] 錄影啟動失敗：${error.message}`);
+  }
+}
+
+function stopRecording() {
+  if (!recordingActive) return;
+  recordingActive = false;
+  if (recordTickTimer) {
+    clearInterval(recordTickTimer);
+    recordTickTimer = null;
+  }
+  $("rec-pill").hidden = true;
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    try { mediaRecorder.stop(); } catch { /* ignore */ }
+  }
+  renderControls();
+}
+
+function disableMotionDetection(statusText = "未啟用") {
+  motionEnabled = false;
+  motionDetector.reset();
+  clearMotionOverlay();
+  $("motion-bar").style.width = "0%";
+  $("motion-bar").classList.remove("triggered");
+  $("motion-status").textContent = statusText;
+  updateMotionThresholdUi();
+}
+
 function endStreamState(reasonText = "") {
+  if (recordingActive) stopRecording();
+  if (motionEnabled) disableMotionDetection("預覽已停");
   clearStreamTimers();
   streaming = false;
   streamBusy = false;
@@ -270,7 +466,7 @@ function endStreamState(reasonText = "") {
 function renderControls() {
   const connected = port !== null && !closing;
   const hasShot = selectedIndex >= 0 && selectedIndex < history.length;
-  const hasAnyImage = !$("preview-image").hidden;
+  const hasAnyImage = !$("stage-frame").hidden;
   const busy = capturing || streamBusy || timelapseRunning;
 
   $("connect").disabled = !supported || opening || port !== null;
@@ -297,8 +493,24 @@ function renderControls() {
       : `拍一張（${selectedSize === "LIVE" ? "QVGA" : selectedSize}）`;
 
   $("download").disabled = !hasShot;
-  $("rotate").disabled = !hasAnyImage;
-  $("mirror").disabled = !hasAnyImage;
+  $("rotate").disabled = !hasAnyImage || recordingActive;
+  $("mirror").disabled = !hasAnyImage || recordingActive;
+
+  // Motion & recording controls
+  $("motion-threshold").disabled = !connected;
+  $("motion-cooldown").disabled = !connected;
+  $("motion-autodownload").disabled = !connected;
+  const motionBtn = $("motion-toggle");
+  motionBtn.disabled = !streaming;
+  motionBtn.textContent = motionEnabled ? "關閉移動偵測" : "開啟移動偵測";
+  motionBtn.classList.toggle("danger-btn", motionEnabled);
+  motionBtn.classList.toggle("secondary", !motionEnabled);
+
+  const recBtn = $("record-toggle");
+  recBtn.disabled = !streaming || !recorderSupported;
+  recBtn.textContent = recordingActive ? "停止錄影並下載" : "開始錄影";
+  recBtn.classList.toggle("danger-btn", recordingActive);
+  recBtn.classList.toggle("secondary", !recordingActive);
 
   const tuneDisabled = !connected || capturing || streamBusy || timelapseRunning || tuningBusy;
   for (const id of [
@@ -330,9 +542,12 @@ function renderControls() {
   } else if (timelapseRunning) {
     badge.dataset.state = "busy";
     badge.textContent = `定時連拍中 (${timelapseDone}/${timelapseTotal})`;
+  } else if (recordingActive) {
+    badge.dataset.state = "error";
+    badge.textContent = "即時預覽＋錄影中";
   } else if (streaming) {
     badge.dataset.state = "ready";
-    badge.textContent = "即時預覽中 · 同步畫面";
+    badge.textContent = motionEnabled ? "預覽＋移動偵測中" : "即時預覽中 · 同步畫面";
   } else if (capturing || streamBusy) {
     badge.dataset.state = "busy";
     badge.textContent = "處理中…";
@@ -362,6 +577,66 @@ function abortActiveWaiter(reason) {
   waiter.reject(new Error(reason));
 }
 
+async function processLiveBitmap(blob, frame) {
+  if (motionBusy || typeof createImageBitmap !== "function") return;
+  motionBusy = true;
+  let bitmap = null;
+  try {
+    bitmap = await createImageBitmap(blob);
+    if (recordingActive) {
+      drawBitmapToRecordCanvas(bitmap);
+      recordFrames++;
+    }
+    if (motionEnabled && streaming) {
+      motionCtx.drawImage(bitmap, 0, 0, MOTION_W, MOTION_H);
+      const rgba = motionCtx.getImageData(0, 0, MOTION_W, MOTION_H).data;
+      const luma = rgbaToLuma(rgba, MOTION_W, MOTION_H);
+      const res = motionDetector.update(luma, performance.now());
+      const pct = res.score.changedPercent;
+      const barWidth = Math.min(100, (pct / MOTION_SCALE_MAX) * 100);
+      $("motion-bar").style.width = `${barWidth.toFixed(1)}%`;
+      $("motion-bar").classList.toggle("triggered", pct >= motionDetector.triggerPercent);
+      $("motion-readout").textContent =
+        `變化 ${pct.toFixed(1)}% / 門檻 ${motionDetector.triggerPercent.toFixed(1)}%`;
+
+      if (!res.ready) {
+        $("motion-status").textContent = "暖機建立基準…";
+        clearMotionOverlay();
+      } else {
+        drawMotionOverlay(pct >= motionDetector.triggerPercent ? res.score.box : null, res.triggered);
+        if (res.triggered) {
+          const autoDownload = $("motion-autodownload").checked;
+          const tag = String(motionDetector.triggerCount).padStart(3, "0");
+          pushSavedShot({
+            jpeg: frame.jpeg.slice(),
+            width: frame.width,
+            height: frame.height,
+            length: frame.length,
+            crc32: frame.crc32,
+            captureMs: 0,
+            tempC: frame.tempC,
+            source: "motion",
+            filenamePrefix: `xiao-motion-${tag}`,
+            autoDownload,
+          });
+          appendLog(
+            `[網頁] 偵測到移動（變化 ${pct.toFixed(1)}%）→ 自動抓拍第 #${motionDetector.triggerCount} 張。`,
+          );
+        }
+        $("motion-status").textContent =
+          res.cooldownRemainingMs > 0
+            ? `已觸發 ${motionDetector.triggerCount} 次 · 冷卻 ${Math.ceil(res.cooldownRemainingMs / 1000)}s`
+            : `監控中 · 已觸發 ${motionDetector.triggerCount} 次`;
+      }
+    }
+  } catch {
+    // Ignore transient decode failure on individual live frame.
+  } finally {
+    if (bitmap) bitmap.close();
+    motionBusy = false;
+  }
+}
+
 function handleLiveFrame(frame) {
   latestLiveFrame = frame;
   if (frame.tempC !== null) latestTempC = frame.tempC;
@@ -374,8 +649,8 @@ function handleLiveFrame(frame) {
   liveUrl = nextUrl;
 
   $("empty-state").hidden = true;
+  $("stage-frame").hidden = false;
   $("preview-image").src = nextUrl;
-  $("preview-image").hidden = false;
   $("live-pill").hidden = false;
   $("live-pill").textContent = fps > 0 ? `LIVE · ${fps.toFixed(1)} FPS` : "LIVE";
   updateTransform();
@@ -387,6 +662,10 @@ function handleLiveFrame(frame) {
   $("meta-verify").textContent = `倒數 ${formatCountdown(streamEndsAt - performance.now())}`;
   $("viewer-subtitle").textContent =
     `即時同步取景中（第 #${frame.seq} 幀）· 按「拍一張」存檔，停止即 deinit`;
+
+  if (motionEnabled || recordingActive) {
+    processLiveBitmap(blob, frame);
+  }
   renderControls();
 }
 
@@ -609,7 +888,9 @@ async function startLivePreview() {
       if (!streaming) return;
       $("meta-verify").textContent = `倒數 ${formatCountdown(streamEndsAt - performance.now())}`;
     }, 1000);
-    appendLog(`[網頁] 已啟動即時預覽（間隔 ${started.intervalMs} ms，安全上限 ${Math.round(started.maxMs / 1000)} 秒）。`);
+    appendLog(
+      `[網頁] 已啟動即時預覽（${isFast ? "20 MHz 雙緩衝" : "10 MHz"}，間隔 ${started.intervalMs} ms，安全上限 ${Math.round(started.maxMs / 1000)} 秒）。`,
+    );
   } catch (error) {
     setMessage(`無法啟動即時預覽：${error.message}`);
     appendLog(`[網頁] 啟動預覽失敗：${error.message}`);
@@ -621,6 +902,8 @@ async function startLivePreview() {
 
 async function stopLivePreview() {
   if (!streaming || streamBusy) return;
+  if (recordingActive) stopRecording();
+  if (motionEnabled) disableMotionDetection("預覽已停");
   streamBusy = true;
   const session = streamSession;
   if (streamAssembler) stats.droppedFrames += streamAssembler.droppedFrames;
@@ -780,7 +1063,6 @@ $("connect").addEventListener("click", async () => {
     $("connection-state").textContent = "已連線（115200 baud）";
     appendLog("[網頁] 已連接 XIAO USB 串口（開機與連線時鏡頭預設關閉）。");
     readTask = readLoop(selected);
-    // Passively sync OV2640 tuning defaults without initializing the camera.
     sendRequest(0, "CAM TUNE GET", parseCamTuning, { timeoutMs: 1200, attempts: 2 })
       .then(applyTuningToUi)
       .catch(() => {});
@@ -837,6 +1119,34 @@ $("capture").addEventListener("click", async () => {
   }
 });
 
+$("motion-threshold").addEventListener("input", updateMotionThresholdUi);
+$("motion-cooldown").addEventListener("change", () => {
+  motionDetector.cooldownMs = Number($("motion-cooldown").value) || 5000;
+});
+
+$("motion-toggle").addEventListener("click", () => {
+  if (!streaming) return;
+  if (motionEnabled) {
+    disableMotionDetection("已關閉");
+    appendLog("[網頁] 已關閉移動偵測。");
+  } else {
+    motionDetector.triggerPercent = Number($("motion-threshold").value) || 4;
+    motionDetector.cooldownMs = Number($("motion-cooldown").value) || 5000;
+    motionDetector.reset();
+    motionEnabled = true;
+    $("motion-status").textContent = "暖機建立基準…";
+    appendLog(
+      `[網頁] 已開啟移動偵測（門檻 ${motionDetector.triggerPercent}%，冷卻 ${motionDetector.cooldownMs / 1000} 秒）。`,
+    );
+  }
+  renderControls();
+});
+
+$("record-toggle").addEventListener("click", () => {
+  if (recordingActive) stopRecording();
+  else startRecording();
+});
+
 for (const [id, key, valId] of [
   ["tune-brightness", "BRIGHTNESS", "val-brightness"],
   ["tune-ae", "AE", "val-ae"],
@@ -890,6 +1200,7 @@ if (!supported) {
 
 window.addEventListener("beforeunload", () => {
   clearTimelapseTimers();
+  if (recordingActive) stopRecording();
   if (streaming && port && writer && !closing) {
     try { writer.write(encoder.encode(`\nCAM STREAM STOP ${streamSession}\n`)); } catch { /* ignore */ }
   }
@@ -897,4 +1208,5 @@ window.addEventListener("beforeunload", () => {
   for (const item of history) URL.revokeObjectURL(item.url);
 });
 
+updateMotionThresholdUi();
 renderControls();

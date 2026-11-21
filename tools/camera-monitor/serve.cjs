@@ -12,6 +12,7 @@ const files = {
   "/styles.css": ["styles.css", "text/css; charset=utf-8"],
   "/monitor.mjs": ["monitor.mjs", "text/javascript; charset=utf-8"],
   "/protocol.mjs": ["protocol.mjs", "text/javascript; charset=utf-8"],
+  "/vision.mjs": ["vision.mjs", "text/javascript; charset=utf-8"],
 };
 const server = http.createServer((req, res) => {
   const pathname = new URL(req.url, "http://127.0.0.1").pathname;

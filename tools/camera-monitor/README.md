@@ -28,7 +28,11 @@ Open <http://127.0.0.1:8766> in desktop Chrome or Edge.
    instant `LIVE` frame) and click **拍一張**, or use **定時連拍** (5–60 s
    interval, 3–20 shot cap, optional auto-download; camera deinitializes between
    shots to stay cool).
-5. Click **停止預覽** when done so the board immediately runs
+5. While live preview is active, you can also enable **移動偵測自動拍照**
+   (client-side luma diff with adjustable sensitivity, cooldown, and bounding box
+   overlay) or **即時錄影（WebM）** (`MediaRecorder` canvas capture that saves a
+   local `.webm` file when stopped).
+6. Click **停止預覽** when done so the board immediately runs
    `esp_camera_deinit()`, click **下載 JPEG** to save locally, and click
    **中斷連線** before uploading firmware.
 
@@ -48,5 +52,5 @@ Open <http://127.0.0.1:8766> in desktop Chrome or Edge.
 ## Offline Checks
 
 ```sh
-node --test tools/camera-monitor/protocol.test.mjs
+node --test tools/camera-monitor/protocol.test.mjs tools/camera-monitor/vision.test.mjs
 ```
