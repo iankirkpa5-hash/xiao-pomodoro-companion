@@ -1,0 +1,3 @@
+{
+  "install": "sed -i '/case \\$- in/,/esac/d' ~/.bashrc 2>/dev/null || true; grep -qxF 'export PATH=\"$HOME/.local/bin:$PATH\"' ~/.bashrc || echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> ~/.bashrc; export PATH=\"$HOME/.local/bin:$PATH\"; python3 -m pip install --no-input -r tools/requirements-hardware.txt -r tools/requirements-audio.txt platformio && pio pkg install -g -p \"platformio/espressif32@^6.13.0\" && pio pkg install"
+}
