@@ -57,7 +57,18 @@ struct CameraFrame {
   uint32_t crc = 0;
 };
 
+struct CameraTuning {
+  int8_t brightness = 0;  // -2..2
+  int8_t contrast = 0;    // -2..2
+  int8_t saturation = 0;  // -2..2
+  int8_t ae_level = 0;    // -2..2
+  uint8_t wb_mode = 0;    // 0..4 (Auto/Sunny/Cloudy/Office/Home)
+  uint8_t hmirror = 0;    // 0..1
+  uint8_t vflip = 0;      // 0..1
+};
+
 CameraFrame cam_frame;
+CameraTuning cam_tuning;
 uint8_t *cam_jpeg = nullptr;
 uint32_t cam_last_activity_ms = 0;
 bool cam_dump_active = false;
@@ -145,6 +156,42 @@ bool camNumber(const char *text, uint32_t &value) {
   }
   value = result;
   return true;
+}
+
+bool camSignedNumber(const char *text, int32_t &value) {
+  if (!text || !*text) return false;
+  bool negative = false;
+  if (*text == '-') {
+    negative = true;
+    ++text;
+  }
+  uint32_t mag = 0;
+  if (!camNumber(text, mag) || mag > 1000) return false;
+  value = negative ? -static_cast<int32_t>(mag) : static_cast<int32_t>(mag);
+  return true;
+}
+
+void camApplyTuning() {
+  sensor_t *s = esp_camera_sensor_get();
+  if (!s) return;
+  if (s->set_brightness) s->set_brightness(s, cam_tuning.brightness);
+  if (s->set_contrast) s->set_contrast(s, cam_tuning.contrast);
+  if (s->set_saturation) s->set_saturation(s, cam_tuning.saturation);
+  if (s->set_ae_level) s->set_ae_level(s, cam_tuning.ae_level);
+  if (s->set_wb_mode) s->set_wb_mode(s, cam_tuning.wb_mode);
+  if (s->set_hmirror) s->set_hmirror(s, cam_tuning.hmirror);
+  if (s->set_vflip) s->set_vflip(s, cam_tuning.vflip);
+}
+
+void camTuningReply() {
+  camRespond("CAM TUNING %d %d %d %d %u %u %u\n",
+             static_cast<int>(cam_tuning.brightness),
+             static_cast<int>(cam_tuning.contrast),
+             static_cast<int>(cam_tuning.saturation),
+             static_cast<int>(cam_tuning.ae_level),
+             static_cast<unsigned>(cam_tuning.wb_mode),
+             static_cast<unsigned>(cam_tuning.hmirror),
+             static_cast<unsigned>(cam_tuning.vflip));
 }
 
 bool camParseSize(const char *text, framesize_t &size_out, int &quality_out) {
@@ -238,6 +285,7 @@ const char *camCaptureSingleFrame(uint32_t id, framesize_t frame_size, int jpeg_
   if (esp_camera_init(&config) != ESP_OK) {
     return "INIT_FAILED";
   }
+  camApplyTuning();
 
   delay(CAM_SETTLE_DELAY_MS);
   // Discard a couple of initial frames so OV2640 AEC/AWB stabilizes.
@@ -340,6 +388,7 @@ void camHandleStreamCommand(const char *action, const char *id_text,
       camRespond("CAM ERROR %lu INIT_FAILED\n", static_cast<unsigned long>(id));
       return;
     }
+    camApplyTuning();
     const uint32_t now = millis();
     cam_stream_hw_ready = true;
     cam_frame = CameraFrame{};
@@ -514,6 +563,52 @@ void camStepStream(uint32_t now) {
   camFlushReply();
 }
 
+void camHandleTuneCommand(const char *action, const char *key, const char *val_text) {
+  if (!action) {
+    camRespond("CAM ERROR 0 BAD_COMMAND\n");
+    return;
+  }
+  if (strcmp(action, "GET") == 0 && !key && !val_text) {
+    camTuningReply();
+    return;
+  }
+  if (strcmp(action, "RESET") == 0 && !key && !val_text) {
+    cam_tuning = CameraTuning{};
+    if (cam_stream_hw_ready) camApplyTuning();
+    camTuningReply();
+    return;
+  }
+  if (strcmp(action, "SET") == 0 && key && val_text) {
+    int32_t v = 0;
+    if (!camSignedNumber(val_text, v)) {
+      camRespond("CAM ERROR 0 BAD_VALUE\n");
+      return;
+    }
+    if (strcmp(key, "BRIGHTNESS") == 0 && v >= -2 && v <= 2) {
+      cam_tuning.brightness = static_cast<int8_t>(v);
+    } else if (strcmp(key, "CONTRAST") == 0 && v >= -2 && v <= 2) {
+      cam_tuning.contrast = static_cast<int8_t>(v);
+    } else if (strcmp(key, "SATURATION") == 0 && v >= -2 && v <= 2) {
+      cam_tuning.saturation = static_cast<int8_t>(v);
+    } else if (strcmp(key, "AE") == 0 && v >= -2 && v <= 2) {
+      cam_tuning.ae_level = static_cast<int8_t>(v);
+    } else if (strcmp(key, "WB") == 0 && v >= 0 && v <= 4) {
+      cam_tuning.wb_mode = static_cast<uint8_t>(v);
+    } else if (strcmp(key, "HMIRROR") == 0 && v >= 0 && v <= 1) {
+      cam_tuning.hmirror = static_cast<uint8_t>(v);
+    } else if (strcmp(key, "VFLIP") == 0 && v >= 0 && v <= 1) {
+      cam_tuning.vflip = static_cast<uint8_t>(v);
+    } else {
+      camRespond("CAM ERROR 0 BAD_VALUE\n");
+      return;
+    }
+    if (cam_stream_hw_ready) camApplyTuning();
+    camTuningReply();
+    return;
+  }
+  camRespond("CAM ERROR 0 BAD_COMMAND\n");
+}
+
 void camHandleCommand(bool pcm_busy) {
   char *save = nullptr;
   const char *prefix = strtok_r(cam_command, " ", &save);
@@ -542,6 +637,15 @@ void camHandleCommand(bool pcm_busy) {
       return;
     }
     camHandleStreamCommand(first, second, third, pcm_busy);
+    return;
+  }
+
+  if (verb && strcmp(verb, "TUNE") == 0) {
+    if (extra) {
+      camRespond("CAM ERROR 0 BAD_COMMAND\n");
+      return;
+    }
+    camHandleTuneCommand(first, second, third);
     return;
   }
 

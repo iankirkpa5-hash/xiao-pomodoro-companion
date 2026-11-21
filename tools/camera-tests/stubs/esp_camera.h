@@ -62,6 +62,16 @@ inline void delay(unsigned long ms) { fake_ms += static_cast<uint32_t>(ms); }
 inline float fake_temp_c = 38.5f;
 inline float temperatureRead() { return fake_temp_c; }
 
+struct sensor_t {
+  int (*set_contrast)(sensor_t *sensor, int level);
+  int (*set_brightness)(sensor_t *sensor, int level);
+  int (*set_saturation)(sensor_t *sensor, int level);
+  int (*set_ae_level)(sensor_t *sensor, int level);
+  int (*set_wb_mode)(sensor_t *sensor, int mode);
+  int (*set_hmirror)(sensor_t *sensor, int enable);
+  int (*set_vflip)(sensor_t *sensor, int enable);
+};
+
 struct FakeCamera {
   bool initialized = false;
   bool outstanding_fb = false;
@@ -72,6 +82,14 @@ struct FakeCamera {
   int deinit_calls = 0;
   int fb_get_calls = 0;
   int fb_return_calls = 0;
+  int brightness = 0;
+  int contrast = 0;
+  int saturation = 0;
+  int ae_level = 0;
+  int wb_mode = 0;
+  int hmirror = 0;
+  int vflip = 0;
+  int tune_apply_calls = 0;
   camera_config_t last_config{};
   std::vector<uint8_t> frame_bytes;
   size_t width = 320;
@@ -81,6 +99,20 @@ struct FakeCamera {
 };
 
 inline FakeCamera fake_camera;
+
+inline sensor_t fake_sensor{
+    [](sensor_t *, int v) { fake_camera.contrast = v; fake_camera.tune_apply_calls++; return 0; },
+    [](sensor_t *, int v) { fake_camera.brightness = v; fake_camera.tune_apply_calls++; return 0; },
+    [](sensor_t *, int v) { fake_camera.saturation = v; fake_camera.tune_apply_calls++; return 0; },
+    [](sensor_t *, int v) { fake_camera.ae_level = v; fake_camera.tune_apply_calls++; return 0; },
+    [](sensor_t *, int v) { fake_camera.wb_mode = v; fake_camera.tune_apply_calls++; return 0; },
+    [](sensor_t *, int v) { fake_camera.hmirror = v; fake_camera.tune_apply_calls++; return 0; },
+    [](sensor_t *, int v) { fake_camera.vflip = v; fake_camera.tune_apply_calls++; return 0; },
+};
+
+inline sensor_t *esp_camera_sensor_get() {
+  return fake_camera.initialized ? &fake_sensor : nullptr;
+}
 
 inline esp_err_t esp_camera_init(const camera_config_t *config) {
   assert(config != nullptr);

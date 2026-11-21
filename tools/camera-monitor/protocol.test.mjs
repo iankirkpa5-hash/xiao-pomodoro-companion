@@ -226,4 +226,16 @@ test("runCapture sends requested high-res size and uses fast dumpFrame when vali
   assert.deepEqual(res.jpeg, jpeg);
   assert.equal(res.state.width, 800);
   assert.equal(res.tempC, 39.4);
+
+  const { parseCamTuning } = await import("./protocol.mjs");
+  assert.deepEqual(parseCamTuning("CAM TUNING 2 -1 0 1 3 1 0"), {
+    brightness: 2,
+    contrast: -1,
+    saturation: 0,
+    ae: 1,
+    wb: 3,
+    hmirror: 1,
+    vflip: 0,
+  });
+  assert.equal(parseCamTuning("CAM INFO 1 320 240 JPEG 262144 64 8000000"), null);
 });

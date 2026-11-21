@@ -296,4 +296,40 @@ int main() {
   assert(sendRouted("CAM RELEASE 301") == "CAM RELEASED 301\n");
   assert(fake_allocations == 0);
   std::cout << "PASS high-resolution capture (SVGA/UXGA) and fast Base64 CAM DUMP\n";
+
+  // 8. OV2640 hardware image tuning (passive when idle, applied on capture and live while streaming).
+  resetCameraTest();
+  cam_tuning = CameraTuning{};
+  assert(sendRouted("CAM TUNE GET") == "CAM TUNING 0 0 0 0 0 0 0\n");
+  assert(fake_camera.init_calls == 0);
+  assert(sendRouted("CAM TUNE SET BRIGHTNESS 2") == "CAM TUNING 2 0 0 0 0 0 0\n");
+  assert(sendRouted("CAM TUNE SET AE -1") == "CAM TUNING 2 0 0 -1 0 0 0\n");
+  assert(sendRouted("CAM TUNE SET CONTRAST 1") == "CAM TUNING 2 1 0 -1 0 0 0\n");
+  assert(sendRouted("CAM TUNE SET SATURATION -2") == "CAM TUNING 2 1 -2 -1 0 0 0\n");
+  assert(sendRouted("CAM TUNE SET WB 3") == "CAM TUNING 2 1 -2 -1 3 0 0\n");
+  assert(sendRouted("CAM TUNE SET HMIRROR 1") == "CAM TUNING 2 1 -2 -1 3 1 0\n");
+  assert(sendRouted("CAM TUNE SET VFLIP 1") == "CAM TUNING 2 1 -2 -1 3 1 1\n");
+  assert(sendRouted("CAM TUNE SET BRIGHTNESS 3") == "CAM ERROR 0 BAD_VALUE\n");
+  assert(sendRouted("CAM TUNE SET WB 5") == "CAM ERROR 0 BAD_VALUE\n");
+  assert(sendRouted("CAM TUNE SET UNKNOWN 1") == "CAM ERROR 0 BAD_VALUE\n");
+  assert(fake_camera.init_calls == 0 && fake_camera.tune_apply_calls == 0);
+
+  // Capture applies stored tuning to sensor after init.
+  fake_camera.frame_bytes = makeJpeg(160);
+  assert(sendRouted("CAM CAPTURE 310 SVGA").find("CAM STATE 310 READY ") == 0);
+  assert(fake_camera.brightness == 2 && fake_camera.contrast == 1 &&
+         fake_camera.saturation == -2 && fake_camera.ae_level == -1 &&
+         fake_camera.wb_mode == 3 && fake_camera.hmirror == 1 && fake_camera.vflip == 1);
+  assert(sendRouted("CAM RELEASE 310") == "CAM RELEASED 310\n");
+
+  // Live streaming applies CAM TUNE SET/RESET immediately without restarting stream.
+  assert(sendRouted("CAM STREAM START 311 150").find("CAM STREAMING 311 150") == 0);
+  const int before_live = fake_camera.tune_apply_calls;
+  assert(sendRouted("CAM TUNE SET BRIGHTNESS -2") == "CAM TUNING -2 1 -2 -1 3 1 1\n");
+  assert(fake_camera.brightness == -2 && fake_camera.tune_apply_calls > before_live);
+  assert(sendRouted("CAM TUNE RESET") == "CAM TUNING 0 0 0 0 0 0 0\n");
+  assert(fake_camera.brightness == 0 && fake_camera.contrast == 0 && fake_camera.wb_mode == 0);
+  assert(sendRouted("CAM STREAM STOP 311") == "CAM STOPPED 311 HOST\n");
+  assert(!fake_camera.initialized && fake_allocations == 0);
+  std::cout << "PASS OV2640 CAM TUNE passive storage, capture application, and live stream updates\n";
 }

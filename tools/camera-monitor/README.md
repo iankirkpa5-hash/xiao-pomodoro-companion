@@ -21,11 +21,13 @@ Open <http://127.0.0.1:8766> in desktop Chrome or Edge.
 1. Close PlatformIO or other serial monitors first (only one app can own COM11).
 2. Click **連接 XIAO** and pick the XIAO USB serial port.
 3. Click **開始即時預覽** to stream live 320×240 JPEG frames over USB while
-   framing. Use **旋轉** / **鏡像** to orient the preview (display-only; saved
-   files keep exact raw device JPEG bytes).
-4. Click **拍一張** while previewing to instantly save the current verified live
-   frame into the history strip (or click **拍一張** while preview is stopped
-   for a one-shot `CAM CAPTURE` with immediate `deinit`).
+   framing. Adjust OV2640 hardware **影像微調** (brightness, exposure
+   compensation, contrast, saturation, white balance, hardware mirror/flip) live
+   in preview, or use display-only **旋轉** / **鏡像** buttons.
+4. Pick a still resolution (`SVGA 800×600`, `UXGA 1600×1200`, `VGA`, `QVGA`, or
+   instant `LIVE` frame) and click **拍一張**, or use **定時連拍** (5–60 s
+   interval, 3–20 shot cap, optional auto-download; camera deinitializes between
+   shots to stay cool).
 5. Click **停止預覽** when done so the board immediately runs
    `esp_camera_deinit()`, click **下載 JPEG** to save locally, and click
    **中斷連線** before uploading firmware.

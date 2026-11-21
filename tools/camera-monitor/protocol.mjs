@@ -6,6 +6,7 @@ const ERROR_RE = /^CAM ERROR (\d+) ([A-Z_]+)$/;
 const STREAMING_RE = /^CAM STREAMING (\d+) (\d+) (\d+) (-?\d+)$/;
 const PONG_RE = /^CAM PONG (\d+) (\d+) (-?\d+)$/;
 const STOPPED_RE = /^CAM STOPPED (\d+) ([A-Z_]+)$/;
+const TUNING_RE = /^CAM TUNING (-?\d+) (-?\d+) (-?\d+) (-?\d+) (\d+) (\d+) (\d+)$/;
 const FRAME_RE = /^CAM FRAME (\d+) (\d+) (\d+) (\d+) (\d+) ([0-9a-f]{8}) (-?\d+)$/;
 const FDATA_RE = /^CAM FDATA (\d+) (\d+) ([A-Za-z0-9+/=]+)$/;
 const FEND_RE = /^CAM FEND (\d+) (\d+)$/;
@@ -201,6 +202,20 @@ export function parseStreamStopped(line, session) {
   const m = STOPPED_RE.exec(line);
   if (!m || Number(m[1]) !== session) return null;
   return { reason: m[2] };
+}
+
+export function parseCamTuning(line) {
+  const m = TUNING_RE.exec(line);
+  if (!m) return null;
+  return {
+    brightness: Number(m[1]),
+    contrast: Number(m[2]),
+    saturation: Number(m[3]),
+    ae: Number(m[4]),
+    wb: Number(m[5]),
+    hmirror: Number(m[6]),
+    vflip: Number(m[7]),
+  };
 }
 
 export function verifyJpeg(bytes, state) {

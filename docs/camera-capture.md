@@ -112,12 +112,17 @@ CAM PONG <id> <remaining_ms> <temp_c_x10>
 CAM STREAM STOP <id>
 CAM STOPPED <id> <HOST|IDLE|WATCHDOG|MAX_TIME>
 
+CAM TUNE GET
+CAM TUNE SET <BRIGHTNESS|CONTRAST|SATURATION|AE|WB|HMIRROR|VFLIP> <value>
+CAM TUNE RESET
+CAM TUNING <brightness> <contrast> <saturation> <ae> <wb> <hmirror> <vflip>
+
 CAM ERROR <id_or_0> <reason>
 ```
 
-Error reasons: `BAD_COMMAND`, `BAD_SIZE`, `BAD_INTERVAL`, `BUSY`, `NO_PSRAM`,
-`INIT_FAILED`, `CAPTURE_FAILED`, `BAD_FRAME`, `FRAME_TOO_LARGE`, `NO_CAPTURE`,
-`NO_STREAM`, `BAD_OFFSET`.
+Error reasons: `BAD_COMMAND`, `BAD_SIZE`, `BAD_VALUE`, `BAD_INTERVAL`, `BUSY`,
+`NO_PSRAM`, `INIT_FAILED`, `CAPTURE_FAILED`, `BAD_FRAME`, `FRAME_TOO_LARGE`,
+`NO_CAPTURE`, `NO_STREAM`, `BAD_OFFSET`.
 
 - `CAM CAPTURE` discards 2 initial frames so OV2640 AEC/AWB stabilizes before
   copying the final JPEG (up to 256 KiB in PSRAM) and immediately calling

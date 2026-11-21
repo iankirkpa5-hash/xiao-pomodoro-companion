@@ -3,6 +3,7 @@ import {
   StreamFrameAssembler,
   classifyDiagnostic,
   parseCamError,
+  parseCamTuning,
   parseStreamPong,
   parseStreamStarted,
   parseStreamStopped,
@@ -20,6 +21,7 @@ let readTask = null;
 let opening = false;
 let closing = false;
 let capturing = false;
+let tuningBusy = false;
 
 let streaming = false;
 let streamBusy = false;
@@ -32,6 +34,13 @@ let liveUrl = null;
 let latestLiveFrame = null;
 let liveFrameTimes = [];
 let latestTempC = null;
+
+let timelapseRunning = false;
+let timelapseDone = 0;
+let timelapseTotal = 0;
+let timelapseNextAt = 0;
+let timelapseTimer = null;
+let timelapseTickTimer = null;
 
 let activeWaiter = null;
 let sessionSeed = Math.floor(Math.random() * 0x7fffffff) + 1;
@@ -90,12 +99,34 @@ function updateTransform() {
   $("mirror").setAttribute("aria-pressed", String(mirrored));
 }
 
+function applyTuningToUi(t) {
+  if (!t) return;
+  $("tune-brightness").value = String(t.brightness);
+  $("val-brightness").textContent = t.brightness > 0 ? `+${t.brightness}` : String(t.brightness);
+  $("tune-ae").value = String(t.ae);
+  $("val-ae").textContent = t.ae > 0 ? `+${t.ae}` : String(t.ae);
+  $("tune-contrast").value = String(t.contrast);
+  $("val-contrast").textContent = t.contrast > 0 ? `+${t.contrast}` : String(t.contrast);
+  $("tune-saturation").value = String(t.saturation);
+  $("val-saturation").textContent = t.saturation > 0 ? `+${t.saturation}` : String(t.saturation);
+  $("tune-wb").value = String(t.wb);
+  $("tune-hmirror").checked = Boolean(t.hmirror);
+  $("tune-vflip").checked = Boolean(t.vflip);
+}
+
 function computeFps() {
   const now = performance.now();
   liveFrameTimes = liveFrameTimes.filter(t => now - t <= 3000);
   if (liveFrameTimes.length < 2) return liveFrameTimes.length ? 1 : 0;
   const spanSec = (liveFrameTimes[liveFrameTimes.length - 1] - liveFrameTimes[0]) / 1000;
   return spanSec > 0 ? (liveFrameTimes.length - 1) / spanSec : 0;
+}
+
+function triggerBlobDownload(url, filename) {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
 }
 
 function renderHistory() {
@@ -125,14 +156,14 @@ function renderHistory() {
   });
 }
 
-function pushSavedShot({ jpeg, width, height, length, crc32, captureMs, tempC, source }) {
+function pushSavedShot({ jpeg, width, height, length, crc32, captureMs, tempC, source, filenamePrefix = "xiao-cam", autoDownload = false }) {
   const blob = new Blob([jpeg], { type: "image/jpeg" });
   const url = URL.createObjectURL(blob);
   const now = new Date();
   const pad = n => String(n).padStart(2, "0");
   const timeLabel = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   const filename =
-    `xiao-cam-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-` +
+    `${filenamePrefix}-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-` +
     `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.jpg`;
 
   history.unshift({
@@ -157,6 +188,9 @@ function pushSavedShot({ jpeg, width, height, length, crc32, captureMs, tempC, s
   if (!streaming) {
     showShotInStage(history[0]);
   }
+  if (autoDownload) {
+    triggerBlobDownload(url, filename);
+  }
   renderControls();
 }
 
@@ -171,7 +205,9 @@ function showShotInStage(item) {
   $("viewer-subtitle").textContent =
     item.source === "live-snap"
       ? `預覽快門存檔 ${item.timeLabel}`
-      : `單張拍攝 ${item.timeLabel} · 耗時 ${item.captureMs} ms`;
+      : item.source === "timelapse"
+        ? `定時連拍 ${item.timeLabel} · 耗時 ${item.captureMs} ms`
+        : `單張拍攝 ${item.timeLabel} · 耗時 ${item.captureMs} ms`;
   updateTransform();
 }
 
@@ -196,6 +232,24 @@ function clearStreamTimers() {
   }
 }
 
+function clearTimelapseTimers() {
+  if (timelapseTimer) {
+    clearTimeout(timelapseTimer);
+    timelapseTimer = null;
+  }
+  if (timelapseTickTimer) {
+    clearInterval(timelapseTickTimer);
+    timelapseTickTimer = null;
+  }
+}
+
+function stopTimelapse(statusText = "已停止") {
+  clearTimelapseTimers();
+  timelapseRunning = false;
+  $("timelapse-status").textContent = statusText;
+  renderControls();
+}
+
 function endStreamState(reasonText = "") {
   clearStreamTimers();
   streaming = false;
@@ -217,23 +271,24 @@ function renderControls() {
   const connected = port !== null && !closing;
   const hasShot = selectedIndex >= 0 && selectedIndex < history.length;
   const hasAnyImage = !$("preview-image").hidden;
+  const busy = capturing || streamBusy || timelapseRunning;
 
   $("connect").disabled = !supported || opening || port !== null;
   $("disconnect").disabled = !connected || opening;
 
   const previewBtn = $("preview-toggle");
-  previewBtn.disabled = !connected || capturing || streamBusy;
+  previewBtn.disabled = !connected || capturing || streamBusy || timelapseRunning;
   previewBtn.textContent = streaming ? "停止預覽" : "開始即時預覽";
   previewBtn.classList.toggle("danger-btn", streaming);
   previewBtn.classList.toggle("primary", !streaming);
 
   const sizeSelect = $("capture-size");
-  sizeSelect.disabled = !connected || capturing || streamBusy;
+  sizeSelect.disabled = !connected || busy;
   const selectedSize = sizeSelect.value;
 
   const captureBtn = $("capture");
   const waitingLiveSnap = streaming && selectedSize === "LIVE" && !latestLiveFrame;
-  captureBtn.disabled = !connected || capturing || streamBusy || waitingLiveSnap;
+  captureBtn.disabled = !connected || busy || waitingLiveSnap;
   captureBtn.textContent =
     selectedSize === "LIVE" && streaming
       ? "拍一張（瞬拍目前畫面）"
@@ -243,10 +298,36 @@ function renderControls() {
   $("rotate").disabled = !hasAnyImage;
   $("mirror").disabled = !hasAnyImage;
 
+  const tuneDisabled = !connected || capturing || streamBusy || timelapseRunning || tuningBusy;
+  for (const id of [
+    "tune-brightness",
+    "tune-ae",
+    "tune-contrast",
+    "tune-saturation",
+    "tune-wb",
+    "tune-hmirror",
+    "tune-vflip",
+    "tune-reset",
+  ]) {
+    $(id).disabled = tuneDisabled;
+  }
+
+  $("timelapse-interval").disabled = !connected || busy;
+  $("timelapse-count").disabled = !connected || busy;
+  $("timelapse-autodownload").disabled = !connected || busy;
+  const tlBtn = $("timelapse-toggle");
+  tlBtn.disabled = !connected || (!timelapseRunning && (capturing || streamBusy));
+  tlBtn.textContent = timelapseRunning ? "停止連拍" : "開始定時連拍";
+  tlBtn.classList.toggle("danger-btn", timelapseRunning);
+  tlBtn.classList.toggle("secondary", !timelapseRunning);
+
   const badge = $("status-badge");
   if (!connected) {
     badge.dataset.state = "idle";
     badge.textContent = hasShot ? "已中斷 · 保留照片" : "等待連線";
+  } else if (timelapseRunning) {
+    badge.dataset.state = "busy";
+    badge.textContent = `定時連拍中 (${timelapseDone}/${timelapseTotal})`;
   } else if (streaming) {
     badge.dataset.state = "ready";
     badge.textContent = "即時預覽中 · 同步畫面";
@@ -303,7 +384,7 @@ function handleLiveFrame(frame) {
   $("meta-temp").textContent = formatTemp(latestTempC);
   $("meta-verify").textContent = `倒數 ${formatCountdown(streamEndsAt - performance.now())}`;
   $("viewer-subtitle").textContent =
-    `即時同步取景中（第 #${frame.seq} 幀）· 按「拍一張」直接存檔，停止即 deinit`;
+    `即時同步取景中（第 #${frame.seq} 幀）· 按「拍一張」存檔，停止即 deinit`;
   renderControls();
 }
 
@@ -403,8 +484,89 @@ async function sendRequest(session, command, parse, { timeoutMs = 1200, attempts
   throw new Error(`無法取得有效回覆：${command}`);
 }
 
+function dumpCapturedFrame(session, maxFrameBytes, onProgress) {
+  const assembler = new StreamFrameAssembler(session, maxFrameBytes, onProgress);
+  return sendRequest(
+    session,
+    `CAM DUMP ${session}`,
+    line => {
+      const result = assembler.feed(line);
+      if (result) return result;
+      if (line === `CAM FEND ${session} 0`) return { failed: true };
+      return null;
+    },
+    { timeoutMs: 25000, attempts: 1 },
+  );
+}
+
+async function captureStillFrame(targetSize, { source = "single-capture", filenamePrefix = "xiao-cam", autoDownload = false } = {}) {
+  capturing = true;
+  setMessage();
+  const session = nextSessionId();
+  setProgress(true, 0, 1, "正在檢查 CAM INFO…");
+  renderControls();
+  try {
+    const result = await runCapture({
+      session,
+      size: targetSize,
+      dumpFrame: dumpCapturedFrame,
+      request: (cmd, parse, opts) => sendRequest(session, cmd, parse, opts),
+      onStage: (stage, detail) => {
+        if (stage === "capture") {
+          setProgress(true, 0, 1, `正在拍攝 ${targetSize} 並立即 deinit…`);
+        } else if (stage === "download" && detail?.state) {
+          setProgress(true, 0, detail.state.length, `高速傳輸中 0 / ${detail.state.length} bytes…`);
+        } else if (stage === "released" && detail && !detail.released) {
+          appendLog(`[網頁] CAM RELEASE 未確認：${detail.releaseError}`);
+        }
+      },
+      onProgress: (done, total) => setProgress(true, done, total),
+    });
+
+    if (result.tempC !== null && result.tempC !== undefined) latestTempC = result.tempC;
+    pushSavedShot({
+      jpeg: result.jpeg,
+      width: result.state.width,
+      height: result.state.height,
+      length: result.state.length,
+      crc32: result.state.crc32,
+      captureMs: result.state.captureMs,
+      tempC: result.tempC ?? latestTempC,
+      source,
+      filenamePrefix,
+      autoDownload,
+    });
+    appendLog(
+      `[網頁] 拍照完成（${targetSize}）：${result.state.width}x${result.state.height}, ` +
+      `${result.state.length} bytes, capture=${result.state.captureMs} ms, ` +
+      `CRC32=${result.state.crc32.toString(16).padStart(8, "0")} PASS`,
+    );
+    return result;
+  } finally {
+    capturing = false;
+    setProgress(false);
+    renderControls();
+  }
+}
+
+async function sendTuneCommand(cmd) {
+  if (!port || closing || capturing || streamBusy || timelapseRunning || tuningBusy) return;
+  tuningBusy = true;
+  renderControls();
+  try {
+    const tuning = await sendRequest(0, cmd, parseCamTuning, { timeoutMs: 1500, attempts: 2 });
+    applyTuningToUi(tuning);
+  } catch (error) {
+    setMessage(`影像參數套用失敗：${error.message}`);
+    appendLog(`[網頁] ${cmd} 失敗：${error.message}`);
+  } finally {
+    tuningBusy = false;
+    renderControls();
+  }
+}
+
 async function startLivePreview() {
-  if (!port || closing || streaming || capturing || streamBusy) return;
+  if (!port || closing || streaming || capturing || streamBusy || timelapseRunning) return;
   streamBusy = true;
   setMessage();
   const session = nextSessionId();
@@ -471,6 +633,67 @@ async function stopLivePreview() {
   }
 }
 
+async function runTimelapseStep(intervalSec, targetSize, autoDownload) {
+  if (!timelapseRunning || !port || closing) return;
+  const shotNum = timelapseDone + 1;
+  $("timelapse-status").textContent = `正在拍攝第 ${shotNum} / ${timelapseTotal} 張…`;
+  try {
+    const seqTag = String(shotNum).padStart(3, "0");
+    await captureStillFrame(targetSize, {
+      source: "timelapse",
+      filenamePrefix: `xiao-timelapse-${seqTag}`,
+      autoDownload,
+    });
+    if (!timelapseRunning) return;
+    timelapseDone++;
+    if (timelapseDone >= timelapseTotal) {
+      appendLog(`[網頁] 定時連拍完成：共 ${timelapseDone} 張（${targetSize}）。`);
+      stopTimelapse(`已完成 ${timelapseDone} / ${timelapseTotal} 張`);
+      return;
+    }
+    timelapseNextAt = performance.now() + intervalSec * 1000;
+    $("timelapse-status").textContent =
+      `已完成 ${timelapseDone} / ${timelapseTotal} 張 · 倒數 ${intervalSec} 秒`;
+    timelapseTimer = setTimeout(
+      () => runTimelapseStep(intervalSec, targetSize, autoDownload),
+      intervalSec * 1000,
+    );
+  } catch (error) {
+    setMessage(`定時連拍中斷：${error.message}`);
+    appendLog(`[網頁] 定時連拍失敗：${error.message}`);
+    stopTimelapse(`中斷於第 ${shotNum} 張`);
+  }
+}
+
+async function startTimelapse() {
+  if (!port || closing || capturing || streamBusy || timelapseRunning) return;
+  if (streaming) {
+    await stopLivePreview();
+  }
+  const intervalSec = Number($("timelapse-interval").value) || 10;
+  const totalCount = Number($("timelapse-count").value) || 5;
+  const autoDownload = $("timelapse-autodownload").checked;
+  const selectedSize = $("capture-size").value;
+  const targetSize = selectedSize === "LIVE" ? "QVGA" : selectedSize;
+
+  timelapseRunning = true;
+  timelapseDone = 0;
+  timelapseTotal = totalCount;
+  timelapseNextAt = 0;
+  setMessage();
+  appendLog(`[網頁] 開始定時連拍：每 ${intervalSec} 秒 1 張，共 ${totalCount} 張（${targetSize}，自動下載=${autoDownload ? "開" : "關"}）。`);
+
+  timelapseTickTimer = setInterval(() => {
+    if (!timelapseRunning || capturing || !timelapseNextAt) return;
+    const remSec = Math.max(0, Math.ceil((timelapseNextAt - performance.now()) / 1000));
+    $("timelapse-status").textContent =
+      `已完成 ${timelapseDone} / ${timelapseTotal} 張 · 倒數 ${remSec} 秒`;
+  }, 500);
+
+  renderControls();
+  runTimelapseStep(intervalSec, targetSize, autoDownload);
+}
+
 async function readLoop(selected) {
   const decoder = new TextDecoder();
   const framer = new LineFramer();
@@ -493,6 +716,7 @@ async function readLoop(selected) {
     if (!closing) failure = `串口讀取中斷：${error.message}`;
   } finally {
     abortActiveWaiter("連線已中斷");
+    if (timelapseRunning) stopTimelapse("串口已中斷");
     if (streaming) endStreamState("串口已中斷");
     if (reader) {
       try { reader.releaseLock(); } catch { /* ignore */ }
@@ -506,6 +730,7 @@ async function readLoop(selected) {
     if (port === selected) port = null;
     closing = false;
     capturing = false;
+    tuningBusy = false;
     setProgress(false);
     $("connection-state").textContent = "已中斷連線";
     if (failure) setMessage(failure);
@@ -515,6 +740,7 @@ async function readLoop(selected) {
 
 async function disconnect() {
   if (!port || closing) return;
+  if (timelapseRunning) stopTimelapse("已手動停止");
   if (streaming) {
     try { await stopLivePreview(); } catch { /* ignore */ }
   }
@@ -544,6 +770,10 @@ $("connect").addEventListener("click", async () => {
     $("connection-state").textContent = "已連線（115200 baud）";
     appendLog("[網頁] 已連接 XIAO USB 串口（開機與連線時鏡頭預設關閉）。");
     readTask = readLoop(selected);
+    // Passively sync OV2640 tuning defaults without initializing the camera.
+    sendRequest(0, "CAM TUNE GET", parseCamTuning, { timeoutMs: 1200, attempts: 2 })
+      .then(applyTuningToUi)
+      .catch(() => {});
   } catch (error) {
     if (error && error.name !== "NotFoundError") {
       setMessage(`無法連接串口：${error.message}`);
@@ -561,28 +791,12 @@ $("preview-toggle").addEventListener("click", () => {
   else startLivePreview();
 });
 
-function dumpCapturedFrame(session, maxFrameBytes, onProgress) {
-  const assembler = new StreamFrameAssembler(session, maxFrameBytes, onProgress);
-  return sendRequest(
-    session,
-    `CAM DUMP ${session}`,
-    line => {
-      const result = assembler.feed(line);
-      if (result) return result;
-      if (line === `CAM FEND ${session} 0`) return { failed: true };
-      return null;
-    },
-    { timeoutMs: 25000, attempts: 1 },
-  );
-}
-
 $("capture-size").addEventListener("change", () => renderControls());
 
 $("capture").addEventListener("click", async () => {
-  if (!port || closing || capturing || streamBusy) return;
+  if (!port || closing || capturing || streamBusy || timelapseRunning) return;
   const selectedSize = $("capture-size").value;
 
-  // Instant shutter from live preview stream when LIVE mode is chosen.
   if (selectedSize === "LIVE" && streaming && latestLiveFrame) {
     const frame = latestLiveFrame;
     pushSavedShot({
@@ -601,67 +815,53 @@ $("capture").addEventListener("click", async () => {
     return;
   }
 
-  // Stop live preview first if shooting a high-resolution still frame.
   if (streaming) {
     await stopLivePreview();
   }
-
   const targetSize = selectedSize === "LIVE" ? "QVGA" : selectedSize;
-  capturing = true;
-  setMessage();
-  const session = nextSessionId();
-  setProgress(true, 0, 1, "正在檢查 CAM INFO…");
-  renderControls();
   try {
-    const result = await runCapture({
-      session,
-      size: targetSize,
-      dumpFrame: dumpCapturedFrame,
-      request: (cmd, parse, opts) => sendRequest(session, cmd, parse, opts),
-      onStage: (stage, detail) => {
-        if (stage === "capture") {
-          setProgress(true, 0, 1, `正在拍攝 ${targetSize} 並立即 deinit…`);
-        } else if (stage === "download" && detail?.state) {
-          setProgress(true, 0, detail.state.length, `高速傳輸中 0 / ${detail.state.length} bytes…`);
-        } else if (stage === "released" && detail && !detail.released) {
-          appendLog(`[網頁] CAM RELEASE 未確認：${detail.releaseError}`);
-        }
-      },
-      onProgress: (done, total) => setProgress(true, done, total),
-    });
-
-    if (result.tempC !== null && result.tempC !== undefined) latestTempC = result.tempC;
-    pushSavedShot({
-      jpeg: result.jpeg,
-      width: result.state.width,
-      height: result.state.height,
-      length: result.state.length,
-      crc32: result.state.crc32,
-      captureMs: result.state.captureMs,
-      tempC: result.tempC ?? latestTempC,
-      source: "single-capture",
-    });
-    appendLog(
-      `[網頁] 高畫質拍照完成：${result.state.width}x${result.state.height}, ${result.state.length} bytes, ` +
-      `capture=${result.state.captureMs} ms, CRC32=${result.state.crc32.toString(16).padStart(8, "0")} PASS`,
-    );
+    await captureStillFrame(targetSize);
   } catch (error) {
     setMessage(`拍照失敗：${error.message}`);
     appendLog(`[網頁] 拍照失敗：${error.message}`);
-  } finally {
-    capturing = false;
-    setProgress(false);
-    renderControls();
+  }
+});
+
+for (const [id, key, valId] of [
+  ["tune-brightness", "BRIGHTNESS", "val-brightness"],
+  ["tune-ae", "AE", "val-ae"],
+  ["tune-contrast", "CONTRAST", "val-contrast"],
+  ["tune-saturation", "SATURATION", "val-saturation"],
+]) {
+  $(id).addEventListener("input", () => {
+    const n = Number($(id).value);
+    $(valId).textContent = n > 0 ? `+${n}` : String(n);
+  });
+  $(id).addEventListener("change", () => sendTuneCommand(`CAM TUNE SET ${key} ${$(id).value}`));
+}
+
+$("tune-wb").addEventListener("change", () => sendTuneCommand(`CAM TUNE SET WB ${$("tune-wb").value}`));
+$("tune-hmirror").addEventListener("change", () =>
+  sendTuneCommand(`CAM TUNE SET HMIRROR ${$("tune-hmirror").checked ? 1 : 0}`),
+);
+$("tune-vflip").addEventListener("change", () =>
+  sendTuneCommand(`CAM TUNE SET VFLIP ${$("tune-vflip").checked ? 1 : 0}`),
+);
+$("tune-reset").addEventListener("click", () => sendTuneCommand("CAM TUNE RESET"));
+
+$("timelapse-toggle").addEventListener("click", () => {
+  if (timelapseRunning) {
+    appendLog("[網頁] 已手動停止定時連拍。");
+    stopTimelapse(`已手動停止（共 ${timelapseDone} 張）`);
+  } else {
+    startTimelapse();
   }
 });
 
 $("download").addEventListener("click", () => {
   if (selectedIndex < 0 || selectedIndex >= history.length) return;
   const item = history[selectedIndex];
-  const link = document.createElement("a");
-  link.href = item.url;
-  link.download = item.filename;
-  link.click();
+  triggerBlobDownload(item.url, item.filename);
 });
 
 $("rotate").addEventListener("click", () => {
@@ -679,6 +879,7 @@ if (!supported) {
 }
 
 window.addEventListener("beforeunload", () => {
+  clearTimelapseTimers();
   if (streaming && port && writer && !closing) {
     try { writer.write(encoder.encode(`\nCAM STREAM STOP ${streamSession}\n`)); } catch { /* ignore */ }
   }
