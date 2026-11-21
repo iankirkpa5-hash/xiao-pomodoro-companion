@@ -46,6 +46,16 @@
       <section class="controls" aria-label="預覽與拍照操作">
         <div class="controls-left">
           <button id="preview-toggle" class="primary" disabled>開始即時預覽</button>
+          <label class="size-picker" for="capture-size">
+            <span>拍照畫質</span>
+            <select id="capture-size" disabled>
+              <option value="SVGA" selected>SVGA 800×600（推薦）</option>
+              <option value="UXGA">UXGA 1600×1200（200萬最高）</option>
+              <option value="VGA">VGA 640×480</option>
+              <option value="QVGA">QVGA 320×240</option>
+              <option value="LIVE">預覽當下幀（320×240 瞬拍）</option>
+            </select>
+          </label>
           <button id="capture" class="secondary" disabled>拍一張</button>
           <button id="download" class="secondary" disabled>下載 JPEG</button>
         </div>

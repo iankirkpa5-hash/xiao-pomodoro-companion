@@ -81,9 +81,9 @@ independently on the shared serial router (`src/serial_commands.cpp`).
 
 ```text
 CAM INFO
-CAM INFO 1 320 240 JPEG 131072 64 <free_psram_bytes>
+CAM INFO 1 320 240 JPEG 262144 64 <free_psram_bytes>
 
-CAM CAPTURE <id>
+CAM CAPTURE <id> [QVGA|VGA|SVGA|UXGA]
 CAM STATE <id> READY <length_bytes> <width> <height> <format> <capture_ms> <crc32>
 
 CAM STATUS <id>
@@ -91,6 +91,11 @@ CAM STATE <id> READY <length_bytes> <width> <height> <format> <capture_ms> <crc3
 
 CAM READ <id> <offset_bytes>
 CAM DATA <id> <offset_bytes> <jpeg_hex> <chunk_crc32>
+
+CAM DUMP <id>
+CAM FRAME <id> 0 <length_bytes> <width> <height> <crc32> <temp_c_x10>
+CAM FDATA <id> 0 <base64_chunk>
+CAM FEND <id> 0
 
 CAM RELEASE <id>
 CAM RELEASED <id>
@@ -110,12 +115,17 @@ CAM STOPPED <id> <HOST|IDLE|WATCHDOG|MAX_TIME>
 CAM ERROR <id_or_0> <reason>
 ```
 
-Error reasons: `BAD_COMMAND`, `BAD_INTERVAL`, `BUSY`, `NO_PSRAM`, `INIT_FAILED`,
-`CAPTURE_FAILED`, `BAD_FRAME`, `FRAME_TOO_LARGE`, `NO_CAPTURE`, `NO_STREAM`,
-`BAD_OFFSET`.
+Error reasons: `BAD_COMMAND`, `BAD_SIZE`, `BAD_INTERVAL`, `BUSY`, `NO_PSRAM`,
+`INIT_FAILED`, `CAPTURE_FAILED`, `BAD_FRAME`, `FRAME_TOO_LARGE`, `NO_CAPTURE`,
+`NO_STREAM`, `BAD_OFFSET`.
 
-- `CAM CAPTURE` with the same active `<id>` is idempotent and returns the existing
-  `READY` state without re-initializing the camera.
+- `CAM CAPTURE` discards 2 initial frames so OV2640 AEC/AWB stabilizes before
+  copying the final JPEG (up to 256 KiB in PSRAM) and immediately calling
+  `esp_camera_deinit()`. Retrying with the same active `<id>` is idempotent and
+  returns the existing `READY` state without re-initializing the camera.
+- `CAM DUMP <id>` pushes the verified `READY` JPEG in 120-byte (160 Base64 char)
+  non-blocking chunks for faster high-resolution download while keeping the
+  buffer available for `CAM READ` fallback until `CAM RELEASE <id>`.
 - `CAM RELEASE` is idempotent. If the host disappears, 60 seconds without session
   activity expires and frees the PSRAM buffer.
 - `CAM READ` offsets must be multiples of 64 within `[0, length_bytes)`.

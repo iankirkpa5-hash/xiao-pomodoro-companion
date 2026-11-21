@@ -227,9 +227,17 @@ function renderControls() {
   previewBtn.classList.toggle("danger-btn", streaming);
   previewBtn.classList.toggle("primary", !streaming);
 
+  const sizeSelect = $("capture-size");
+  sizeSelect.disabled = !connected || capturing || streamBusy;
+  const selectedSize = sizeSelect.value;
+
   const captureBtn = $("capture");
-  captureBtn.disabled = !connected || capturing || streamBusy || (streaming && !latestLiveFrame);
-  captureBtn.textContent = streaming ? "拍一張（存下目前畫面）" : "拍一張";
+  const waitingLiveSnap = streaming && selectedSize === "LIVE" && !latestLiveFrame;
+  captureBtn.disabled = !connected || capturing || streamBusy || waitingLiveSnap;
+  captureBtn.textContent =
+    selectedSize === "LIVE" && streaming
+      ? "拍一張（瞬拍目前畫面）"
+      : `拍一張（${selectedSize === "LIVE" ? "QVGA" : selectedSize}）`;
 
   $("download").disabled = !hasShot;
   $("rotate").disabled = !hasAnyImage;
@@ -553,11 +561,29 @@ $("preview-toggle").addEventListener("click", () => {
   else startLivePreview();
 });
 
+function dumpCapturedFrame(session, maxFrameBytes, onProgress) {
+  const assembler = new StreamFrameAssembler(session, maxFrameBytes, onProgress);
+  return sendRequest(
+    session,
+    `CAM DUMP ${session}`,
+    line => {
+      const result = assembler.feed(line);
+      if (result) return result;
+      if (line === `CAM FEND ${session} 0`) return { failed: true };
+      return null;
+    },
+    { timeoutMs: 25000, attempts: 1 },
+  );
+}
+
+$("capture-size").addEventListener("change", () => renderControls());
+
 $("capture").addEventListener("click", async () => {
   if (!port || closing || capturing || streamBusy) return;
+  const selectedSize = $("capture-size").value;
 
-  // Instant shutter from live preview stream.
-  if (streaming && latestLiveFrame) {
+  // Instant shutter from live preview stream when LIVE mode is chosen.
+  if (selectedSize === "LIVE" && streaming && latestLiveFrame) {
     const frame = latestLiveFrame;
     pushSavedShot({
       jpeg: frame.jpeg.slice(),
@@ -575,7 +601,12 @@ $("capture").addEventListener("click", async () => {
     return;
   }
 
-  // Single-shot capture with immediate deinit when preview is off.
+  // Stop live preview first if shooting a high-resolution still frame.
+  if (streaming) {
+    await stopLivePreview();
+  }
+
+  const targetSize = selectedSize === "LIVE" ? "QVGA" : selectedSize;
   capturing = true;
   setMessage();
   const session = nextSessionId();
@@ -584,12 +615,14 @@ $("capture").addEventListener("click", async () => {
   try {
     const result = await runCapture({
       session,
+      size: targetSize,
+      dumpFrame: dumpCapturedFrame,
       request: (cmd, parse, opts) => sendRequest(session, cmd, parse, opts),
       onStage: (stage, detail) => {
         if (stage === "capture") {
-          setProgress(true, 0, 1, "正在拍照並立即 deinit…");
+          setProgress(true, 0, 1, `正在拍攝 ${targetSize} 並立即 deinit…`);
         } else if (stage === "download" && detail?.state) {
-          setProgress(true, 0, detail.state.length, `下載中 0 / ${detail.state.length} bytes…`);
+          setProgress(true, 0, detail.state.length, `高速傳輸中 0 / ${detail.state.length} bytes…`);
         } else if (stage === "released" && detail && !detail.released) {
           appendLog(`[網頁] CAM RELEASE 未確認：${detail.releaseError}`);
         }
@@ -597,6 +630,7 @@ $("capture").addEventListener("click", async () => {
       onProgress: (done, total) => setProgress(true, done, total),
     });
 
+    if (result.tempC !== null && result.tempC !== undefined) latestTempC = result.tempC;
     pushSavedShot({
       jpeg: result.jpeg,
       width: result.state.width,
@@ -604,11 +638,11 @@ $("capture").addEventListener("click", async () => {
       length: result.state.length,
       crc32: result.state.crc32,
       captureMs: result.state.captureMs,
-      tempC: latestTempC,
+      tempC: result.tempC ?? latestTempC,
       source: "single-capture",
     });
     appendLog(
-      `[網頁] 單張拍照完成：${result.state.width}x${result.state.height}, ${result.state.length} bytes, ` +
+      `[網頁] 高畫質拍照完成：${result.state.width}x${result.state.height}, ${result.state.length} bytes, ` +
       `capture=${result.state.captureMs} ms, CRC32=${result.state.crc32.toString(16).padStart(8, "0")} PASS`,
     );
   } catch (error) {

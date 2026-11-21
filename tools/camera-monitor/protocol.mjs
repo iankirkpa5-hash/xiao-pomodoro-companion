@@ -237,9 +237,10 @@ export function verifyJpeg(bytes, state) {
 }
 
 export class StreamFrameAssembler {
-  constructor(session, maxFrameBytes = 131072) {
+  constructor(session, maxFrameBytes = 262144, onProgress = null) {
     this.session = session;
     this.maxFrameBytes = maxFrameBytes;
+    this.onProgress = onProgress;
     this.current = null;
     this.droppedFrames = 0;
   }
@@ -266,6 +267,7 @@ export class StreamFrameAssembler {
         buffer: new Uint8Array(length),
         offset: 0,
       };
+      if (this.onProgress) this.onProgress(0, length);
       return null;
     }
 
@@ -279,6 +281,7 @@ export class StreamFrameAssembler {
         }
         this.current.buffer.set(bytes, this.current.offset);
         this.current.offset += bytes.length;
+        if (this.onProgress) this.onProgress(this.current.offset, this.current.length);
       } catch {
         this.current = null;
         this.droppedFrames++;
@@ -324,6 +327,8 @@ export class StreamFrameAssembler {
 export async function runCapture({
   request,
   session,
+  size = "QVGA",
+  dumpFrame = null,
   onStage = () => {},
   onProgress = () => {},
 }) {
@@ -333,28 +338,44 @@ export async function runCapture({
     onStage("info");
     const info = await request("CAM INFO", parseCamInfo, { timeoutMs: 1200, attempts: 5 });
 
-    onStage("capture", { info });
+    onStage("capture", { info, size });
+    const captureCmd = size && size !== "QVGA" ? `CAM CAPTURE ${session} ${size}` : `CAM CAPTURE ${session}`;
     const state = await request(
-      `CAM CAPTURE ${session}`,
+      captureCmd,
       line => parseCamState(line, session, info.maxFrameBytes),
-      { timeoutMs: 5500, attempts: 2 },
+      { timeoutMs: 7000, attempts: 2 },
     );
 
     onStage("download", { info, state });
-    const jpeg = new Uint8Array(state.length);
-    for (let offset = 0; offset < state.length; offset += info.chunkBytes) {
-      const length = Math.min(info.chunkBytes, state.length - offset);
-      const chunk = await request(
-        `CAM READ ${session} ${offset}`,
-        line => parseCamData(line, session, offset, length),
-        { timeoutMs: 1200, attempts: 3 },
-      );
-      jpeg.set(chunk, offset);
-      onProgress(offset + length, state.length);
+    let jpeg = null;
+    let tempC = null;
+    if (dumpFrame) {
+      try {
+        const dumped = await dumpFrame(session, info.maxFrameBytes, onProgress);
+        if (dumped && dumped.jpeg && dumped.jpeg.length === state.length && dumped.crc32 === state.crc32) {
+          jpeg = dumped.jpeg;
+          tempC = dumped.tempC;
+        }
+      } catch {
+        jpeg = null;
+      }
+    }
+    if (!jpeg) {
+      jpeg = new Uint8Array(state.length);
+      for (let offset = 0; offset < state.length; offset += info.chunkBytes) {
+        const length = Math.min(info.chunkBytes, state.length - offset);
+        const chunk = await request(
+          `CAM READ ${session} ${offset}`,
+          line => parseCamData(line, session, offset, length),
+          { timeoutMs: 1200, attempts: 3 },
+        );
+        jpeg.set(chunk, offset);
+        onProgress(offset + length, state.length);
+      }
     }
 
     const verification = verifyJpeg(jpeg, state);
-    return { info, state, jpeg, verification, released: false, releaseError: null };
+    return { info, state, jpeg, tempC, verification, released: false, releaseError: null };
   } finally {
     try {
       await request(

@@ -142,14 +142,15 @@ class CameraClient:
         raise RuntimeError("no valid reply to " + command)
 
 
-def collect(client, report):
+def collect(client, report, size="QVGA"):
     info = client.request("CAM INFO", parse_info, attempts=5)
     report["device_info"] = info
-    print("Requesting single JPEG frame (camera initializes once and deinitializes immediately).", flush=True)
+    print(f"Requesting single {size} JPEG frame (camera initializes once and deinitializes immediately).", flush=True)
+    cmd = f"CAM CAPTURE {client.session}" if size == "QVGA" else f"CAM CAPTURE {client.session} {size}"
     status = client.request(
-        f"CAM CAPTURE {client.session}",
+        cmd,
         lambda line: parse_state(line, client.session, info["max_frame_bytes"]),
-        timeout=5.0,
+        timeout=7.0,
         attempts=2,
     )
     report["capture"] = status
@@ -160,7 +161,7 @@ def collect(client, report):
     )
     jpeg = bytearray()
     total = status["length"]
-    deadline = time.monotonic() + 60
+    deadline = time.monotonic() + 90
     for offset in range(0, total, info["chunk_bytes"]):
         if time.monotonic() > deadline:
             raise RuntimeError("download deadline exceeded")
@@ -182,6 +183,7 @@ def collect(client, report):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", required=True)
+    parser.add_argument("--size", choices=("QVGA", "VGA", "SVGA", "UXGA"), default="QVGA")
     parser.add_argument("--notes", default="")
     args = parser.parse_args(argv)
     repo = Path(__file__).resolve().parents[1]
@@ -195,6 +197,7 @@ def main(argv=None):
         started_utc=utc_now(),
         session=session,
         port=args.port,
+        size_requested=args.size,
         operator_notes=args.notes,
         source=source_metadata(repo),
         tool_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -214,7 +217,7 @@ def main(argv=None):
         link.timeout = 0.05
         raw = (output / "serial.log").open("xb")
         client = CameraClient(link, raw, report["commands"], session)
-        jpeg, status = collect(client, report)
+        jpeg, status = collect(client, report, size=args.size)
         write_jpeg(output / "frame.jpg", jpeg, status)
         report["verdict"] = "PASS_CAMERA_CAPTURE"
         result = 0

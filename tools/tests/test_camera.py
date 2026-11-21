@@ -185,6 +185,26 @@ class CameraTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "serial diagnostics contain errors"):
             cam.collect(client, {})
 
+    def test_high_res_size_command(self):
+        jpeg = sample_jpeg(180)
+        seen = []
+
+        def response(command, _):
+            seen.append(command)
+            if command == "CAM INFO":
+                return b"CAM INFO 1 320 240 JPEG 262144 64 8000000\n"
+            if command == "CAM CAPTURE 77 SVGA":
+                return f"CAM STATE 77 READY {len(jpeg)} 800 600 4 320 {zlib.crc32(jpeg):08x}\n".encode()
+            offset = int(command.split()[-1])
+            chunk = jpeg[offset:offset + 64]
+            return f"CAM DATA 77 {offset} {chunk.hex()} {zlib.crc32(chunk):08x}\n".encode()
+
+        client = cam.CameraClient(FakeLink(response, 4096), io.BytesIO(), [], 77)
+        received, status = cam.collect(client, {}, size="SVGA")
+        self.assertEqual(received, jpeg)
+        self.assertEqual((status["width"], status["height"]), (800, 600))
+        self.assertIn("CAM CAPTURE 77 SVGA", seen)
+
 
 if __name__ == "__main__":
     unittest.main()

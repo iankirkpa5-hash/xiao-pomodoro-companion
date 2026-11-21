@@ -234,6 +234,29 @@ main {
   flex-wrap: wrap;
 }
 
+.size-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.size-picker select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid #a4b8af;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.size-picker select:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
 .viewer-panel, .history-panel, .diagnostics {
   background: var(--white);
   border: 1px solid var(--line);

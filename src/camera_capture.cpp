@@ -13,11 +13,12 @@ namespace {
 constexpr uint32_t CAM_PROTOCOL_VERSION = 1;
 constexpr uint32_t CAM_DEFAULT_WIDTH = 320;
 constexpr uint32_t CAM_DEFAULT_HEIGHT = 240;
-constexpr uint32_t CAM_MAX_FRAME_BYTES = 131072;  // 128 KiB bounded PSRAM cap.
+constexpr uint32_t CAM_MAX_FRAME_BYTES = 262144;  // 256 KiB bounded PSRAM cap (supports UXGA).
 constexpr size_t CAM_CHUNK_BYTES = 64;
 constexpr size_t CAM_STREAM_CHUNK_BYTES = 120;    // 120 raw bytes -> 160 Base64 chars (< 224 B TX).
 constexpr uint32_t CAM_RETENTION_MS = 60000;
 constexpr uint32_t CAM_SETTLE_DELAY_MS = 250;
+constexpr int CAM_WARMUP_FRAMES = 2;              // Discard initial AEC/AWB settling frames.
 constexpr uint32_t CAM_STREAM_MIN_INTERVAL_MS = 100;
 constexpr uint32_t CAM_STREAM_MAX_INTERVAL_MS = 2000;
 constexpr uint32_t CAM_STREAM_MAX_MS = 180000;       // 3-minute thermal safety cap.
@@ -59,6 +60,8 @@ struct CameraFrame {
 CameraFrame cam_frame;
 uint8_t *cam_jpeg = nullptr;
 uint32_t cam_last_activity_ms = 0;
+bool cam_dump_active = false;
+uint32_t cam_dump_offset = 0;
 
 uint32_t cam_stream_started_ms = 0;
 uint32_t cam_stream_last_ping_ms = 0;
@@ -144,7 +147,31 @@ bool camNumber(const char *text, uint32_t &value) {
   return true;
 }
 
-camera_config_t camConfig(int jpeg_quality = 12) {
+bool camParseSize(const char *text, framesize_t &size_out, int &quality_out) {
+  if (!text || strcmp(text, "QVGA") == 0) {
+    size_out = FRAMESIZE_QVGA;
+    quality_out = 12;
+    return true;
+  }
+  if (strcmp(text, "VGA") == 0) {
+    size_out = FRAMESIZE_VGA;
+    quality_out = 10;
+    return true;
+  }
+  if (strcmp(text, "SVGA") == 0) {
+    size_out = FRAMESIZE_SVGA;
+    quality_out = 10;
+    return true;
+  }
+  if (strcmp(text, "UXGA") == 0) {
+    size_out = FRAMESIZE_UXGA;
+    quality_out = 12;
+    return true;
+  }
+  return false;
+}
+
+camera_config_t camConfig(framesize_t frame_size = FRAMESIZE_QVGA, int jpeg_quality = 12) {
   camera_config_t config{};
   // Use LEDC channel/timer 1 so LCD backlight PWM on channel 0 is untouched.
   config.ledc_channel = LEDC_CHANNEL_1;
@@ -167,7 +194,7 @@ camera_config_t camConfig(int jpeg_quality = 12) {
   config.pin_reset = CAMERA_PIN_RESET;
   config.xclk_freq_hz = 10000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_QVGA;
+  config.frame_size = frame_size;
   config.jpeg_quality = jpeg_quality;
   config.fb_count = 1;
   config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
@@ -179,6 +206,8 @@ void camReleaseCapture() {
   uint8_t *old = cam_jpeg;
   cam_jpeg = nullptr;
   cam_frame = CameraFrame{};
+  cam_dump_active = false;
+  cam_dump_offset = 0;
   cam_stream_offset = 0;
   cam_stream_seq = 0;
   heap_caps_free(old);
@@ -199,18 +228,24 @@ void camStatusReply(const CameraFrame &f) {
              static_cast<unsigned long>(f.crc));
 }
 
-const char *camCaptureSingleFrame(uint32_t id) {
+const char *camCaptureSingleFrame(uint32_t id, framesize_t frame_size, int jpeg_quality) {
   if (heap_caps_get_free_size(MALLOC_CAP_SPIRAM) == 0) {
     return "NO_PSRAM";
   }
 
   const uint32_t started_ms = millis();
-  camera_config_t config = camConfig(12);
+  camera_config_t config = camConfig(frame_size, jpeg_quality);
   if (esp_camera_init(&config) != ESP_OK) {
     return "INIT_FAILED";
   }
 
   delay(CAM_SETTLE_DELAY_MS);
+  // Discard a couple of initial frames so OV2640 AEC/AWB stabilizes.
+  for (int i = 0; i < CAM_WARMUP_FRAMES; ++i) {
+    camera_fb_t *warm = esp_camera_fb_get();
+    if (warm) esp_camera_fb_return(warm);
+  }
+
   camera_fb_t *fb = esp_camera_fb_get();
   if (!fb) {
     esp_camera_deinit();
@@ -259,6 +294,8 @@ const char *camCaptureSingleFrame(uint32_t id) {
   cam_frame.format = format;
   cam_frame.capture_ms = elapsed_ms;
   cam_frame.crc = crc;
+  cam_dump_active = false;
+  cam_dump_offset = 0;
   cam_last_activity_ms = millis();
   return nullptr;
 }
@@ -298,7 +335,7 @@ void camHandleStreamCommand(const char *action, const char *id_text,
       camRespond("CAM ERROR %lu NO_PSRAM\n", static_cast<unsigned long>(id));
       return;
     }
-    camera_config_t config = camConfig(18);
+    camera_config_t config = camConfig(FRAMESIZE_QVGA, 18);
     if (esp_camera_init(&config) != ESP_OK) {
       camRespond("CAM ERROR %lu INIT_FAILED\n", static_cast<unsigned long>(id));
       return;
@@ -358,6 +395,32 @@ void camHandleStreamCommand(const char *action, const char *id_text,
   }
 
   camRespond("CAM ERROR %lu BAD_COMMAND\n", static_cast<unsigned long>(id));
+}
+
+void camStepDump() {
+  if (!cam_dump_active || cam_frame.state != CameraState::Ready || !cam_jpeg) {
+    cam_dump_active = false;
+    return;
+  }
+  if (Serial.available()) {
+    return;
+  }
+  cam_last_activity_ms = millis();
+  if (cam_dump_offset < cam_frame.length) {
+    const size_t chunk = cam_frame.length - cam_dump_offset < CAM_STREAM_CHUNK_BYTES
+                             ? static_cast<size_t>(cam_frame.length - cam_dump_offset)
+                             : CAM_STREAM_CHUNK_BYTES;
+    char b64[((CAM_STREAM_CHUNK_BYTES + 2) / 3) * 4 + 1];
+    camBase64Encode(cam_jpeg + cam_dump_offset, chunk, b64);
+    cam_dump_offset += static_cast<uint32_t>(chunk);
+    camRespond("CAM FDATA %lu 0 %s\n", static_cast<unsigned long>(cam_frame.id), b64);
+    camFlushReply();
+    return;
+  }
+  cam_dump_active = false;
+  cam_dump_offset = 0;
+  camRespond("CAM FEND %lu 0\n", static_cast<unsigned long>(cam_frame.id));
+  camFlushReply();
 }
 
 void camStepStream(uint32_t now) {
@@ -490,8 +553,10 @@ void camHandleCommand(bool pcm_busy) {
   }
 
   if (strcmp(verb, "CAPTURE") == 0) {
-    if (second) {
-      camRespond("CAM ERROR %lu BAD_COMMAND\n", static_cast<unsigned long>(id));
+    framesize_t frame_size = FRAMESIZE_QVGA;
+    int jpeg_quality = 12;
+    if (!camParseSize(second, frame_size, jpeg_quality)) {
+      camRespond("CAM ERROR %lu BAD_SIZE\n", static_cast<unsigned long>(id));
       return;
     }
     if (cam_frame.state != CameraState::Idle) {
@@ -508,7 +573,7 @@ void camHandleCommand(bool pcm_busy) {
       camRespond("CAM ERROR %lu BUSY\n", static_cast<unsigned long>(id));
       return;
     }
-    const char *error = camCaptureSingleFrame(id);
+    const char *error = camCaptureSingleFrame(id, frame_size, jpeg_quality);
     if (error) {
       camRespond("CAM ERROR %lu %s\n", static_cast<unsigned long>(id), error);
       return;
@@ -537,7 +602,9 @@ void camHandleCommand(bool pcm_busy) {
   }
 
   if (cam_frame.state != CameraState::Ready || cam_frame.id != id) {
-    if ((strcmp(verb, "STATUS") == 0 && !second) || strcmp(verb, "READ") == 0) {
+    if ((strcmp(verb, "STATUS") == 0 && !second) ||
+        (strcmp(verb, "DUMP") == 0 && !second) ||
+        strcmp(verb, "READ") == 0) {
       camRespond("CAM ERROR %lu NO_CAPTURE\n", static_cast<unsigned long>(id));
     } else {
       camRespond("CAM ERROR %lu BAD_COMMAND\n", static_cast<unsigned long>(id));
@@ -548,6 +615,16 @@ void camHandleCommand(bool pcm_busy) {
   cam_last_activity_ms = millis();
   if (strcmp(verb, "STATUS") == 0 && !second) {
     camStatusReply(cam_frame);
+  } else if (strcmp(verb, "DUMP") == 0 && !second) {
+    cam_dump_active = true;
+    cam_dump_offset = 0;
+    camRespond("CAM FRAME %lu 0 %lu %lu %lu %08lx %ld\n",
+               static_cast<unsigned long>(cam_frame.id),
+               static_cast<unsigned long>(cam_frame.length),
+               static_cast<unsigned long>(cam_frame.width),
+               static_cast<unsigned long>(cam_frame.height),
+               static_cast<unsigned long>(cam_frame.crc),
+               static_cast<long>(camReadTempDeciC()));
   } else if (strcmp(verb, "READ") == 0) {
     if (!camNumber(second, value) || value >= cam_frame.length || value % CAM_CHUNK_BYTES != 0) {
       camRespond("CAM ERROR %lu BAD_OFFSET\n", static_cast<unsigned long>(id));
@@ -583,6 +660,11 @@ void camera_capture_poll() {
 
   if (cam_reply_length) {
     camFlushReply();
+    return;
+  }
+
+  if (cam_frame.state == CameraState::Ready && cam_dump_active) {
+    camStepDump();
     return;
   }
 

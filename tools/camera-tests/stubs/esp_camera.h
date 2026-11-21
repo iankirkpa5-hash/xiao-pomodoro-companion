@@ -13,7 +13,12 @@ constexpr esp_err_t ESP_FAIL = -1;
 enum ledc_channel_t { LEDC_CHANNEL_0 = 0, LEDC_CHANNEL_1 = 1 };
 enum ledc_timer_t { LEDC_TIMER_0 = 0, LEDC_TIMER_1 = 1 };
 enum pixformat_t { PIXFORMAT_RGB565 = 0, PIXFORMAT_JPEG = 4 };
-enum framesize_t { FRAMESIZE_QVGA = 5 };
+enum framesize_t {
+  FRAMESIZE_QVGA = 5,
+  FRAMESIZE_VGA = 8,
+  FRAMESIZE_SVGA = 9,
+  FRAMESIZE_UXGA = 13,
+};
 enum camera_grab_mode_t { CAMERA_GRAB_WHEN_EMPTY = 0, CAMERA_GRAB_LATEST = 1 };
 enum camera_fb_location_t { CAMERA_FB_IN_PSRAM = 0, CAMERA_FB_IN_DRAM = 1 };
 

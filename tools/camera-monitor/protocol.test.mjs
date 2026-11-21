@@ -199,3 +199,31 @@ test("StreamFrameAssembler reassembles Base64 JPEG frames and drops corrupt fram
   assert.equal(assembler.feed("CAM FEND 9 2"), null);
   assert.equal(assembler.droppedFrames, 1);
 });
+
+test("runCapture sends requested high-res size and uses fast dumpFrame when valid", async () => {
+  const jpeg = makeJpeg(260, 0);
+  const commands = [];
+  const res = await runCapture({
+    session: 91,
+    size: "SVGA",
+    async request(command, parse) {
+      commands.push(command);
+      if (command === "CAM INFO") return parse("CAM INFO 1 320 240 JPEG 262144 64 8000000");
+      if (command === "CAM CAPTURE 91 SVGA") {
+        return parse(`CAM STATE 91 READY ${jpeg.length} 800 600 4 310 ${crc32(jpeg).toString(16).padStart(8, "0")}`);
+      }
+      if (command === "CAM RELEASE 91") return parse("CAM RELEASED 91");
+      throw new Error("unexpected: " + command);
+    },
+    async dumpFrame(session, maxBytes, onProgress) {
+      assert.equal(session, 91);
+      assert.equal(maxBytes, 262144);
+      onProgress(jpeg.length, jpeg.length);
+      return { jpeg, crc32: crc32(jpeg), tempC: 39.4 };
+    },
+  });
+  assert.deepEqual(commands, ["CAM INFO", "CAM CAPTURE 91 SVGA", "CAM RELEASE 91"]);
+  assert.deepEqual(res.jpeg, jpeg);
+  assert.equal(res.state.width, 800);
+  assert.equal(res.tempC, 39.4);
+});

@@ -51,12 +51,12 @@ int main() {
 
   // 1. Passive CAM INFO never initializes the camera and reports verified capabilities.
   const std::string info = sendRouted("CAM INFO");
-  assert(info.find("CAM INFO 1 320 240 JPEG 131072 64 ") == 0);
+  assert(info.find("CAM INFO 1 320 240 JPEG 262144 64 ") == 0);
   assert(fake_camera.init_calls == 0 && !fake_camera.initialized);
   assert(fake_allocations == 0);
   std::cout << "PASS passive CAM INFO without camera init\n";
 
-  // 2. Capture once, verify pinout/LEDC1, immediate deinit, CRC, chunks, idempotent retries & release.
+  // 2. Capture once, verify pinout/LEDC1, warmup + immediate deinit, CRC, chunks, idempotent retries & release.
   fake_camera.frame_bytes = makeJpeg(200);
   const uint32_t expected_crc =
       ~camCrcUpdate(0xffffffffU, fake_camera.frame_bytes.data(), fake_camera.frame_bytes.size());
@@ -68,7 +68,8 @@ int main() {
   assert(state.find("CAM STATE 77 READY 200 320 240 4 250 ") == 0);
   assert(state.find(expected_crc_hex) != std::string::npos);
   assert(fake_camera.init_calls == 1 && fake_camera.deinit_calls == 1);
-  assert(fake_camera.fb_get_calls == 1 && fake_camera.fb_return_calls == 1);
+  assert(fake_camera.fb_get_calls == 1 + CAM_WARMUP_FRAMES &&
+         fake_camera.fb_return_calls == 1 + CAM_WARMUP_FRAMES);
   assert(!fake_camera.initialized && !fake_camera.outstanding_fb);
   assert(fake_allocations == 1);
 
@@ -124,24 +125,29 @@ int main() {
   resetCameraTest();
   fake_camera.frame_bytes = {0x00, 0x01, 0x02, 0x03};  // Not JPEG SOI
   assert(sendRouted("CAM CAPTURE 13") == "CAM ERROR 13 BAD_FRAME\n");
-  assert(fake_camera.init_calls == 1 && fake_camera.deinit_calls == 1 && fake_camera.fb_return_calls == 1);
+  assert(fake_camera.init_calls == 1 && fake_camera.deinit_calls == 1 &&
+         fake_camera.fb_return_calls == 1 + CAM_WARMUP_FRAMES);
 
   resetCameraTest();
   fake_camera.frame_bytes = makeJpeg(16);
   fake_camera.format = PIXFORMAT_RGB565;
   assert(sendRouted("CAM CAPTURE 14") == "CAM ERROR 14 BAD_FRAME\n");
-  assert(fake_camera.deinit_calls == 1 && fake_camera.fb_return_calls == 1);
+  assert(fake_camera.deinit_calls == 1 && fake_camera.fb_return_calls == 1 + CAM_WARMUP_FRAMES);
 
   resetCameraTest();
   fake_camera.frame_bytes = makeJpeg(CAM_MAX_FRAME_BYTES + 1);
   assert(sendRouted("CAM CAPTURE 15") == "CAM ERROR 15 FRAME_TOO_LARGE\n");
-  assert(fake_camera.deinit_calls == 1 && fake_camera.fb_return_calls == 1 && fake_allocations == 0);
+  assert(fake_camera.deinit_calls == 1 && fake_camera.fb_return_calls == 1 + CAM_WARMUP_FRAMES &&
+         fake_allocations == 0);
 
   resetCameraTest();
   fake_camera.frame_bytes = makeJpeg(128);
-  fake_camera.on_fb_get = []() { fake_no_psram = true; };  // Alloc fails after init/fb_get
+  fake_camera.on_fb_get = []() {
+    if (fake_camera.fb_get_calls > CAM_WARMUP_FRAMES) fake_no_psram = true;
+  };
   assert(sendRouted("CAM CAPTURE 16") == "CAM ERROR 16 NO_PSRAM\n");
-  assert(fake_camera.deinit_calls == 1 && fake_camera.fb_return_calls == 1 && fake_allocations == 0);
+  assert(fake_camera.deinit_calls == 1 && fake_camera.fb_return_calls == 1 + CAM_WARMUP_FRAMES &&
+         fake_allocations == 0);
   std::cout << "PASS guaranteed deinit and zero leaks across all error paths\n";
 
   // 4. Coexistence with PCM on the same Serial stream + mutual exclusion during PCM recording.
@@ -149,7 +155,7 @@ int main() {
   fake_camera.frame_bytes = makeJpeg(100);
   assert(sendRouted("PCM INFO").find("PCM INFO 1 16000 1 16 5000 64 ") == 0);
   assert(sendRouted("PCM START 50 100").find("PCM STATE 50 RECORDING") == 0);
-  assert(sendRouted("CAM INFO").find("CAM INFO 1 320 240 JPEG 131072 64 ") == 0);
+  assert(sendRouted("CAM INFO").find("CAM INFO 1 320 240 JPEG 262144 64 ") == 0);
   assert(sendRouted("CAM CAPTURE 51") == "CAM ERROR 51 BUSY\n");
   assert(fake_camera.init_calls == 0);
   assert(sendRouted("PCM RELEASE 50") == "PCM RELEASED 50\n");
@@ -170,7 +176,7 @@ int main() {
 
   for (const auto &bad : std::vector<std::string>{
            "CAM", "CAM INFO extra", "CAM CAPTURE 0", "CAM CAPTURE -1",
-           "CAM CAPTURE 4294967296", "CAM CAPTURE 1 extra", "CAM UNKNOWN 1",
+           "CAM CAPTURE 4294967296", "CAM CAPTURE 1 4K", "CAM UNKNOWN 1",
            "CAM CAPTURE 1\t2", "CAM CAPTURE " + std::string(100, '1')}) {
     assert(sendRouted(bad).find("CAM ERROR") == 0);
     assert(!camera_capture_is_active());
@@ -194,7 +200,7 @@ int main() {
   Serial.tx_space = 256;
   serial_commands_service(true);
   assert(!camera_capture_has_pending_reply());
-  assert(Serial.output.find("CAM INFO 1 320 240 JPEG 131072 64 ") == 0);
+  assert(Serial.output.find("CAM INFO 1 320 240 JPEG 262144 64 ") == 0);
   std::cout << "PASS expiry, rollover, malformed commands and TX backpressure\n";
 
   // 6. Live preview streaming: START, Base64 FRAME/FDATA/FEND, PING/PONG, mid-frame STOP, WATCHDOG, MAX_TIME.
@@ -259,4 +265,35 @@ int main() {
   assert(Serial.output == "CAM STOPPED 220 MAX_TIME\n");
   assert(!fake_camera.initialized && fake_camera.deinit_calls == 1 && fake_allocations == 0);
   std::cout << "PASS live stream, Base64 chunks, PING, mid-frame STOP, watchdog and max-time deinit\n";
+
+  // 7. High-resolution single capture (SVGA / UXGA) + fast Base64 CAM DUMP.
+  resetCameraTest();
+  fake_camera.width = 800;
+  fake_camera.height = 600;
+  fake_camera.frame_bytes = makeJpeg(300);
+  assert(sendRouted("CAM CAPTURE 300 BADRES") == "CAM ERROR 300 BAD_SIZE\n");
+  assert(fake_camera.init_calls == 0);
+  assert(sendRouted("CAM CAPTURE 300 SVGA").find("CAM STATE 300 READY 300 800 600 4 250 ") == 0);
+  assert(fake_camera.last_config.frame_size == FRAMESIZE_SVGA && fake_camera.last_config.jpeg_quality == 10);
+  assert(!fake_camera.initialized && fake_camera.deinit_calls == 1);
+  Serial.output.clear();
+  Serial.input = "CAM DUMP 300\n";
+  for (int i = 0; i < 20 && Serial.output.find("CAM FEND 300 0\n") == std::string::npos; ++i) {
+    serial_commands_service(true);
+  }
+  assert(Serial.output.find("CAM FRAME 300 0 300 800 600 ") == 0);
+  assert(Serial.output.find("CAM FDATA 300 0 ") != std::string::npos);
+  assert(Serial.output.find("CAM FEND 300 0\n") != std::string::npos);
+  assert(sendRouted("CAM RELEASE 300") == "CAM RELEASED 300\n");
+  assert(fake_allocations == 0);
+
+  resetCameraTest();
+  fake_camera.width = 1600;
+  fake_camera.height = 1200;
+  fake_camera.frame_bytes = makeJpeg(400);
+  assert(sendRouted("CAM CAPTURE 301 UXGA").find("CAM STATE 301 READY 400 1600 1200 4 250 ") == 0);
+  assert(fake_camera.last_config.frame_size == FRAMESIZE_UXGA && fake_camera.last_config.jpeg_quality == 12);
+  assert(sendRouted("CAM RELEASE 301") == "CAM RELEASED 301\n");
+  assert(fake_allocations == 0);
+  std::cout << "PASS high-resolution capture (SVGA/UXGA) and fast Base64 CAM DUMP\n";
 }
