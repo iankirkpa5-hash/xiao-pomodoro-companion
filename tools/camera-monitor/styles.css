@@ -59,6 +59,12 @@ button.secondary {
 }
 
 button.secondary:hover:not(:disabled) { background: #e6ede4; }
+button.danger-btn {
+  background: var(--danger);
+  border: 1px solid var(--danger);
+  color: #fff;
+}
+button.danger-btn:hover:not(:disabled) { background: #922e24; }
 button.small-btn { padding: 7px 12px; font-size: 13px; font-weight: 600; }
 
 p, h1, h2 { margin: 0; }
@@ -279,6 +285,7 @@ main {
 }
 
 .stage {
+  position: relative;
   min-height: 360px;
   border: 1px dashed #c4cfc6;
   border-radius: 8px;
@@ -289,6 +296,20 @@ main {
   overflow: hidden;
   padding: 14px;
   margin-bottom: 10px;
+}
+
+.live-pill {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(173, 61, 50, 0.92);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
 }
 
 .empty-state {

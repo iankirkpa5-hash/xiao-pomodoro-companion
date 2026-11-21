@@ -54,6 +54,8 @@ struct camera_fb_t {
 };
 
 inline void delay(unsigned long ms) { fake_ms += static_cast<uint32_t>(ms); }
+inline float fake_temp_c = 38.5f;
+inline float temperatureRead() { return fake_temp_c; }
 
 struct FakeCamera {
   bool initialized = false;

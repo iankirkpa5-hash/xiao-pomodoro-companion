@@ -14,7 +14,7 @@
       <div class="intro">
         <p class="eyebrow">CAMERA OBSERVATION · 02</p>
         <h1>看見畫面。</h1>
-        <p>按需拍一張、立刻關閉驅動，透過 USB 串口傳回電腦檢視。</p>
+        <p>先開即時預覽取景，滿意再按下快門存檔；停止或逾時自動 deinit。</p>
       </div>
       <section class="connection" aria-labelledby="connection-heading">
         <h2 id="connection-heading">設備連線</h2>
@@ -25,11 +25,11 @@
         <p id="message" class="message" role="alert" hidden></p>
       </section>
       <section class="steps" aria-labelledby="steps-heading">
-        <h2 id="steps-heading">安全與測試步驟</h2>
+        <h2 id="steps-heading">取景與安全步驟</h2>
         <ol>
-          <li><strong>斷電接妥鏡頭</strong><span>確認 Sense 擴充板與 FPC 排線插牢後再接 USB。</span></li>
-          <li><strong>按下「拍一張」</strong><span>板端會初始化、拍一張 QVGA JPEG、立即 deinit，再逐塊傳回。</span></li>
-          <li><strong>檢查畫面與溫度</strong><span>若模組手感發燙（Grade 3），請立即拔除 USB 電源。</span></li>
+          <li><strong>開啟即時預覽</strong><span>畫面同步更新，可搭配旋轉／鏡像對準人像與光線。</span></li>
+          <li><strong>按下「拍一張」存下當下畫面</strong><span>預覽中按快門會直接存下眼前畫面；未開預覽時則執行單張拍照並立即 deinit。</span></li>
+          <li><strong>留意散熱與溫度</strong><span>預覽上限 3 分鐘自動停止，斷線 10 秒自動 deinit；若手感發燙（Grade 3）請立刻停止並斷電。</span></li>
         </ol>
       </section>
       <p class="local-note">USB 串口 · 115200 baud<br>影像留在此瀏覽器，不上傳雲端。<br>不會開啟電腦內建攝影機或麥克風。</p>
@@ -43,9 +43,10 @@
         <span id="status-badge" class="badge" data-state="idle">等待連線</span>
       </header>
 
-      <section class="controls" aria-label="拍照操作">
+      <section class="controls" aria-label="預覽與拍照操作">
         <div class="controls-left">
-          <button id="capture" class="primary" disabled>拍一張</button>
+          <button id="preview-toggle" class="primary" disabled>開始即時預覽</button>
+          <button id="capture" class="secondary" disabled>拍一張</button>
           <button id="download" class="secondary" disabled>下載 JPEG</button>
         </div>
         <div class="controls-right">
@@ -56,8 +57,8 @@
 
       <section class="viewer-panel" aria-labelledby="viewer-heading">
         <div class="panel-title">
-          <h2 id="viewer-heading">目前畫面</h2>
-          <span id="viewer-subtitle">按需單張 QVGA JPEG · 拍完即 deinit</span>
+          <h2 id="viewer-heading">即時畫面／預覽</h2>
+          <span id="viewer-subtitle">QVGA 320×240 JPEG · 預覽停止即 deinit</span>
         </div>
         <div class="progress-wrap" id="progress-wrap" hidden>
           <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
@@ -65,39 +66,40 @@
         </div>
         <div class="stage" id="stage">
           <div id="empty-state" class="empty-state">
-            <p class="empty-title">尚未拍攝</p>
-            <p class="empty-sub">連接 XIAO 後點擊上方「拍一張」，驗證通過的 JPEG 會顯示在這裡。</p>
+            <p class="empty-title">尚未開始預覽或拍攝</p>
+            <p class="empty-sub">連接 XIAO 後點擊「開始即時預覽」同步取景，或直接點「拍一張」單張擷取。</p>
           </div>
-          <img id="preview-image" alt="XIAO 攝像機拍下的單張畫面" hidden>
+          <img id="preview-image" alt="XIAO 攝像機畫面" hidden>
+          <span id="live-pill" class="live-pill" hidden>LIVE</span>
         </div>
         <p id="transform-note" class="small">旋轉與鏡像僅影響網頁顯示，下載的 JPEG 維持板端原始位元組。</p>
       </section>
 
-      <section class="readout" aria-label="本次拍攝資訊">
-        <div><span>解析度與格式</span><strong id="meta-size">—</strong></div>
-        <div><span>檔案大小</span><strong id="meta-bytes">—</strong></div>
-        <div><span>擷取耗時</span><strong id="meta-capture-ms">—</strong></div>
-        <div><span>CRC32 / JPEG</span><strong id="meta-verify">—</strong></div>
+      <section class="readout" aria-label="即時狀態與拍攝資訊">
+        <div><span>畫面與幀率</span><strong id="meta-size">—</strong></div>
+        <div><span>幀大小</span><strong id="meta-bytes">—</strong></div>
+        <div><span>ESP32 晶片內部溫度</span><strong id="meta-temp">—</strong></div>
+        <div><span>安全倒數 / CRC32</span><strong id="meta-verify">—</strong></div>
       </section>
 
       <section class="history-panel" aria-labelledby="history-heading">
         <div class="panel-title">
-          <h2 id="history-heading">最近拍攝（本頁暫存）</h2>
+          <h2 id="history-heading">已拍下的照片（本頁暫存）</h2>
           <span id="history-count">0 / 6 張</span>
         </div>
         <div id="history-strip" class="history-strip">
-          <p class="small">目前尚無暫存照片。最多保留最近 6 張，重新整理頁面會清空。</p>
+          <p class="small">按「拍一張」留下的照片會出現在這裡（最多 6 張），重新整理頁面會清空。</p>
         </div>
       </section>
 
       <details class="diagnostics">
         <summary>串口記錄與診斷 <span id="diagnostic-summary">尚無記錄</span></summary>
-        <p class="small">保留最近 120 行串口輸出。若出現 I2C 錯誤、韌體錯誤或重試異常會如實顯示。</p>
+        <p class="small">保留最近 120 行串口輸出（串流幀內容 `CAM FDATA` 不重複洗版）。I2C 或韌體錯誤會如實顯示。</p>
         <pre id="raw-log" tabindex="0" aria-label="最近串口記錄"></pre>
       </details>
 
       <footer>
-        硬體邊界：XIAO ESP32S3 Sense 未接出硬體 PWDN／RESET 腳位，<code>esp_camera_deinit()</code> 會停用驅動與 XCLK，但不等同於切斷感測器供電。此工具僅供單張驗證與取景觀察。
+        硬體邊界：溫度讀數為 ESP32-S3 晶片內部感測器（非 OV2640 鏡頭表面溫度）。XIAO ESP32S3 Sense 未接出硬體 PWDN／RESET 腳位，<code>esp_camera_deinit()</code> 會停用驅動與 XCLK，但不等同於切斷感測器供電。
       </footer>
     </main>
   </div>

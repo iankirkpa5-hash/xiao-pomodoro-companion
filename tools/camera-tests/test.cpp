@@ -196,4 +196,67 @@ int main() {
   assert(!camera_capture_has_pending_reply());
   assert(Serial.output.find("CAM INFO 1 320 240 JPEG 131072 64 ") == 0);
   std::cout << "PASS expiry, rollover, malformed commands and TX backpressure\n";
+
+  // 6. Live preview streaming: START, Base64 FRAME/FDATA/FEND, PING/PONG, mid-frame STOP, WATCHDOG, MAX_TIME.
+  resetCameraTest();
+  fake_ms = 1000;
+  fake_temp_c = 41.2f;
+  fake_camera.frame_bytes = makeJpeg(250);
+  assert(sendRouted("CAM STREAM START 200 50") == "CAM ERROR 200 BAD_INTERVAL\n");
+  assert(!fake_camera.initialized);
+  const std::string started = sendRouted("CAM STREAM START 200 150");
+  assert(started == "CAM STREAMING 200 150 180000 412\n");
+  assert(fake_camera.initialized && fake_camera.init_calls == 1 && fake_camera.deinit_calls == 0);
+  // Single capture rejected while streaming.
+  assert(sendRouted("CAM CAPTURE 201") == "CAM ERROR 201 BUSY\n");
+  // Advance past settle delay and pump one full frame (250 bytes -> 3 FDATA chunks + FEND).
+  fake_ms += CAM_SETTLE_DELAY_MS;
+  Serial.output.clear();
+  for (int i = 0; i < 10 && Serial.output.find("CAM FEND 200 1\n") == std::string::npos; ++i) {
+    serial_commands_service(true);
+  }
+  assert(Serial.output.find("CAM FRAME 200 1 250 320 240 ") != std::string::npos);
+  assert(Serial.output.find("CAM FDATA 200 1 ") != std::string::npos);
+  assert(Serial.output.find("CAM FEND 200 1\n") != std::string::npos);
+  assert(fake_allocations == 0 && !fake_camera.outstanding_fb);
+  // PING refreshes watchdog and reports remaining time + temperature.
+  fake_ms += 2000;
+  const std::string pong = sendRouted("CAM STREAM PING 200");
+  assert(pong.find("CAM PONG 200 ") == 0 && pong.find(" 412\n") != std::string::npos);
+  // Start next frame and interrupt mid-frame with STOP -> immediate deinit & zero leak.
+  fake_ms += 200;
+  Serial.output.clear();
+  serial_commands_service(true);  // Emits CAM FRAME 200 2, holds cam_jpeg in PSRAM.
+  assert(fake_allocations == 1);
+  assert(sendRouted("CAM STREAM STOP 200") == "CAM STOPPED 200 HOST\n");
+  assert(!fake_camera.initialized && fake_camera.deinit_calls == 1 && fake_allocations == 0);
+  assert(sendRouted("CAM STREAM STOP 200") == "CAM STOPPED 200 IDLE\n");
+
+  // Watchdog auto-deinit after 10s without PING.
+  resetCameraTest();
+  fake_ms = 5000;
+  fake_camera.frame_bytes = makeJpeg(100);
+  assert(sendRouted("CAM STREAM START 210 200").find("CAM STREAMING 210 200") == 0);
+  fake_ms += CAM_STREAM_WATCHDOG_MS;
+  Serial.output.clear();
+  serial_commands_service(true);
+  serial_commands_service(true);
+  assert(Serial.output == "CAM STOPPED 210 WATCHDOG\n");
+  assert(!fake_camera.initialized && fake_camera.deinit_calls == 1 && fake_allocations == 0);
+
+  // Max-time auto-deinit after 3 minutes even when PINGing regularly.
+  resetCameraTest();
+  fake_ms = 10000;
+  assert(sendRouted("CAM STREAM START 220 200").find("CAM STREAMING 220 200") == 0);
+  for (uint32_t elapsed = 5000; elapsed < CAM_STREAM_MAX_MS; elapsed += 5000) {
+    fake_ms = 10000 + elapsed;
+    assert(sendRouted("CAM STREAM PING 220").find("CAM PONG 220 ") == 0);
+  }
+  fake_ms = 10000 + CAM_STREAM_MAX_MS;
+  Serial.output.clear();
+  serial_commands_service(true);
+  serial_commands_service(true);
+  assert(Serial.output == "CAM STOPPED 220 MAX_TIME\n");
+  assert(!fake_camera.initialized && fake_camera.deinit_calls == 1 && fake_allocations == 0);
+  std::cout << "PASS live stream, Base64 chunks, PING, mid-frame STOP, watchdog and max-time deinit\n";
 }

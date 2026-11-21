@@ -95,17 +95,35 @@ CAM DATA <id> <offset_bytes> <jpeg_hex> <chunk_crc32>
 CAM RELEASE <id>
 CAM RELEASED <id>
 
+CAM STREAM START <id> [interval_ms]
+CAM STREAMING <id> <interval_ms> <max_ms> <temp_c_x10>
+CAM FRAME <id> <seq> <length_bytes> <width> <height> <crc32> <temp_c_x10>
+CAM FDATA <id> <seq> <base64_chunk>
+CAM FEND <id> <seq>
+
+CAM STREAM PING <id>
+CAM PONG <id> <remaining_ms> <temp_c_x10>
+
+CAM STREAM STOP <id>
+CAM STOPPED <id> <HOST|IDLE|WATCHDOG|MAX_TIME>
+
 CAM ERROR <id_or_0> <reason>
 ```
 
-Error reasons: `BAD_COMMAND`, `BUSY`, `NO_PSRAM`, `INIT_FAILED`, `CAPTURE_FAILED`,
-`BAD_FRAME`, `FRAME_TOO_LARGE`, `NO_CAPTURE`, `BAD_OFFSET`.
+Error reasons: `BAD_COMMAND`, `BAD_INTERVAL`, `BUSY`, `NO_PSRAM`, `INIT_FAILED`,
+`CAPTURE_FAILED`, `BAD_FRAME`, `FRAME_TOO_LARGE`, `NO_CAPTURE`, `NO_STREAM`,
+`BAD_OFFSET`.
 
 - `CAM CAPTURE` with the same active `<id>` is idempotent and returns the existing
   `READY` state without re-initializing the camera.
 - `CAM RELEASE` is idempotent. If the host disappears, 60 seconds without session
   activity expires and frees the PSRAM buffer.
 - `CAM READ` offsets must be multiples of 64 within `[0, length_bytes)`.
+- `CAM STREAM` uses QVGA JPEG quality 18 streamed in 120-byte (160 Base64 char)
+  non-blocking chunks so each line fits inside the ESP32-S3 HWCDC 256-byte TX
+  ring buffer. Firmware automatically calls `esp_camera_deinit()` after 180 s
+  (`MAX_TIME`) or 10 s without a `CAM STREAM PING` (`WATCHDOG`). `<temp_c_x10>`
+  is the ESP32-S3 internal die temperature in tenths of °C (not sensor surface).
 
 ## Offline Tests
 

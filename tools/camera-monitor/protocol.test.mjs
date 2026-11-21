@@ -150,3 +150,52 @@ test("runCapture still sends CAM RELEASE after a mid-download error", async () =
   );
   assert.deepEqual(commands, ["CAM INFO", "CAM CAPTURE 88", "CAM RELEASE 88"]);
 });
+
+test("StreamFrameAssembler reassembles Base64 JPEG frames and drops corrupt frames", async () => {
+  const {
+    StreamFrameAssembler,
+    base64ToBytes,
+    parseStreamPong,
+    parseStreamStarted,
+    parseStreamStopped,
+  } = await import("./protocol.mjs");
+
+  assert.deepEqual(base64ToBytes("Zm9v"), new TextEncoder().encode("foo"));
+  assert.deepEqual(base64ToBytes("Zm8="), new TextEncoder().encode("fo"));
+  assert.deepEqual(base64ToBytes("Zg=="), new TextEncoder().encode("f"));
+  assert.throws(() => base64ToBytes("abc"));
+
+  assert.deepEqual(parseStreamStarted("CAM STREAMING 9 150 180000 415", 9), {
+    intervalMs: 150,
+    maxMs: 180000,
+    tempC: 41.5,
+  });
+  assert.deepEqual(parseStreamPong("CAM PONG 9 120000 420", 9), {
+    remainingMs: 120000,
+    tempC: 42.0,
+  });
+  assert.deepEqual(parseStreamStopped("CAM STOPPED 9 WATCHDOG", 9), { reason: "WATCHDOG" });
+
+  const jpeg = makeJpeg(250, 2);
+  const b64All = Buffer.from(jpeg).toString("base64");
+  const assembler = new StreamFrameAssembler(9);
+  assert.equal(
+    assembler.feed(`CAM FRAME 9 1 ${jpeg.length} 320 240 ${crc32(jpeg).toString(16).padStart(8, "0")} 415`),
+    null,
+  );
+  // Split in valid 4-char multiples simulating 120-byte chunks.
+  for (let i = 0; i < b64All.length; i += 160) {
+    assert.equal(assembler.feed(`CAM FDATA 9 1 ${b64All.slice(i, i + 160)}`), null);
+  }
+  const assembled = assembler.feed("CAM FEND 9 1");
+  assert.ok(assembled);
+  assert.deepEqual(assembled.jpeg, jpeg);
+  assert.equal(assembled.tempC, 41.5);
+  assert.equal(assembler.droppedFrames, 0);
+
+  // Corrupt CRC frame is cleanly dropped without throwing.
+  assembler.feed(`CAM FRAME 9 2 ${jpeg.length} 320 240 00000000 420`);
+  assembler.feed(`CAM FDATA 9 2 ${b64All}`);
+  assert.equal(assembler.feed("CAM FEND 9 2"), null);
+  assert.equal(assembler.droppedFrames, 1);
+});
