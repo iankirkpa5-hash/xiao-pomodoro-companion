@@ -46,6 +46,14 @@
       <section class="controls" aria-label="預覽與拍照操作">
         <div class="controls-left">
           <button id="preview-toggle" class="primary" disabled>開始即時預覽</button>
+          <label class="size-picker" for="preview-interval">
+            <span>預覽速度</span>
+            <select id="preview-interval" disabled>
+              <option value="0" selected>全速（0 ms）</option>
+              <option value="40">流暢（40 ms）</option>
+              <option value="150">省電（150 ms · 約 6 FPS）</option>
+            </select>
+          </label>
           <label class="size-picker" for="capture-size">
             <span>拍照畫質</span>
             <select id="capture-size" disabled>

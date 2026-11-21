@@ -19,7 +19,6 @@ constexpr size_t CAM_STREAM_CHUNK_BYTES = 120;    // 120 raw bytes -> 160 Base64
 constexpr uint32_t CAM_RETENTION_MS = 60000;
 constexpr uint32_t CAM_SETTLE_DELAY_MS = 250;
 constexpr int CAM_WARMUP_FRAMES = 2;              // Discard initial AEC/AWB settling frames.
-constexpr uint32_t CAM_STREAM_MIN_INTERVAL_MS = 100;
 constexpr uint32_t CAM_STREAM_MAX_INTERVAL_MS = 2000;
 constexpr uint32_t CAM_STREAM_MAX_MS = 180000;       // 3-minute thermal safety cap.
 constexpr uint32_t CAM_STREAM_WATCHDOG_MS = 10000;   // Auto-deinit if host stops pinging.
@@ -360,7 +359,6 @@ void camHandleStreamCommand(const char *action, const char *id_text,
     uint32_t interval_ms = 150;
     if (param_text) {
       if (!camNumber(param_text, interval_ms) ||
-          interval_ms < CAM_STREAM_MIN_INTERVAL_MS ||
           interval_ms > CAM_STREAM_MAX_INTERVAL_MS) {
         camRespond("CAM ERROR %lu BAD_INTERVAL\n", static_cast<unsigned long>(id));
         return;

@@ -208,8 +208,11 @@ int main() {
   fake_ms = 1000;
   fake_temp_c = 41.2f;
   fake_camera.frame_bytes = makeJpeg(250);
-  assert(sendRouted("CAM STREAM START 200 50") == "CAM ERROR 200 BAD_INTERVAL\n");
+  assert(sendRouted("CAM STREAM START 200 2001") == "CAM ERROR 200 BAD_INTERVAL\n");
   assert(!fake_camera.initialized);
+  assert(sendRouted("CAM STREAM START 199 0") == "CAM STREAMING 199 0 180000 412\n");
+  assert(sendRouted("CAM STREAM STOP 199") == "CAM STOPPED 199 HOST\n");
+  fake_camera.init_calls = fake_camera.deinit_calls = 0;
   const std::string started = sendRouted("CAM STREAM START 200 150");
   assert(started == "CAM STREAMING 200 150 180000 412\n");
   assert(fake_camera.initialized && fake_camera.init_calls == 1 && fake_camera.deinit_calls == 0);

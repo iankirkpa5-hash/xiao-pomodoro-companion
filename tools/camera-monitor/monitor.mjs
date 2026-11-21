@@ -282,6 +282,8 @@ function renderControls() {
   previewBtn.classList.toggle("danger-btn", streaming);
   previewBtn.classList.toggle("primary", !streaming);
 
+  $("preview-interval").disabled = !connected || busy || streaming;
+
   const sizeSelect = $("capture-size");
   sizeSelect.disabled = !connected || busy;
   const selectedSize = sizeSelect.value;
@@ -570,11 +572,13 @@ async function startLivePreview() {
   streamBusy = true;
   setMessage();
   const session = nextSessionId();
+  const intervalMs = Number($("preview-interval").value);
+  const safeInterval = Number.isFinite(intervalMs) && intervalMs >= 0 ? intervalMs : 0;
   renderControls();
   try {
     const started = await sendRequest(
       session,
-      `CAM STREAM START ${session} 150`,
+      `CAM STREAM START ${session} ${safeInterval}`,
       line => parseStreamStarted(line, session),
       { timeoutMs: 4000, attempts: 2 },
     );
