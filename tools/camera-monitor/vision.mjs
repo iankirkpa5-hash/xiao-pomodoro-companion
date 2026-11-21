@@ -10,9 +10,9 @@ export function rgbaToLuma(rgba, width, height) {
   return luma;
 }
 
-export function computeMotionScore(prevLuma, currLuma, width, height, pixelDeltaThreshold = 18) {
+export function computeMotionScore(refLuma, currLuma, width, height, pixelDeltaThreshold = 14) {
   const totalPixels = width * height;
-  if (prevLuma.length !== totalPixels || currLuma.length !== totalPixels) {
+  if (refLuma.length !== totalPixels || currLuma.length !== totalPixels) {
     throw new Error("luma dimensions mismatch");
   }
   let changedPixels = 0;
@@ -26,7 +26,7 @@ export function computeMotionScore(prevLuma, currLuma, width, height, pixelDelta
     const row = y * width;
     for (let x = 0; x < width; x++) {
       const idx = row + x;
-      const diff = Math.abs(currLuma[idx] - prevLuma[idx]);
+      const diff = Math.abs(currLuma[idx] - refLuma[idx]);
       diffSum += diff;
       if (diff >= pixelDeltaThreshold) {
         changedPixels++;
@@ -63,10 +63,11 @@ export class MotionDetector {
   constructor({
     width = 64,
     height = 48,
-    pixelDeltaThreshold = 18,
-    triggerPercent = 4.0,
+    pixelDeltaThreshold = 14,
+    triggerPercent = 3.0,
     cooldownMs = 5000,
-    warmupFrames = 3,
+    warmupFrames = 4,
+    bgTauSec = 0.65,
   } = {}) {
     this.width = width;
     this.height = height;
@@ -74,11 +75,13 @@ export class MotionDetector {
     this.triggerPercent = triggerPercent;
     this.cooldownMs = cooldownMs;
     this.warmupFrames = warmupFrames;
+    this.bgTauSec = bgTauSec;
     this.reset();
   }
 
   reset() {
-    this.prevLuma = null;
+    this.bgLuma = null;
+    this.lastUpdateMs = null;
     this.framesSeen = 0;
     this.lastTriggerMs = -Infinity;
     this.triggerCount = 0;
@@ -86,8 +89,9 @@ export class MotionDetector {
 
   update(currLuma, nowMs) {
     this.framesSeen++;
-    if (!this.prevLuma) {
-      this.prevLuma = currLuma.slice();
+    if (!this.bgLuma) {
+      this.bgLuma = Float32Array.from(currLuma);
+      this.lastUpdateMs = nowMs;
       return {
         ready: false,
         triggered: false,
@@ -103,14 +107,22 @@ export class MotionDetector {
       };
     }
 
+    // Compare against time-normalized EMA background so normal-speed movement
+    // is detected equally well at both 6.9 FPS and 27.8 FPS.
     const score = computeMotionScore(
-      this.prevLuma,
+      this.bgLuma,
       currLuma,
       this.width,
       this.height,
       this.pixelDeltaThreshold,
     );
-    this.prevLuma = currLuma.slice();
+
+    const dtSec = Math.min(0.5, Math.max(0.01, (nowMs - this.lastUpdateMs) / 1000));
+    this.lastUpdateMs = nowMs;
+    const alpha = 1 - Math.exp(-dtSec / this.bgTauSec);
+    for (let i = 0; i < this.bgLuma.length; i++) {
+      this.bgLuma[i] += alpha * (currLuma[i] - this.bgLuma[i]);
+    }
 
     const ready = this.framesSeen > this.warmupFrames;
     const sinceLast = nowMs - this.lastTriggerMs;

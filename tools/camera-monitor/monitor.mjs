@@ -149,9 +149,9 @@ function updateTransform() {
 }
 
 function updateMotionThresholdUi() {
-  const pct = Number($("motion-threshold").value) || 4;
+  const pct = Number($("motion-threshold").value) || 3;
   motionDetector.triggerPercent = pct;
-  $("val-motion-threshold").textContent = `${pct}%`;
+  $("val-motion-threshold").textContent = `${pct.toFixed(1)}%`;
   const markLeft = Math.min(100, Math.round((pct / MOTION_SCALE_MAX) * 100));
   $("motion-threshold-mark").style.left = `${markLeft}%`;
   if (!motionEnabled) {
