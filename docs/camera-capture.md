@@ -32,8 +32,23 @@ the `v1.7-camera-test` thermal issue is solved.
 ## Capture Workflow (Real Device)
 
 Attach the removable camera module to the Sense expansion board FPC connector
-(with USB power disconnected while plugging/unplugging the ribbon). Close other
-serial monitors and disconnect the Microphone Web Monitor first.
+(with USB power disconnected while plugging/unplugging the ribbon). The Round
+Display is **not** required for camera capture: `TOUCH_INT` uses `INPUT_PULLUP`
+so detached touch stays idle, and SPI display writes do not block boot. Close
+other serial monitors and disconnect the Microphone Web Monitor first.
+
+### Option A: Local Browser Viewer (Web Serial)
+
+For quick interactive framing and viewing in desktop Chrome or Edge:
+
+```powershell
+node tools/camera-monitor/serve.cjs
+```
+
+Open `http://127.0.0.1:8766`, click **連接 XIAO**, then click **拍一張**. See
+[Camera Web Monitor](../tools/camera-monitor/README.md).
+
+### Option B: CLI Evidence Capture
 
 From the repository root:
 

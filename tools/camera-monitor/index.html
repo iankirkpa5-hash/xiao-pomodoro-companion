@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XIAO 攝像觀測室</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="monitor.mjs"></script>
+</head>
+<body>
+  <div class="workspace">
+    <aside class="sidebar">
+      <a class="brand" href="./" aria-label="XIAO 攝像觀測室首頁"><span class="brand-mark" aria-hidden="true"></span>XIAO / LAB</a>
+      <div class="intro">
+        <p class="eyebrow">CAMERA OBSERVATION · 02</p>
+        <h1>看見畫面。</h1>
+        <p>按需拍一張、立刻關閉驅動，透過 USB 串口傳回電腦檢視。</p>
+      </div>
+      <section class="connection" aria-labelledby="connection-heading">
+        <h2 id="connection-heading">設備連線</h2>
+        <p id="connection-state" class="connection-state" role="status">尚未連線</p>
+        <button id="connect" class="primary">連接 XIAO</button>
+        <button id="disconnect" class="secondary" disabled>中斷連線</button>
+        <p id="connection-help" class="small">點擊連接後選擇 COM11 或 XIAO USB 串口。請先關閉其他串口監視器；無需接圓屏也可使用。</p>
+        <p id="message" class="message" role="alert" hidden></p>
+      </section>
+      <section class="steps" aria-labelledby="steps-heading">
+        <h2 id="steps-heading">安全與測試步驟</h2>
+        <ol>
+          <li><strong>斷電接妥鏡頭</strong><span>確認 Sense 擴充板與 FPC 排線插牢後再接 USB。</span></li>
+          <li><strong>按下「拍一張」</strong><span>板端會初始化、拍一張 QVGA JPEG、立即 deinit，再逐塊傳回。</span></li>
+          <li><strong>檢查畫面與溫度</strong><span>若模組手感發燙（Grade 3），請立即拔除 USB 電源。</span></li>
+        </ol>
+      </section>
+      <p class="local-note">USB 串口 · 115200 baud<br>影像留在此瀏覽器，不上傳雲端。<br>不會開啟電腦內建攝影機或麥克風。</p>
+    </aside>
+    <main>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">XIAO POMODORO COMPANION</p>
+          <h2>攝像觀測室</h2>
+        </div>
+        <span id="status-badge" class="badge" data-state="idle">等待連線</span>
+      </header>
+
+      <section class="controls" aria-label="拍照操作">
+        <div class="controls-left">
+          <button id="capture" class="primary" disabled>拍一張</button>
+          <button id="download" class="secondary" disabled>下載 JPEG</button>
+        </div>
+        <div class="controls-right">
+          <button id="rotate" class="secondary small-btn" type="button" disabled>旋轉 0°</button>
+          <button id="mirror" class="secondary small-btn" type="button" aria-pressed="false" disabled>鏡像：關</button>
+        </div>
+      </section>
+
+      <section class="viewer-panel" aria-labelledby="viewer-heading">
+        <div class="panel-title">
+          <h2 id="viewer-heading">目前畫面</h2>
+          <span id="viewer-subtitle">按需單張 QVGA JPEG · 拍完即 deinit</span>
+        </div>
+        <div class="progress-wrap" id="progress-wrap" hidden>
+          <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+          <span id="progress-text" class="progress-text">準備中…</span>
+        </div>
+        <div class="stage" id="stage">
+          <div id="empty-state" class="empty-state">
+            <p class="empty-title">尚未拍攝</p>
+            <p class="empty-sub">連接 XIAO 後點擊上方「拍一張」，驗證通過的 JPEG 會顯示在這裡。</p>
+          </div>
+          <img id="preview-image" alt="XIAO 攝像機拍下的單張畫面" hidden>
+        </div>
+        <p id="transform-note" class="small">旋轉與鏡像僅影響網頁顯示，下載的 JPEG 維持板端原始位元組。</p>
+      </section>
+
+      <section class="readout" aria-label="本次拍攝資訊">
+        <div><span>解析度與格式</span><strong id="meta-size">—</strong></div>
+        <div><span>檔案大小</span><strong id="meta-bytes">—</strong></div>
+        <div><span>擷取耗時</span><strong id="meta-capture-ms">—</strong></div>
+        <div><span>CRC32 / JPEG</span><strong id="meta-verify">—</strong></div>
+      </section>
+
+      <section class="history-panel" aria-labelledby="history-heading">
+        <div class="panel-title">
+          <h2 id="history-heading">最近拍攝（本頁暫存）</h2>
+          <span id="history-count">0 / 6 張</span>
+        </div>
+        <div id="history-strip" class="history-strip">
+          <p class="small">目前尚無暫存照片。最多保留最近 6 張，重新整理頁面會清空。</p>
+        </div>
+      </section>
+
+      <details class="diagnostics">
+        <summary>串口記錄與診斷 <span id="diagnostic-summary">尚無記錄</span></summary>
+        <p class="small">保留最近 120 行串口輸出。若出現 I2C 錯誤、韌體錯誤或重試異常會如實顯示。</p>
+        <pre id="raw-log" tabindex="0" aria-label="最近串口記錄"></pre>
+      </details>
+
+      <footer>
+        硬體邊界：XIAO ESP32S3 Sense 未接出硬體 PWDN／RESET 腳位，<code>esp_camera_deinit()</code> 會停用驅動與 XCLK，但不等同於切斷感測器供電。此工具僅供單張驗證與取景觀察。
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
