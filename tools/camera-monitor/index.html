@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XIAO 攝像觀測室</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="monitor.mjs"></script>
+</head>
+<body>
+  <div class="workspace">
+    <aside class="sidebar">
+      <a class="brand" href="./" aria-label="XIAO 攝像觀測室首頁"><span class="brand-mark" aria-hidden="true"></span>XIAO / LAB</a>
+      <div class="intro">
+        <p class="eyebrow">CAMERA OBSERVATION · 02</p>
+        <h1>看見畫面。</h1>
+        <p>先開即時預覽取景，滿意再按下快門存檔；停止或逾時自動 deinit。</p>
+      </div>
+      <section class="connection" aria-labelledby="connection-heading">
+        <h2 id="connection-heading">設備連線</h2>
+        <p id="connection-state" class="connection-state" role="status">尚未連線</p>
+        <button id="connect" class="primary">連接 XIAO</button>
+        <button id="disconnect" class="secondary" disabled>中斷連線</button>
+        <p id="connection-help" class="small">點擊連接後選擇 COM11 或 XIAO USB 串口。請先關閉其他串口監視器；無需接圓屏也可使用。</p>
+        <p id="message" class="message" role="alert" hidden></p>
+      </section>
+      <section class="steps" aria-labelledby="steps-heading">
+        <h2 id="steps-heading">取景與安全步驟</h2>
+        <ol>
+          <li><strong>開啟即時預覽</strong><span>畫面同步更新，可搭配旋轉／鏡像對準人像與光線。</span></li>
+          <li><strong>按下「拍一張」存下當下畫面</strong><span>預覽中按快門會直接存下眼前畫面；未開預覽時則執行單張拍照並立即 deinit。</span></li>
+          <li><strong>留意散熱與溫度</strong><span>預覽上限 3 分鐘自動停止，斷線 10 秒自動 deinit；若手感發燙（Grade 3）請立刻停止並斷電。</span></li>
+        </ol>
+      </section>
+      <p class="local-note">USB 串口 · 115200 baud<br>影像留在此瀏覽器，不上傳雲端。<br>不會開啟電腦內建攝影機或麥克風。</p>
+    </aside>
+    <main>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">XIAO POMODORO COMPANION</p>
+          <h2>攝像觀測室</h2>
+        </div>
+        <span id="status-badge" class="badge" data-state="idle">等待連線</span>
+      </header>
+
+      <section class="controls" aria-label="預覽與拍照操作">
+        <div class="controls-left">
+          <button id="preview-toggle" class="primary" disabled>開始即時預覽</button>
+          <label class="size-picker" for="preview-interval">
+            <span>預覽速度</span>
+            <select id="preview-interval" disabled>
+              <option value="0" selected>標準 10 MHz（低溫 · 約 6.9 FPS）</option>
+              <option value="0:FAST">極速測試 20 MHz 雙緩衝（測極速）</option>
+              <option value="150">省電 10 MHz（150 ms · 約 6.4 FPS）</option>
+            </select>
+          </label>
+          <label class="size-picker" for="capture-size">
+            <span>拍照畫質</span>
+            <select id="capture-size" disabled>
+              <option value="SVGA" selected>SVGA 800×600（推薦）</option>
+              <option value="UXGA">UXGA 1600×1200（200萬最高）</option>
+              <option value="VGA">VGA 640×480</option>
+              <option value="QVGA">QVGA 320×240</option>
+              <option value="LIVE">預覽當下幀（320×240 瞬拍）</option>
+            </select>
+          </label>
+          <button id="capture" class="secondary" disabled>拍一張</button>
+          <button id="download" class="secondary" disabled>下載 JPEG</button>
+        </div>
+        <div class="controls-right">
+          <button id="rotate" class="secondary small-btn" type="button" disabled>旋轉 0°</button>
+          <button id="mirror" class="secondary small-btn" type="button" aria-pressed="false" disabled>鏡像：關</button>
+        </div>
+      </section>
+
+      <section class="viewer-panel" aria-labelledby="viewer-heading">
+        <div class="panel-title">
+          <h2 id="viewer-heading">即時畫面／預覽</h2>
+          <span id="viewer-subtitle">QVGA 320×240 JPEG · 預覽停止即 deinit</span>
+        </div>
+        <div class="progress-wrap" id="progress-wrap" hidden>
+          <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+          <span id="progress-text" class="progress-text">準備中…</span>
+        </div>
+        <div class="stage" id="stage">
+          <div id="empty-state" class="empty-state">
+            <p class="empty-title">尚未開始預覽或拍攝</p>
+            <p class="empty-sub">連接 XIAO 後點擊「開始即時預覽」同步取景，或直接點「拍一張」單張擷取。</p>
+          </div>
+          <div id="stage-frame" class="stage-frame" hidden>
+            <img id="preview-image" alt="XIAO 攝像機畫面">
+            <canvas id="motion-overlay" class="motion-overlay" width="320" height="240" hidden></canvas>
+          </div>
+          <span id="live-pill" class="live-pill" hidden>LIVE</span>
+          <span id="rec-pill" class="rec-pill" hidden>REC 00:00</span>
+        </div>
+        <p id="transform-note" class="small">旋轉與鏡像僅影響網頁顯示與 WebM 錄影，下載的單張 JPEG 維持板端原始位元組。</p>
+      </section>
+
+      <section class="readout" aria-label="即時狀態與拍攝資訊">
+        <div><span>畫面與幀率</span><strong id="meta-size">—</strong></div>
+        <div><span>幀大小</span><strong id="meta-bytes">—</strong></div>
+        <div><span>ESP32 晶片內部溫度</span><strong id="meta-temp">—</strong></div>
+        <div><span>安全倒數 / CRC32</span><strong id="meta-verify">—</strong></div>
+      </section>
+
+      <section class="tools-grid" aria-label="移動偵測與即時錄影">
+        <div class="tool-card">
+          <div class="panel-title">
+            <h2>移動偵測自動拍照（純網頁端）</h2>
+            <span id="motion-status">未啟用</span>
+          </div>
+          <div class="motion-meter">
+            <div class="motion-track">
+              <div id="motion-bar" class="motion-bar"></div>
+              <div id="motion-threshold-mark" class="motion-mark"></div>
+            </div>
+            <span id="motion-readout" class="motion-readout">變化 0.0% / 門檻 3.0%</span>
+          </div>
+          <div class="tune-row">
+            <label class="inline-field" for="motion-threshold">
+              <span>門檻 <strong id="val-motion-threshold">3.0%</strong></span>
+              <input id="motion-threshold" type="range" min="0.5" max="15" step="0.5" value="3" disabled>
+            </label>
+            <label class="inline-field" for="motion-cooldown">
+              <span>冷卻</span>
+              <select id="motion-cooldown" disabled>
+                <option value="3000">3 秒</option>
+                <option value="5000" selected>5 秒</option>
+                <option value="10000">10 秒</option>
+              </select>
+            </label>
+          </div>
+          <label class="check-field">
+            <input id="motion-autodownload" type="checkbox" disabled>
+            <span>偵測到移動時自動下載 JPEG（未勾選仍會存入下方縮圖列）</span>
+          </label>
+          <div class="timelapse-actions">
+            <button id="motion-toggle" class="secondary" type="button" disabled>開啟移動偵測</button>
+          </div>
+          <p class="small">在即時預覽開啟時運作（免重燒韌體），畫面出現明顯移動即自動抓拍並標示移動區域。</p>
+        </div>
+
+        <div class="tool-card">
+          <div class="panel-title">
+            <h2>即時錄影（WebM）</h2>
+            <span id="record-status">未錄影</span>
+          </div>
+          <p class="small">直接錄下即時預覽串流（最高可達 27.8 FPS），套用目前的旋轉與鏡像方向，停止錄影或預覽結束時自動下載 <code>.webm</code> 檔案。</p>
+          <div class="timelapse-actions">
+            <button id="record-toggle" class="secondary" type="button" disabled>開始錄影</button>
+          </div>
+          <p class="small">純瀏覽器端 <code>MediaRecorder</code> 錄製，檔案留在本機，不上傳雲端。</p>
+        </div>
+      </section>
+
+      <section class="tools-grid" aria-label="影像微調與定時連拍">
+        <div class="tool-card">
+          <div class="panel-title">
+            <h2>影像微調（OV2640 硬體）</h2>
+            <button id="tune-reset" class="secondary small-btn" type="button" disabled>重設預設值</button>
+          </div>
+          <div class="tune-sliders">
+            <label>
+              <span>亮度 <strong id="val-brightness">0</strong></span>
+              <input id="tune-brightness" type="range" min="-2" max="2" step="1" value="0" disabled>
+            </label>
+            <label>
+              <span>曝光補償 <strong id="val-ae">0</strong></span>
+              <input id="tune-ae" type="range" min="-2" max="2" step="1" value="0" disabled>
+            </label>
+            <label>
+              <span>對比 <strong id="val-contrast">0</strong></span>
+              <input id="tune-contrast" type="range" min="-2" max="2" step="1" value="0" disabled>
+            </label>
+            <label>
+              <span>飽和度 <strong id="val-saturation">0</strong></span>
+              <input id="tune-saturation" type="range" min="-2" max="2" step="1" value="0" disabled>
+            </label>
+          </div>
+          <div class="tune-row">
+            <label class="inline-field" for="tune-wb">
+              <span>白平衡</span>
+              <select id="tune-wb" disabled>
+                <option value="0" selected>自動</option>
+                <option value="1">晴天</option>
+                <option value="2">陰天</option>
+                <option value="3">辦公室</option>
+                <option value="4">室內暖光</option>
+              </select>
+            </label>
+            <label class="check-field"><input id="tune-hmirror" type="checkbox" disabled><span>硬體鏡像</span></label>
+            <label class="check-field"><input id="tune-vflip" type="checkbox" disabled><span>硬體垂直翻轉</span></label>
+          </div>
+          <p class="small">預覽中調整會即時生效，並套用到後續的高畫質拍照與定時連拍。</p>
+        </div>
+
+        <div class="tool-card">
+          <div class="panel-title">
+            <h2>定時連拍（縮時存檔）</h2>
+            <span id="timelapse-status">尚未啟動</span>
+          </div>
+          <div class="timelapse-fields">
+            <label class="inline-field" for="timelapse-interval">
+              <span>間隔</span>
+              <select id="timelapse-interval" disabled>
+                <option value="5">每 5 秒</option>
+                <option value="10" selected>每 10 秒</option>
+                <option value="30">每 30 秒</option>
+                <option value="60">每 60 秒</option>
+              </select>
+            </label>
+            <label class="inline-field" for="timelapse-count">
+              <span>張數上限</span>
+              <select id="timelapse-count" disabled>
+                <option value="3">3 張</option>
+                <option value="5" selected>5 張</option>
+                <option value="10">10 張</option>
+                <option value="20">20 張</option>
+              </select>
+            </label>
+          </div>
+          <label class="check-field timelapse-check">
+            <input id="timelapse-autodownload" type="checkbox" checked disabled>
+            <span>每拍完一張自動下載 JPEG 到電腦下載資料夾</span>
+          </label>
+          <div class="timelapse-actions">
+            <button id="timelapse-toggle" class="secondary" type="button" disabled>開始定時連拍</button>
+          </div>
+          <p class="small">依上方所選「拍照畫質」逐張拍攝；每張拍完立刻 deinit，間隔期間鏡頭保持關閉降溫。</p>
+        </div>
+      </section>
+
+      <section class="history-panel" aria-labelledby="history-heading">
+        <div class="panel-title">
+          <h2 id="history-heading">已拍下的照片（本頁暫存）</h2>
+          <span id="history-count">0 / 6 張</span>
+        </div>
+        <div id="history-strip" class="history-strip">
+          <p class="small">按「拍一張」留下的照片會出現在這裡（最多 6 張），重新整理頁面會清空。</p>
+        </div>
+      </section>
+
+      <details class="diagnostics">
+        <summary>串口記錄與診斷 <span id="diagnostic-summary">尚無記錄</span></summary>
+        <p class="small">保留最近 120 行串口輸出（串流幀內容 `CAM FDATA` 不重複洗版）。I2C 或韌體錯誤會如實顯示。</p>
+        <pre id="raw-log" tabindex="0" aria-label="最近串口記錄"></pre>
+      </details>
+
+      <footer>
+        硬體邊界：溫度讀數為 ESP32-S3 晶片內部感測器（非 OV2640 鏡頭表面溫度）。XIAO ESP32S3 Sense 未接出硬體 PWDN／RESET 腳位，<code>esp_camera_deinit()</code> 會停用驅動與 XCLK，但不等同於切斷感測器供電。
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

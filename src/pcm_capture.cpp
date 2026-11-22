@@ -243,7 +243,7 @@ void pcm_capture_read_error() {
   portEXIT_CRITICAL(&pcm_mux);
 }
 
-void pcm_capture_service(bool microphone_ready) {
+void pcm_capture_poll() {
   const uint32_t now = millis();
   portENTER_CRITICAL(&pcm_mux);
   if (recording.state == State::Recording &&
@@ -260,8 +260,43 @@ void pcm_capture_service(bool microphone_ready) {
       reply_offset += Serial.write(reinterpret_cast<const uint8_t *>(reply) + reply_offset, remaining);
       if (reply_offset == reply_length) reply_length = reply_offset = 0;
     }
-    return;
   }
+}
+
+bool pcm_capture_has_pending_reply() {
+  return reply_length != 0;
+}
+
+bool pcm_capture_is_active() {
+  portENTER_CRITICAL(&pcm_mux);
+  const bool occupied = recording.state != State::Idle;
+  portEXIT_CRITICAL(&pcm_mux);
+  return occupied;
+}
+
+bool pcm_capture_handle_command(const char *line, bool microphone_ready) {
+  if (!line || strncmp(line, "PCM", 3) != 0 || (line[3] != '\0' && line[3] != ' ')) {
+    return false;
+  }
+  const size_t len = strlen(line);
+  if (len >= sizeof(command)) {
+    respond("PCM ERROR 0 BAD_COMMAND\n");
+    return true;
+  }
+  memcpy(command, line, len + 1);
+  handleCommand(microphone_ready);
+  return true;
+}
+
+void pcm_capture_reject_command() {
+  respond("PCM ERROR 0 BAD_COMMAND\n");
+}
+
+void pcm_capture_service(bool microphone_ready) {
+  pcm_capture_poll();
+  if (reply_length) return;
+
+  const uint32_t now = millis();
   if (command_length && now - last_rx_ms > 1000) {
     command_length = 0;
     discard_command = true;
@@ -270,7 +305,7 @@ void pcm_capture_service(bool microphone_ready) {
     const int c = Serial.read();
     last_rx_ms = now;
     if (c == '\n') {
-      if (discard_command) respond("PCM ERROR 0 BAD_COMMAND\n");
+      if (discard_command) pcm_capture_reject_command();
       else {
         command[command_length] = 0;
         handleCommand(microphone_ready);
